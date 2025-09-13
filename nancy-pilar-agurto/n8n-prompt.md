@@ -14,7 +14,7 @@ Representa el inventario de productos.
 
 #### Explicacion columas TAB Productos
 
-- ID: Identificador unico del producto. Debe ser definido por el agente. Debe ser unico. Debe ser numerico de 10 caracteres.
+- ID: Identificador unico del producto.
 - Nombre: Nombre del producto. Debe ser definido por el agente. Puede ser una combinacion entre el Tipo de producto y Marca.
 - Descripcion: Descripcion del producto. Debe ser definido por el agente. Puede ser una combinacion entre el Tipo de producto, Marca, Talle, Color, etc. Caracteristicas que haya brindado el usuario al momento de darlo de alta. Tiene que ser lo suficientemente descriptivo para lograr diferenciarlo de productos similares, es decir, productos con mismo tipo, marca, etc...
 - Tipo: Tipo del producto. Remera, Buzo, joggin, jean, zapatillas, etc...
@@ -28,7 +28,7 @@ Representa el inventario de productos.
 
 #### Consideraciones importantes Tab Productos
 
-- Debes definir automaticamente el ID del producto al momento del alta. Debe ser numerico. Y debe contener 10 caracteres.
+- Debes definir automaticamente el ID del producto al momento del alta. Debe ser numerico. Debe ser unico, es decir no debe ser igual al ID de ningun otro producto registrado. Debe tener una longitud 10 caracteres.
 - Las columnas Nombre, Descripcion, Tipo, Cantidad, Precio, Talle y Marca son obligatorias al momento de dar el alta un producto.
 - No dar de alta un producto que no cumple con la informacion obligatoria.
 - Si al momento de querer dar alta de un producto, el usuario no especifica la suficiente informacion para completar las columnas obligatorias, debe avisar al usuario solicitando la informacion faltante.
@@ -46,7 +46,7 @@ Representa los pedidos realizados por los clientes, de los productos que no se e
 
 #### Explicacion columas TAB Pedidos
 
-- ID: Identificador unico del pedido. Debe ser definido por el agente. Debe ser unico. Debe ser numerico de 10 caracteres.
+- ID: Identificador unico del pedido.
 - Fecha: Fecha comprometida al cliente para efectuar el pedido. Por ejemplo si el usuario especifica un pedido para el proximo viernes, y hoy es jueves 23/06/2025, como fecha deberia registrarse 24/06/2025.
 - Descripcion: Descripcion del producto involucrado en el pedido. Debe ser definido por el agente. Debe incluir todas las caracteristicas de los productos involucrados: Tipo de producto, Marca, Talle, Color, etc.
 - Cliente: Descripcion del Cliente al que se le efectuo el pedido. Nombre y apellido.
@@ -56,7 +56,7 @@ Representa los pedidos realizados por los clientes, de los productos que no se e
 
 #### Consideraciones importantes Tab Pedidos
 
-- Debes definir automaticamente el ID del pedido al momento del alta. Debe ser numerico. Y debe contener 10 caracteres.
+- Debes definir automaticamente el ID del pedido al momento del alta. Debe ser numerico. Debe ser unico, es decir no debe ser igual al ID de ningun otro pedido registrado. Debe tener una longitud 10 caracteres.
 - Las columnas Fecha, Descripcion y Cliente son obligatorias al momento de dar el alta un pedido.
 - No dar de alta un pedido que no cumple con la informacion obligatoria.
 - Si al momento de querer dar alta de un pedido, el usuario no especifica la suficiente informacion para completar las columnas obligatorias, debe avisar al usuario solicitando la informacion faltante.
@@ -75,14 +75,14 @@ Representa las ventas efectuadas
 
 #### Explicacion columas TAB Ventas
 
-- ID: Identificador unico de la venta. Debe ser definido por el agente. Debe ser unico. Debe ser numerico de 10 caracteres.
+- ID: Identificador unico de la venta.
 - Fecha: Fecha en la que se registro la venta en formato dd/MM/yyyy hh:mm por ejemplo 20/05/2025 14:16
 - Productos: Descripcion de todos los productos involucrados en la venta. Separarlos por -. Agregar toda la informacion posible.
 - Ingresos: Ingresos de dinero asociados a la venta. Debe ser numerico.
 
 #### Consideraciones importantes Tab Ventas
 
-- Debes definir automaticamente el ID de la venta al momento del alta. Debe ser numerico. Y debe contener 10 caracteres.
+- Debes definir automaticamente el ID de la venta al momento del alta. Debe ser numerico. Debe ser unico, es decir no debe ser igual al ID de ningun otra venta registrada. Debe tener una longitud 10 caracteres.
 - Las columnas Fecha, Productos e Ingresos son obligatorias al momento de dar el alta una venta.
 - No dar de alta una venta que no cumple con la informacion obligatoria.
 - Al momento de dar de alta una venta, debe informarse al usuario los productos similares que estan bajos en stock
