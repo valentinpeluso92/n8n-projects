@@ -1,0 +1,1393 @@
+{
+  "name": "Nancy Pilar Agurto - Agente de ventas",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2512,
+        -304
+      ],
+      "id": "6dc31c91-0b48-4988-868b-68f271706895",
+      "name": "Telegram Trigger",
+      "webhookId": "b9aa1908-0b64-4252-a7b7-5997d4d23304",
+      "credentials": {
+        "telegramApi": {
+          "id": "Tdd3pz3RzIQi5eKJ",
+          "name": "Nancy Pilar Agurto - Ventas"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.voice?.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "de5ed371-f395-4d5b-9879-f517c00c53b9"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f3ea1b07-c763-4d2c-a901-d27611b92b45",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -2272,
+        -304
+      ],
+      "id": "2041c712-5109-4ab9-b0c6-a96e653d798b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2096,
+        -496
+      ],
+      "id": "fcfcdc2f-7058-45ae-ba6e-bfabf41df4f3",
+      "name": "Get a file",
+      "webhookId": "cce5508e-b963-4104-a898-9c421ee3c0aa",
+      "credentials": {
+        "telegramApi": {
+          "id": "Tdd3pz3RzIQi5eKJ",
+          "name": "Nancy Pilar Agurto - Ventas"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "translate",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1888,
+        -496
+      ],
+      "id": "d91ac2d5-8bdb-4679-bd5e-011e6d5308bf",
+      "name": "Audio a Texto",
+      "credentials": {
+        "openAiApi": {
+          "id": "yR53pz6kmBmXxc8h",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Quiero traducir al español el siguiente texto: {{ $json.text }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1664,
+        -496
+      ],
+      "id": "14f76b94-2124-4f3f-9446-3b44be9162b0",
+      "name": "Translate english to spanish",
+      "credentials": {
+        "openAiApi": {
+          "id": "yR53pz6kmBmXxc8h",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const randomId = () => {\n  const S4 = () => (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);\n  return `${S4()}${S4()}-${S4()}-${S4()}-${S4()}-${S4()}${S4()}${S4()}`;\n};\n\nvar days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];\n    \nvar months = ['January','February','March','April','May','June','July','August','September','October','November','December'];\n\nconst timeDifference = 3;\nconst date = new Date();\nconst dateString = JSON.stringify({\n    day: days[date.getUTCDay()],\n    month: months[date.getUTCMonth()],\n    year: date.getUTCFullYear(),\n    hour: date.getUTCHours() - timeDifference,\n    minutes: date.getUTCMinutes(),\n    date: `${date.getUTCDate()}\\/${date.getUTCMonth() + 1}\\/${date.getUTCFullYear()}`\n  });\n\nreturn {\n  userText: $input.first().json.message?.content?.['traduccion_español'] || $input.first()?.json?.message?.text,\n  chatId: $input.first().json.message.chat.id,\n  date: dateString,\n  ID: randomId()\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1248,
+        -288
+      ],
+      "id": "b4240545-dd1e-4312-84fe-70e874603e51",
+      "name": "Map user text"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "valentinpeluso92",
+          "mode": "list",
+          "cachedResultName": "valentinpeluso92",
+          "cachedResultUrl": "https://github.com/valentinpeluso92"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-projects",
+          "mode": "list",
+          "cachedResultName": "n8n-projects",
+          "cachedResultUrl": "https://github.com/valentinpeluso92/n8n-projects"
+        },
+        "filePath": "nancy-pilar-agurto/n8n-prompt.md",
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -1024,
+        -288
+      ],
+      "id": "777116dc-fa31-4bcd-ac0b-dd9ffaafcaaf",
+      "name": "Get prompt",
+      "webhookId": "8c13ff5f-1002-45cf-aa72-bd968d52c7eb",
+      "credentials": {
+        "githubApi": {
+          "id": "MIdIYwYLNlstFbFk",
+          "name": "Personal GitHub"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -288
+      ],
+      "id": "932e2422-f240-4345-ad97-cc7ba4e78837",
+      "name": "Extract Prompt"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}\n\nPROMPT DEL USUARIO\n{{ $('Map user text').item.json.userText }}\n\nCURRENT DATE:\n{{ $('Map user text').item.json.date }}\n\nCHAT ID:\n{{ $('Map user text').item.json.chatId }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -496,
+        -288
+      ],
+      "id": "0de75bf7-9f9f-464f-8753-ab5aff601627",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "responseFormat": "text"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1136,
+        32
+      ],
+      "id": "efe1fb61-980a-4375-9926-48001113f75b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "yR53pz6kmBmXxc8h",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Map user text').item.json.chatId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1024,
+        176
+      ],
+      "id": "44c6c439-8cbc-4d4a-b64c-3e5229d13aa7",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg",
+          "mode": "list",
+          "cachedResultName": "Nancy Pilar Agurto",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1922547922,
+          "mode": "list",
+          "cachedResultName": "Productos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit#gid=1922547922"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -816,
+        224
+      ],
+      "id": "64d0bb64-ecf2-4039-bb4b-0b2344ae47f9",
+      "name": "Obtener Productos",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Map user text').item.json.chatId }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -64,
+        -544
+      ],
+      "id": "01e646f1-852d-4222-9201-db14d4216b57",
+      "name": "Send a text message1",
+      "webhookId": "ed476a05-9f61-4cba-8b2e-c62c71407e7e",
+      "credentials": {
+        "telegramApi": {
+          "id": "Tdd3pz3RzIQi5eKJ",
+          "name": "Nancy Pilar Agurto - Ventas"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg",
+          "mode": "list",
+          "cachedResultName": "Nancy Pilar Agurto",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 335119141,
+          "mode": "list",
+          "cachedResultName": "Ventas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit#gid=335119141"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -656,
+        272
+      ],
+      "id": "e04838f8-eb12-49b5-859e-4d374bda5ea5",
+      "name": "Obtener Ventas",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg",
+          "mode": "list",
+          "cachedResultName": "Nancy Pilar Agurto",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 365003384,
+          "mode": "list",
+          "cachedResultName": "Pedidos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit#gid=365003384"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -496,
+        304
+      ],
+      "id": "02cb6f07-db85-41d0-8616-3dcce314126e",
+      "name": "Obtener Pedidos",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg",
+          "mode": "list",
+          "cachedResultName": "Nancy Pilar Agurto",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1922547922,
+          "mode": "list",
+          "cachedResultName": "Productos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit#gid=1922547922"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nombre": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Nombre', ``, 'string') }}",
+            "Descripcion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Descripcion', ``, 'string') }}",
+            "Tipo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tipo', ``, 'string') }}",
+            "Cantidad": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cantidad', ``, 'string') }}",
+            "Precio": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Precio', ``, 'string') }}",
+            "Talle": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Talle', ``, 'string') }}",
+            "Marca": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Marca', ``, 'string') }}",
+            "Creado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Creado', ``, 'string') }}",
+            "Actualizado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Actualizado', ``, 'string') }}",
+            "Eliminado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Eliminado', ``, 'string') }}",
+            "ID": "={{ $('Map user text').item.json.ID }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Descripcion",
+              "displayName": "Descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tipo",
+              "displayName": "Tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cantidad",
+              "displayName": "Cantidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Precio",
+              "displayName": "Precio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Talle",
+              "displayName": "Talle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Marca",
+              "displayName": "Marca",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Creado",
+              "displayName": "Creado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Actualizado",
+              "displayName": "Actualizado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Eliminado",
+              "displayName": "Eliminado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -16,
+        208
+      ],
+      "id": "0021e5a1-ae85-47e1-90ca-87f66cabaf28",
+      "name": "Alta Producto",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg",
+          "mode": "list",
+          "cachedResultName": "Nancy Pilar Agurto",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1922547922,
+          "mode": "list",
+          "cachedResultName": "Productos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit#gid=1922547922"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ID__using_to_match_', ``, 'string') }}",
+            "Nombre": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Nombre', ``, 'string') }}",
+            "Descripcion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Descripcion', ``, 'string') }}",
+            "Tipo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tipo', ``, 'string') }}",
+            "Cantidad": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cantidad', ``, 'string') }}",
+            "Precio": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Precio', ``, 'string') }}",
+            "Talle": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Talle', ``, 'string') }}",
+            "Marca": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Marca', ``, 'string') }}",
+            "Creado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Creado', ``, 'string') }}",
+            "Actualizado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Actualizado', ``, 'string') }}",
+            "Eliminado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Eliminado', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Descripcion",
+              "displayName": "Descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tipo",
+              "displayName": "Tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cantidad",
+              "displayName": "Cantidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Precio",
+              "displayName": "Precio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Talle",
+              "displayName": "Talle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Marca",
+              "displayName": "Marca",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Creado",
+              "displayName": "Creado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Actualizado",
+              "displayName": "Actualizado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Eliminado",
+              "displayName": "Eliminado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        384,
+        32
+      ],
+      "id": "7842215e-9e3f-4b27-b33b-9b6baacfc8f0",
+      "name": "Modificacion Producto",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg",
+          "mode": "list",
+          "cachedResultName": "Nancy Pilar Agurto",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 365003384,
+          "mode": "list",
+          "cachedResultName": "Pedidos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit#gid=365003384"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('Map user text').item.json.ID }}",
+            "Fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha', ``, 'string') }}",
+            "Descripcion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Descripcion', ``, 'string') }}",
+            "Cliente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cliente', ``, 'string') }}",
+            "Creado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Creado', ``, 'string') }}",
+            "Actualizado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Actualizado', ``, 'string') }}",
+            "Resuelto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Resuelto', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Descripcion",
+              "displayName": "Descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Creado",
+              "displayName": "Creado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Actualizado",
+              "displayName": "Actualizado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resuelto",
+              "displayName": "Resuelto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -336,
+        304
+      ],
+      "id": "23967aba-5787-499f-8ac6-5b41c2c1ede1",
+      "name": "Alta Pedido",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg",
+          "mode": "list",
+          "cachedResultName": "Nancy Pilar Agurto",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 365003384,
+          "mode": "list",
+          "cachedResultName": "Pedidos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit#gid=365003384"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ID', ``, 'string') }}",
+            "Fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha', ``, 'string') }}",
+            "Descripcion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Descripcion', ``, 'string') }}",
+            "Cliente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cliente', ``, 'string') }}",
+            "Creado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Creado', ``, 'string') }}",
+            "Actualizado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Actualizado', ``, 'string') }}",
+            "Resuelto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Resuelto', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Descripcion",
+              "displayName": "Descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Creado",
+              "displayName": "Creado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Actualizado",
+              "displayName": "Actualizado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resuelto",
+              "displayName": "Resuelto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        128,
+        176
+      ],
+      "id": "fe596912-b1af-400a-91b4-650fb5eedc64",
+      "name": "Modificacion Pedido",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg",
+          "mode": "list",
+          "cachedResultName": "Nancy Pilar Agurto",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 335119141,
+          "mode": "list",
+          "cachedResultName": "Ventas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit#gid=335119141"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('Map user text').item.json.ID }}",
+            "Fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha', ``, 'string') }}",
+            "Productos": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Productos', ``, 'string') }}",
+            "Ingresos": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Ingresos', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Productos",
+              "displayName": "Productos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ingresos",
+              "displayName": "Ingresos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -176,
+        256
+      ],
+      "id": "160a779d-9001-4abf-badc-aa93ecf88e51",
+      "name": "Alta  Venta",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg",
+          "mode": "list",
+          "cachedResultName": "Nancy Pilar Agurto",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 335119141,
+          "mode": "list",
+          "cachedResultName": "Ventas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ENUvzH9vDQlUZ10J89y1egvNWVVG__Qye42DGJDPcNg/edit#gid=335119141"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ID', ``, 'string') }}",
+            "Fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha', ``, 'string') }}",
+            "Productos": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Productos', ``, 'string') }}",
+            "Ingresos": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Ingresos', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Productos",
+              "displayName": "Productos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ingresos",
+              "displayName": "Ingresos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        112
+      ],
+      "id": "b7067a71-103c-461c-a6ff-a60d3799ffbc",
+      "name": "Modificacion Venta",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Nancy Pilar Agurto"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Map user text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Audio a Texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audio a Texto": {
+      "main": [
+        [
+          {
+            "node": "Translate english to spanish",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translate english to spanish": {
+      "main": [
+        [
+          {
+            "node": "Map user text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map user text": {
+      "main": [
+        [
+          {
+            "node": "Get prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get prompt": {
+      "main": [
+        [
+          {
+            "node": "Extract Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Productos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Ventas": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Pedidos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alta Producto": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modificacion Producto": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alta Pedido": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modificacion Pedido": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alta  Venta": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modificacion Venta": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8ba2e52c-a513-476e-ba88-b880b5c51a17",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "914667f379206fe8d083188e17e5e435f986c59ab32d558e4d2d7255afc38315"
+  },
+  "id": "DQ0vdyYScFdcHOLO",
+  "tags": []
+}
