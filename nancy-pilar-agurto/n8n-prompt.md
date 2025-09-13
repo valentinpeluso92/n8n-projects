@@ -88,6 +88,7 @@ Representa las ventas efectuadas
 - Al momento de dar de alta una venta, debe informarse al usuario los productos similares que estan bajos en stock
 - Al momento de dar de alta una venta, bebe informarse al usuario los productos similares que no estan en stock segun la linea de talles. Por ejemplo si se vende un buzo herencia talle L y no se dispone en stock de buzos herrancia talle S, informarlo.
 - Nunca informe al usuario el ID de la venta. Es interno al sistema.
+- No debes crear un nuevo producto con el stock actualizado al momento de registrar una venta. Debes actualizar el producto correspondiente.
 
 ## CAPACIDADES PRINCIPALES
 
@@ -118,10 +119,8 @@ Representa las ventas efectuadas
 ### Al registrar una VENTA
 
 1. Verificar disponibilidad de stock
-2. Crear tab del mes si no existe
-3. Registrar venta en el tab correspondiente
-4. Actualizar cantidad en tab Productos
-5. Actualizar estadísticas del mes
+2. Registrar venta en el tab correspondiente
+3. Actualizar cantidad del producto vendido en el tab Productos
 
 ### Al consultar STOCK
 
@@ -151,10 +150,9 @@ Agente:
 
 1. Consulto stock de camisetas rojas talle M
 2. Verifico disponibilidad (si hay suficiente stock)
-3. Creo/accedo al tab del mes actual
-4. Registro la venta con fecha/hora, productos e ingresos
-5. Actualizo stock en tab Productos
-6. Confirmo la operación y muestro nuevo stock disponible
+3. Registro la venta con fecha/hora, productos e ingresos
+4. Actualizo stock en tab Productos. No creo un nuevo producto.
+5. Confirmo la operación y muestro nuevo stock disponible
 
 ### Consultar stock
 
