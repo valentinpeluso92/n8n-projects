@@ -9,11 +9,12 @@ Tu planilla de Google Sheets está organizada en los siguientes tabs:
 
 Representa el inventario de productos.
 
-- Columnas: Nombre | Descripcion | Tipo | Cantidad | Precio | Talle | Marca | Creado | Actualizado | Eliminado
+- Columnas: ID | Nombre | Descripcion | Tipo | Cantidad | Precio | Talle | Marca | Creado | Actualizado | Eliminado
 - Función: Registro maestro de inventario y catálogo de productos
 
 #### Explicacion columas TAB Productos
 
+- ID: Identificador unico del producto. Debe ser definido por el agente. Debe ser unico. Debe ser numerico de 10 caracteres.
 - Nombre: Nombre del producto. Debe ser definido por el agente. Puede ser una combinacion entre el Tipo de producto y Marca.
 - Descripcion: Descripcion del producto. Debe ser definido por el agente. Puede ser una combinacion entre el Tipo de producto, Marca, Talle, Color, etc. Caracteristicas que haya brindado el usuario al momento de darlo de alta. Tiene que ser lo suficientemente descriptivo para lograr diferenciarlo de productos similares, es decir, productos con mismo tipo, marca, etc...
 - Tipo: Tipo del producto. Remera, Buzo, joggin, jean, zapatillas, etc...
@@ -38,11 +39,12 @@ Representa el inventario de productos.
 
 Representa los pedidos realizados por los clientes, de los productos que no se encontraban en stock al momento de tratar de efectuar una venta.
 
-- Columnas: Fecha | Descripcion | Cliente | Creado | Actualizado | Resuelto
+- Columnas: ID | Fecha | Descripcion | Cliente | Creado | Actualizado | Resuelto
 - Función: Registro de solicitudes y órdenes pendientes
 
 #### Explicacion columas TAB Pedidos
 
+- ID: Identificador unico del pedido. Debe ser definido por el agente. Debe ser unico. Debe ser numerico de 10 caracteres.
 - Fecha: Fecha comprometida al cliente para efectuar el pedido. Por ejemplo si el usuario especifica un pedido para el proximo viernes, y hoy es jueves 23/06/2025, como fecha deberia registrarse 24/06/2025.
 - Descripcion: Descripcion del producto involucrado en el pedido. Debe ser definido por el agente. Debe incluir todas las caracteristicas de los productos involucrados: Tipo de producto, Marca, Talle, Color, etc.
 - Cliente: Descripcion del Cliente al que se le efectuo el pedido. Nombre y apellido.
@@ -63,11 +65,12 @@ Representa los pedidos realizados por los clientes, de los productos que no se e
 
 Representa las ventas efectuadas
 
-- Columnas: Fecha | Productos | Ingresos
+- Columnas: ID | Fecha | Productos | Ingresos
 - Función: Registro detallado de ventas por mes
 
 #### Explicacion columas TAB Ventas
 
+- ID: Identificador unico de la venta. Debe ser definido por el agente. Debe ser unico. Debe ser numerico de 10 caracteres.
 - Fecha: Fecha en la que se registro la venta en formato dd/MM/yyyy hh:mm por ejemplo 20/05/2025 14:16
 - Productos: Descripcion de todos los productos involucrados en la venta. Separarlos por -. Agregar toda la informacion posible.
 - Ingresos: Ingresos de dinero asociados a la venta. Debe ser numerico.
