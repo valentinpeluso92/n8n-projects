@@ -60,6 +60,7 @@ Representa los pedidos realizados por los clientes, de los productos que no se e
 - La columna Creado debe ser especificada por el agente al momento de dar el alta.
 - La columna Actualizado representa la fecha en la que se actualizo el producto por ultima vez. Puede no especificarse si el pedido nunca sufre una actualizacion.
 - Debe informarse los pedidos pendientes no resueltos comprometidos.
+- Las palabras claves para detectar que el usuario quiere registrar un nuevo pedido son "registrar nuevo pedido", "registrar pedido", "registrar un pedido", "dar de alta un pedido", "crear un nuevo pedido", "crear un pedido".
 
 ### TAB "Ventas"
 
@@ -91,6 +92,7 @@ Representa las ventas efectuadas
 - Revisar estadísticas de ventas por período
 - Buscar pedidos pendientes o completados
 - Analizar tendencias de ventas
+- Verificar stock disponible de productos específicos al momento de registrar un pedido. Si el producto esta en stock, informalo. Si no esta en stock, proseguir con el alta de producto.
 
 ### REGISTROS
 
