@@ -124,17 +124,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70",
+          "value": "1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU",
           "mode": "list",
-          "cachedResultName": "Nancy Pilar Agurto",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit?usp=drivesdk"
+          "cachedResultName": "Nancy Pilar Agurto (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Productos",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit#gid=0"
         },
         "options": {}
       },
@@ -157,17 +157,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70",
+          "value": "1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU",
           "mode": "list",
-          "cachedResultName": "Nancy Pilar Agurto",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit?usp=drivesdk"
+          "cachedResultName": "Nancy Pilar Agurto (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": 329391517,
           "mode": "list",
           "cachedResultName": "Ventas",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit#gid=329391517"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit#gid=329391517"
         },
         "options": {}
       },
@@ -182,7 +182,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "T1oERU72F70WKHmb",
-          "name": "Nancy Pilar Agurto"
+          "name": "Autopia"
         }
       }
     },
@@ -190,17 +190,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70",
+          "value": "1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU",
           "mode": "list",
-          "cachedResultName": "Nancy Pilar Agurto",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit?usp=drivesdk"
+          "cachedResultName": "Nancy Pilar Agurto (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": 1472494395,
           "mode": "list",
           "cachedResultName": "Pedidos",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit#gid=1472494395"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit#gid=1472494395"
         },
         "options": {}
       },
@@ -215,7 +215,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "T1oERU72F70WKHmb",
-          "name": "Nancy Pilar Agurto"
+          "name": "Autopia"
         }
       }
     },
@@ -224,10 +224,10 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70",
+          "value": "1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU",
           "mode": "list",
-          "cachedResultName": "Nancy Pilar Agurto",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit?usp=drivesdk"
+          "cachedResultName": "Nancy Pilar Agurto (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -369,7 +369,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "T1oERU72F70WKHmb",
-          "name": "Nancy Pilar Agurto"
+          "name": "Autopia"
         }
       }
     },
@@ -378,10 +378,10 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70",
+          "value": "1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU",
           "mode": "list",
-          "cachedResultName": "Nancy Pilar Agurto",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit?usp=drivesdk"
+          "cachedResultName": "Nancy Pilar Agurto (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -526,7 +526,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "T1oERU72F70WKHmb",
-          "name": "Nancy Pilar Agurto"
+          "name": "Autopia"
         }
       }
     },
@@ -535,10 +535,10 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70",
+          "value": "1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU",
           "mode": "list",
-          "cachedResultName": "Nancy Pilar Agurto",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit?usp=drivesdk"
+          "cachedResultName": "Nancy Pilar Agurto (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -643,7 +643,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "T1oERU72F70WKHmb",
-          "name": "Nancy Pilar Agurto"
+          "name": "Autopia"
         }
       }
     },
@@ -652,10 +652,10 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70",
+          "value": "1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU",
           "mode": "list",
-          "cachedResultName": "Nancy Pilar Agurto",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit?usp=drivesdk"
+          "cachedResultName": "Nancy Pilar Agurto (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -771,7 +771,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "T1oERU72F70WKHmb",
-          "name": "Nancy Pilar Agurto"
+          "name": "Autopia"
         }
       }
     },
@@ -780,10 +780,10 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70",
+          "value": "1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU",
           "mode": "list",
-          "cachedResultName": "Nancy Pilar Agurto",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit?usp=drivesdk"
+          "cachedResultName": "Nancy Pilar Agurto (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -858,7 +858,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "T1oERU72F70WKHmb",
-          "name": "Nancy Pilar Agurto"
+          "name": "Autopia"
         }
       }
     },
@@ -867,10 +867,10 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70",
+          "value": "1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU",
           "mode": "list",
-          "cachedResultName": "Nancy Pilar Agurto",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWoQlpi3YtJyBXsrDrwLeu2mzz7EAiXtXKs7PpTZa70/edit?usp=drivesdk"
+          "cachedResultName": "Nancy Pilar Agurto (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uzicmC0bbaWLo2FiExc1wyTq0txUPfMorwn8bH4CHZU/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -956,7 +956,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "T1oERU72F70WKHmb",
-          "name": "Nancy Pilar Agurto"
+          "name": "Autopia"
         }
       }
     },
@@ -1489,11 +1489,24 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "fa538cb0-6eaf-4f14-b02c-fbfcd10605d2",
+  "versionId": "62cb97b9-ca0e-415d-adb7-4f7957eec1ff",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "914667f379206fe8d083188e17e5e435f986c59ab32d558e4d2d7255afc38315"
   },
   "id": "DQ0vdyYScFdcHOLO",
-  "tags": []
+  "tags": [
+    {
+      "createdAt": "2025-09-26T16:30:03.321Z",
+      "updatedAt": "2025-09-26T16:30:03.321Z",
+      "id": "TI6mB3GZwNS1U5T5",
+      "name": "Sbox"
+    },
+    {
+      "createdAt": "2025-09-26T16:29:58.595Z",
+      "updatedAt": "2025-09-26T16:29:58.595Z",
+      "id": "V7e6JxndFWlVnFiB",
+      "name": "Autopia"
+    }
+  ]
 }
