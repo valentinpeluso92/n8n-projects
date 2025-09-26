@@ -32,7 +32,7 @@
           "cachedResultName": "n8n-projects",
           "cachedResultUrl": "https://github.com/valentinpeluso92/n8n-projects"
         },
-        "filePath": "nancy-pilar-agurto/n8n-prompt.md",
+        "filePath": "nancy-pilar-agurto/sbox-n8n-prompt.md",
         "additionalParameters": {}
       },
       "type": "n8n-nodes-base.github",
@@ -1489,7 +1489,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "62cb97b9-ca0e-415d-adb7-4f7957eec1ff",
+  "versionId": "7fb62df3-762e-4fec-acee-f00ec6ae8f2f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "914667f379206fe8d083188e17e5e435f986c59ab32d558e4d2d7255afc38315"
