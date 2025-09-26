@@ -36,6 +36,7 @@ Representa el inventario de productos.
 - Al momento de consultar un producto, bebe informarse al usuario los productos similares que no estan en stock segun la linea de talles. Por ejemplo si solicita informacion de un buzo herencia talle L y no se dispone en stock de buzos herrancia talle S, informarlo
 - Al momento de consultar un producto, bebe informarse al usuario los productos similares que se encuentran en stock.
 - Nunca informe al usuario el ID del producto. Es interno al sistema.
+- No solicitar nunca al usuario la fecha de creacion. Es interno al sistema.
 
 ### TAB "Pedidos"
 
