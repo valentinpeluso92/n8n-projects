@@ -1,0 +1,887 @@
+{
+  "name": "(Sbox) - Zoovital",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const randomId = () => {\n  const S4 = () => (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);\n  return `${S4()}${S4()}-${S4()}-${S4()}-${S4()}-${S4()}${S4()}${S4()}`;\n};\n\nvar days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];\n    \nvar months = ['January','February','March','April','May','June','July','August','September','October','November','December'];\n\nconst timeDifference = 3;\nconst date = new Date();\nconst dateString = JSON.stringify({\n    day: days[date.getUTCDay()],\n    month: months[date.getUTCMonth()],\n    year: date.getUTCFullYear(),\n    hour: date.getUTCHours() - timeDifference,\n    minutes: date.getUTCMinutes(),\n    date: `${date.getUTCDate()}\\/${date.getUTCMonth() + 1}\\/${date.getUTCFullYear()}`\n  });\n\nconst mapResponse = $input.first().json;\n\nreturn {\n  userText: mapResponse.body,\n  fromNumber: mapResponse.from,\n  date: dateString,\n  ID: randomId()\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        32
+      ],
+      "id": "cf309c4a-5a65-47f4-9b6a-d631013f1b9e",
+      "name": "Map user text"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "valentinpeluso92",
+          "mode": "list",
+          "cachedResultName": "valentinpeluso92",
+          "cachedResultUrl": "https://github.com/valentinpeluso92"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-projects",
+          "mode": "list",
+          "cachedResultName": "n8n-projects",
+          "cachedResultUrl": "https://github.com/valentinpeluso92/n8n-projects"
+        },
+        "filePath": "zoovital/sbox-n8n-prompt.md",
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        32
+      ],
+      "id": "bb4a784a-7e83-48e7-9126-f4f4bf110510",
+      "name": "Get prompt",
+      "webhookId": "8c13ff5f-1002-45cf-aa72-bd968d52c7eb",
+      "credentials": {
+        "githubApi": {
+          "id": "MIdIYwYLNlstFbFk",
+          "name": "Personal GitHub"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        592,
+        32
+      ],
+      "id": "2ddf81a8-9979-43bc-9470-87157ef298c9",
+      "name": "Extract Prompt"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}\n\nPROMPT DEL USUARIO\n{{ $('Map user text').item.json.userText }}\n\nCURRENT DATE:\n{{ $('Map user text').item.json.date }}\n\nCHAT ID:\n{{ $('Map user text').item.json.chatId }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        32
+      ],
+      "id": "c27a90da-17ed-4161-aeb1-596a19426236",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "responseFormat": "text"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        496,
+        384
+      ],
+      "id": "116434de-e8b2-49d3-b91b-00955616ba24",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "yR53pz6kmBmXxc8h",
+          "name": "Autopia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Recibir WhatsApp').item.json.metadata.phone_number_id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        384
+      ],
+      "id": "519a6b02-0175-4c5f-a48e-627c0cd89f51",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0a94599d-4063-41e6-b10d-9f4284397632",
+              "leftValue": "={{ $json.messages[0].from }}",
+              "rightValue": "5492214942770",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -1200,
+        16
+      ],
+      "id": "749ffecf-5e52-4992-9d91-bf3b14ad1442",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  body: $input.first().json.messages[0].text.body,\n  from: $input.first().json.messages[0].from\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -80
+      ],
+      "id": "cee780c3-7ab0-49ab-b7b6-41f43edda7ba",
+      "name": "Map text message"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  audio: $input.first().json.messages[0].audio,\n  from: $input.first().json.messages[0].from\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        96
+      ],
+      "id": "1b5e774b-68b9-4e65-89d5-82f504b74775",
+      "name": "Map audio message"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.messages[0].type }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "50051518-9b0a-4f1d-beca-58c55d8ff5b1"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "30c9bea7-73a4-48e5-a1ba-7e836a01b8f7",
+                    "leftValue": "={{ $json.messages[0].type }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1024,
+        16
+      ],
+      "id": "927dafe8-4fdd-4a3d-8998-4ee3a356a7df",
+      "name": "Message type"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -448,
+        96
+      ],
+      "id": "cdb4919b-7c38-4620-80b5-602711901ef7",
+      "name": "Get audio",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "fUus3CYWAH2kvxtF",
+          "name": "Bearer Whatsapp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -272,
+        96
+      ],
+      "id": "eeceadee-b438-45ac-ab99-6339777fdacf",
+      "name": "Transcribe audio",
+      "credentials": {
+        "openAiApi": {
+          "id": "J3mSmqCggTA6TgeU",
+          "name": "n8n agent whatsapp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const audioMessage = $('Map audio message').first().json;\nconst transcribeAudioResponse = $input.first().json;\n\nreturn {\n  chat_id: audioMessage.chat_id,\n  body: transcribeAudioResponse.text,\n  type: audioMessage.type,\n  from_name: audioMessage.from_name,\n  from: audioMessage.from\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        96
+      ],
+      "id": "8b597dce-793b-499b-8477-b3b6f0029d75",
+      "name": "Map Audio Response"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "773137852553545",
+        "recipientPhoneNumber": "={{ $('Map user text').item.json.fromNumber }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        32
+      ],
+      "id": "8c739040-14b0-443a-bbc6-f05b0401fca7",
+      "name": "Send message",
+      "webhookId": "f91a09be-a798-49e4-9ee2-ffdc21b2f9b9",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "yUoAsdMbJkMFoOZT",
+          "name": "Autopia - Enviar mensaje"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1392,
+        16
+      ],
+      "id": "bd07667d-e881-4f5b-9c2e-3bcbae17db61",
+      "name": "Recibir WhatsApp",
+      "webhookId": "3c0e2003-e89b-4c59-bfe5-419dc5587cf4",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "Iruml7BBCdGyGXkt",
+          "name": "Autopia - Recibir Mensaje"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $json.audio.id }}"
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        96
+      ],
+      "id": "a989ded0-9a06-4ca0-9ec0-d2df302de0fa",
+      "name": "Download media",
+      "webhookId": "bae1fd0a-d096-4048-b406-e8f4b4117573",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "yUoAsdMbJkMFoOZT",
+          "name": "Autopia - Enviar mensaje"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo",
+          "mode": "list",
+          "cachedResultName": "Zoovital (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Turnos Fisioterapia",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        848,
+        384
+      ],
+      "id": "bc5cf24a-782a-4e3d-9e6c-7e53a34cdd20",
+      "name": "Obtener Turnos Fisio",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Autopia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo",
+          "mode": "list",
+          "cachedResultName": "Zoovital (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Turnos Fisioterapia",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Creado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Creado', ``, 'string') }}",
+            "Actualizado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Actualizado', ``, 'string') }}",
+            "Eliminado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Eliminado', ``, 'string') }}",
+            "ID": "={{ $('Map user text').item.json.ID }}",
+            "Cliente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cliente', ``, 'string') }}",
+            "Telefono": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Telefono', ``, 'string') }}",
+            "Fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Telefono",
+              "displayName": "Telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Creado",
+              "displayName": "Creado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Actualizado",
+              "displayName": "Actualizado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Eliminado",
+              "displayName": "Eliminado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        384
+      ],
+      "id": "b1eb7b30-880b-420e-ad28-5a827e8ad832",
+      "name": "Alta Turnos Fisio",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Autopia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo",
+          "mode": "list",
+          "cachedResultName": "Zoovital (Sbox)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Turnos Fisioterapia",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ID__using_to_match_', ``, 'string') }}",
+            "Creado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Creado', ``, 'string') }}",
+            "Actualizado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Actualizado', ``, 'string') }}",
+            "Eliminado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Eliminado', ``, 'string') }}",
+            "row_number": 0,
+            "Cliente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cliente', ``, 'string') }}",
+            "Telefono": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Telefono', ``, 'string') }}",
+            "Fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Telefono",
+              "displayName": "Telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Creado",
+              "displayName": "Creado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Actualizado",
+              "displayName": "Actualizado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Eliminado",
+              "displayName": "Eliminado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1200,
+        384
+      ],
+      "id": "6844517c-ffbb-4cb4-9e95-cbf6e3572821",
+      "name": "Modificacion Turnos Fisio",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Autopia"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Map user text": {
+      "main": [
+        [
+          {
+            "node": "Get prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get prompt": {
+      "main": [
+        [
+          {
+            "node": "Extract Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Message type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map text message": {
+      "main": [
+        [
+          {
+            "node": "Map user text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map audio message": {
+      "main": [
+        [
+          {
+            "node": "Download media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message type": {
+      "main": [
+        [
+          {
+            "node": "Map text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Map audio message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe audio": {
+      "main": [
+        [
+          {
+            "node": "Map Audio Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Audio Response": {
+      "main": [
+        [
+          {
+            "node": "Map user text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recibir WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download media": {
+      "main": [
+        [
+          {
+            "node": "Get audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Turnos Fisio": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alta Turnos Fisio": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modificacion Turnos Fisio": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e23485d3-5e57-4975-86e0-6652723486c9",
+  "meta": {
+    "instanceId": "914667f379206fe8d083188e17e5e435f986c59ab32d558e4d2d7255afc38315"
+  },
+  "id": "qXcwfmOKIwNAiOFM",
+  "tags": [
+    {
+      "createdAt": "2025-09-26T16:29:58.595Z",
+      "updatedAt": "2025-09-26T16:29:58.595Z",
+      "id": "V7e6JxndFWlVnFiB",
+      "name": "Autopia"
+    },
+    {
+      "createdAt": "2025-09-26T16:30:03.321Z",
+      "updatedAt": "2025-09-26T16:30:03.321Z",
+      "id": "TI6mB3GZwNS1U5T5",
+      "name": "Sbox"
+    }
+  ]
+}
