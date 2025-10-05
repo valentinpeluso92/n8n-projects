@@ -6,7 +6,7 @@ Tengo una planilla en google sheet que almacena los turnos de fisioterapita de u
 ID: Identificador del turno. Ejemplo cc44b268-ddac-33c4-f7de-5f4064ae1951
 Cliente: Nombre del cliente al que se le registra el turno. Por ejemplo "Jhon Doe"
 Telefono: Telefono del cliente al que se le registra el turno. Por ejemplo "2214942770"
-Fecha: Fecha en la que se registro el turno en formato dd/MM/yyyy, por ejemplo 24/09/2025
+Fecha: Fecha en la que se registro el turno en formato dd/MM/yyyy HH:mm. Tiene que incluir la hora. Debe ser martes o viernes. Los horarios disponibles son de 9 30 a 12 y de 16 a 19. Por ejemplo 10/10/2025 10:30
 Creado: Fecha de creacion en formato dd/MM/yyyy, por ejemplo 24/09/2025
 Actualizado: Fecha de actualizacion en formato dd/MM/yyyy, por ejemplo 24/09/2025
 Eliminado: Fecha de eliminacion en formato dd/MM/yyyy, por ejemplo 24/09/2025.
