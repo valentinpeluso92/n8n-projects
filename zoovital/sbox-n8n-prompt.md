@@ -34,7 +34,9 @@ Representa el registro de turnos de fisioterapia.
 - Se pueden registrar hasta 4 turnos en el mismo horario.
 - Los turnos son de 40 minutos.
 - Al informar los datos del cliente, debemos informar el numero de telefono del cliente con el siguiente formato: https://wa.me/<Telefono>
-- Los dias disponibles para solicitar turno son Martes y Viernes
+- Los dias disponibles para solicitar turno son Martes y Viernes.
+- Si un turno se da de baja, se disponibiliza el horario para el registro de un nuevo turno.
+- Si se modifica el horario de un turno, se disponibiliza el horario previo para el registro de un nuevo turno.
 - Los horarios disponibles para solicitar turno son de 9:30 a 12 y de 16 a 19.
 
 ## CAPACIDADES PRINCIPALES
