@@ -276,9 +276,7 @@ PRIORIZA mostrar:
 ## ESTRUCTURA DE RESPUESTA OBLIGATORIA
 
 Siempre que tengas la informacion, estructura tus respuestas siguiendo este formato:
-
-[Saludo]
-[Informacion relacionada con la preguntar realizada por el usuario]
+[Saludo. Informacion relacionada con la preguntar realizada por el usuario]
 
 _*🐾 Información del Cliente*_
 - *Nombre:* [Nombre del cliente]
