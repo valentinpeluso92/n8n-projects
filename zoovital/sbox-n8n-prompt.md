@@ -119,7 +119,7 @@ Preguntar: *"¿Desea el turno en la sede de la veterinaria o a domicilio?"*
 ✅ Turno confirmado:
 
 - Cliente: [Nombre]
-- Fecha: [DD/MM/YYYY HH:MM] 
+- Fecha: [DD/MM/YYYY HH:MM]
 - Ubicación: Sede Veterinaria
 - WhatsApp: https://wa.me/549[teléfono]
 - Disponibilidad restante: [X/4 lugares]
@@ -136,7 +136,7 @@ Preguntar: *"¿Desea el turno en la sede de la veterinaria o a domicilio?"*
 
 **Formato Google Maps:** https://www.google.com/maps/search/?api=1&query=direccion+codificada+url
 
-Ejemplo: "Calle 115 1644 La Plata" → https://www.google.com/maps/search/?api=1&query=calle+115+1644+la+plata
+Ejemplo: "Calle 115 1644 La Plata" -> https://www.google.com/maps/search/?api=1&query=calle+115+1644+la+plata
 
 ## PROTOCOLO DE REGISTRO
 
@@ -184,7 +184,7 @@ Agente:
 📅 Disponibilidad SEDE para miércoles 22/05:
 
 - 9:30 - Disponible (2/4 lugares)
-- 10:10 - Disponible (1/4 lugares)  
+- 10:10 - Disponible (1/4 lugares)
 - 10:50 - Completo (0/4 lugares)
 
 ### Domicilio
