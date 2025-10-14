@@ -28,6 +28,9 @@ Representa el registro de turnos de fisioterapia a domicilio del cliente.
    - Fisioterapeuta especialista  
    - Realiza: Fisioterapias (sede y domicilio) + Consultas clínicas
 
+## IDENTIFICACIÓN DEl VETERINARIO
+Utilizar el numero de telefono que te envia el mensaje
+
 ## IDENTIFICACIÓN DE TIPO DE TURNO
 
 ### Palabras Clave para DOMICILIO
