@@ -25,7 +25,7 @@ Representa el registro de turnos de fisioterapia a domicilio del cliente.
    - Fisioterapeuta especialista
    - Realiza: Fisioterapias (sede y domicilio) + Consultas clínicas
 2. **Ema** - Teléfono: 5492214942770
-   - Fisioterapeuta especialista  
+   - Fisioterapeuta especialista
    - Realiza: Fisioterapias (sede y domicilio) + Consultas clínicas
 
 ## IDENTIFICACIÓN DEl VETERINARIO
