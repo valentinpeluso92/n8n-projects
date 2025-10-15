@@ -1,5 +1,5 @@
 {
-  "name": "(Sbox) - Zoovital",
+  "name": "Zoovital",
   "nodes": [
     {
       "parameters": {
@@ -11,7 +11,7 @@
         144,
         32
       ],
-      "id": "cf309c4a-5a65-47f4-9b6a-d631013f1b9e",
+      "id": "a403a2c5-97a1-4962-89c0-a0671bbbda95",
       "name": "Map user text"
     },
     {
@@ -32,7 +32,7 @@
           "cachedResultName": "n8n-projects",
           "cachedResultUrl": "https://github.com/valentinpeluso92/n8n-projects"
         },
-        "filePath": "zoovital/sbox-n8n-prompt.md",
+        "filePath": "zoovital/n8n-prompt.md",
         "additionalParameters": {}
       },
       "type": "n8n-nodes-base.github",
@@ -41,9 +41,9 @@
         368,
         32
       ],
-      "id": "bb4a784a-7e83-48e7-9126-f4f4bf110510",
+      "id": "8dfa65bb-3465-47b7-bf80-8d29ac8a5093",
       "name": "Get prompt",
-      "webhookId": "8c13ff5f-1002-45cf-aa72-bd968d52c7eb",
+      "webhookId": "f03eacb4-e584-4210-ba9d-73672dc690fd",
       "credentials": {
         "githubApi": {
           "id": "MIdIYwYLNlstFbFk",
@@ -62,13 +62,13 @@
         592,
         32
       ],
-      "id": "2ddf81a8-9979-43bc-9470-87157ef298c9",
+      "id": "5c09e5c7-56a1-4c68-a39e-5c528db42918",
       "name": "Extract Prompt"
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json.data }}\n\nPROMPT DEL USUARIO:\n{{ $('Map user text').item.json.userText }}\n\nFECHA DE HOY:\n{{ $('Map user text').item.json.date }}\n\nVETERINARIO:\n{{ $('Map user text').item.json.vet }}",
+        "text": "={{ $json.data }}\n\nPROMPT DEL USUARIO\n{{ $('Map user text').item.json.userText }}\n\nCURRENT DATE:\n{{ $('Map user text').item.json.date }}\n\nVETERINARIO:\n{{ $('Map user text').item.json.vet }}",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -77,7 +77,7 @@
         896,
         32
       ],
-      "id": "c27a90da-17ed-4161-aeb1-596a19426236",
+      "id": "7cf01892-8c25-431d-a115-bf0f8ffb0370",
       "name": "AI Agent"
     },
     {
@@ -94,10 +94,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        352,
-        304
+        464,
+        368
       ],
-      "id": "116434de-e8b2-49d3-b91b-00955616ba24",
+      "id": "b1893a32-75e7-4a74-8576-bf85bec31fda",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
@@ -119,7 +119,7 @@
             {
               "id": "0a94599d-4063-41e6-b10d-9f4284397632",
               "leftValue": "={{ $json.messages[0].from }}",
-              "rightValue": "5492214942770",
+              "rightValue": "5492281662808|5492215940000",
               "operator": {
                 "type": "string",
                 "operation": "regex"
@@ -136,7 +136,7 @@
         -1200,
         16
       ],
-      "id": "749ffecf-5e52-4992-9d91-bf3b14ad1442",
+      "id": "53522920-11bf-4af0-8e48-74aa54c051b1",
       "name": "Filter"
     },
     {
@@ -149,7 +149,7 @@
         -80,
         -80
       ],
-      "id": "cee780c3-7ab0-49ab-b7b6-41f43edda7ba",
+      "id": "6128f68e-5ede-4eba-b3a1-efbfdda52488",
       "name": "Map text message"
     },
     {
@@ -162,7 +162,7 @@
         -784,
         96
       ],
-      "id": "1b5e774b-68b9-4e65-89d5-82f504b74775",
+      "id": "28d8ece0-2b27-4852-8cbe-e8525731a1ce",
       "name": "Map audio message"
     },
     {
@@ -228,7 +228,7 @@
         -1024,
         16
       ],
-      "id": "927dafe8-4fdd-4a3d-8998-4ee3a356a7df",
+      "id": "9a3d9a1e-a406-49f2-90b5-361c3fdea5c8",
       "name": "Message type"
     },
     {
@@ -244,7 +244,7 @@
         -448,
         96
       ],
-      "id": "cdb4919b-7c38-4620-80b5-602711901ef7",
+      "id": "06730620-53f5-4b88-ad17-4d87d8548414",
       "name": "Get audio",
       "credentials": {
         "httpBearerAuth": {
@@ -265,7 +265,7 @@
         -272,
         96
       ],
-      "id": "eeceadee-b438-45ac-ab99-6339777fdacf",
+      "id": "2f36efae-91ed-4355-a2d7-76ca0c60ee84",
       "name": "Transcribe audio",
       "credentials": {
         "openAiApi": {
@@ -284,7 +284,7 @@
         -80,
         96
       ],
-      "id": "8b597dce-793b-499b-8477-b3b6f0029d75",
+      "id": "8fa45db4-caa7-444b-8be5-f63c395e7ebd",
       "name": "Map Audio Response"
     },
     {
@@ -301,13 +301,13 @@
         1264,
         32
       ],
-      "id": "8c739040-14b0-443a-bbc6-f05b0401fca7",
+      "id": "3269b261-3b8d-4f89-961b-f98e43b9206c",
       "name": "Send message",
-      "webhookId": "f91a09be-a798-49e4-9ee2-ffdc21b2f9b9",
+      "webhookId": "2c2dfb9b-4bae-4901-9408-221edb0046c9",
       "credentials": {
         "whatsAppApi": {
-          "id": "yUoAsdMbJkMFoOZT",
-          "name": "Autopia - Enviar mensaje"
+          "id": "rUcJqDxJzwWGGIRD",
+          "name": "Zoovital - Enviar Mensaje"
         }
       }
     },
@@ -324,13 +324,13 @@
         -1392,
         16
       ],
-      "id": "bd07667d-e881-4f5b-9c2e-3bcbae17db61",
+      "id": "99d6b94a-695e-4545-a380-7804d96e527c",
       "name": "Recibir WhatsApp",
-      "webhookId": "3c0e2003-e89b-4c59-bfe5-419dc5587cf4",
+      "webhookId": "c59d3ee1-e8c5-4861-8de4-73cd934e32e8",
       "credentials": {
         "whatsAppTriggerApi": {
-          "id": "Iruml7BBCdGyGXkt",
-          "name": "Autopia - Recibir Mensaje"
+          "id": "BI42jrVs1v02SEdv",
+          "name": "Zoovital - Recibir Mensaje"
         }
       }
     },
@@ -346,9 +346,9 @@
         -624,
         96
       ],
-      "id": "a989ded0-9a06-4ca0-9ec0-d2df302de0fa",
+      "id": "87613b3e-71a0-4c5d-9da4-241d6cabb296",
       "name": "Download media",
-      "webhookId": "bae1fd0a-d096-4048-b406-e8f4b4117573",
+      "webhookId": "c78c73df-c249-4036-b6be-d3b14f7bfb6a",
       "credentials": {
         "whatsAppApi": {
           "id": "yUoAsdMbJkMFoOZT",
@@ -358,51 +358,30 @@
     },
     {
       "parameters": {
-        "sessionIdType": "customKey",
-        "sessionKey": "=zoovital-{{ $('Map user text').item.json.fromNumber }}",
-        "tableName": "zoovital_sbox_n8n_chat_histories"
-      },
-      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
-      "typeVersion": 1.3,
-      "position": [
-        480,
-        432
-      ],
-      "id": "1c6d3ea9-f6cb-4437-b2da-8e708014253e",
-      "name": "Postgres Chat Memory",
-      "credentials": {
-        "postgres": {
-          "id": "f13IqtERALBVGYfM",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo",
+          "value": "19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM",
           "mode": "list",
-          "cachedResultName": "Zoovital (Sbox)",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit?usp=drivesdk"
+          "cachedResultName": "Zoovital",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Turnos Fisioterapia",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM/edit#gid=0"
         },
         "options": {}
       },
       "type": "n8n-nodes-base.googleSheetsTool",
       "typeVersion": 4.7,
       "position": [
-        592,
+        720,
         560
       ],
-      "id": "67aef5d1-23ce-4fcd-9a47-4fcf09d3c475",
-      "name": "Sede Obtener Turnos",
+      "id": "e18013f7-c4d4-49b9-ad37-f4611ffa4afd",
+      "name": "Obtener Turnos Fisio",
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "T1oERU72F70WKHmb",
@@ -415,10 +394,10 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo",
+          "value": "19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM",
           "mode": "list",
-          "cachedResultName": "Zoovital (Sbox)",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit?usp=drivesdk"
+          "cachedResultName": "Zoovital",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -433,7 +412,7 @@
             "Creado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Creado', ``, 'string') }}",
             "Actualizado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Actualizado', ``, 'string') }}",
             "Eliminado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Eliminado', ``, 'string') }}",
-            "ID": "={{ $('Map user text').item.json.ID }}",
+            "ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ID', ``, 'string') }}",
             "Cliente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cliente', ``, 'string') }}",
             "Telefono": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Telefono', ``, 'string') }}",
             "Fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha', ``, 'string') }}"
@@ -515,179 +494,11 @@
       "type": "n8n-nodes-base.googleSheetsTool",
       "typeVersion": 4.7,
       "position": [
-        720,
+        864,
         624
       ],
-      "id": "a854542b-288e-4594-88eb-62ae5b1faac7",
-      "name": "Sede Alta Turno",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "T1oERU72F70WKHmb",
-          "name": "Autopia"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo",
-          "mode": "list",
-          "cachedResultName": "Zoovital (Sbox)",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": 1532952460,
-          "mode": "list",
-          "cachedResultName": "Domicilios Fisioterapia",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit#gid=1532952460"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleSheetsTool",
-      "typeVersion": 4.7,
-      "position": [
-        1104,
-        608
-      ],
-      "id": "0b3f1001-24d8-40e8-b3f0-faa941fc9649",
-      "name": "Domicilio Obtener Turnos",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "T1oERU72F70WKHmb",
-          "name": "Autopia"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo",
-          "mode": "list",
-          "cachedResultName": "Zoovital (Sbox)",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": 1532952460,
-          "mode": "list",
-          "cachedResultName": "Domicilios Fisioterapia",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit#gid=1532952460"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "Cliente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cliente', ``, 'string') }}",
-            "Telefono": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Telefono', ``, 'string') }}",
-            "Direccion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Direccion', ``, 'string') }}",
-            "Fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha', ``, 'string') }}",
-            "Creado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Creado', ``, 'string') }}",
-            "Actualizado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Actualizado', ``, 'string') }}",
-            "Eliminado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Eliminado', ``, 'string') }}",
-            "ID": "={{ $('Map user text').item.json.ID }}",
-            "Veterinario": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Veterinario', ``, 'string') }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "ID",
-              "displayName": "ID",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Cliente",
-              "displayName": "Cliente",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Telefono",
-              "displayName": "Telefono",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Veterinario",
-              "displayName": "Veterinario",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Direccion",
-              "displayName": "Direccion",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Fecha",
-              "displayName": "Fecha",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Creado",
-              "displayName": "Creado",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Actualizado",
-              "displayName": "Actualizado",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Eliminado",
-              "displayName": "Eliminado",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleSheetsTool",
-      "typeVersion": 4.7,
-      "position": [
-        1248,
-        544
-      ],
-      "id": "56470048-6e89-4b9b-a113-14c08d8af55b",
-      "name": "Domicilio Alta Turno",
+      "id": "9fff868a-d302-4315-8653-1e9311e40e6d",
+      "name": "Alta Turnos Fisio",
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "T1oERU72F70WKHmb",
@@ -700,10 +511,10 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo",
+          "value": "19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM",
           "mode": "list",
-          "cachedResultName": "Zoovital (Sbox)",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit?usp=drivesdk"
+          "cachedResultName": "Zoovital",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -815,11 +626,200 @@
       "type": "n8n-nodes-base.googleSheetsTool",
       "typeVersion": 4.7,
       "position": [
-        880,
+        1008,
+        672
+      ],
+      "id": "3790bff6-961e-4c46-bfc8-84b65d71d5f8",
+      "name": "Modificacion Turnos Fisio",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Autopia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=zoovital-{{ $('Map user text').item.json.fromNumber }}",
+        "tableName": "zoovital_n8n_chat_histories"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        496
+      ],
+      "id": "b49fc792-0fb8-4b12-9392-44b1abd69eda",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "f13IqtERALBVGYfM",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM",
+          "mode": "list",
+          "cachedResultName": "Zoovital",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 543127796,
+          "mode": "list",
+          "cachedResultName": "Domicilios Fisioterapia",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM/edit#gid=543127796"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        672
+      ],
+      "id": "700b7fb0-c09d-46d0-8ee1-54f223455dcd",
+      "name": "Domicilio Obtener Turnos",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T1oERU72F70WKHmb",
+          "name": "Autopia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM",
+          "mode": "list",
+          "cachedResultName": "Zoovital",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1532952460,
+          "mode": "list",
+          "cachedResultName": "Domicilios Fisioterapia",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit#gid=1532952460"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Cliente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cliente', ``, 'string') }}",
+            "Telefono": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Telefono', ``, 'string') }}",
+            "Direccion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Direccion', ``, 'string') }}",
+            "Fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha', ``, 'string') }}",
+            "Creado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Creado', ``, 'string') }}",
+            "Actualizado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Actualizado', ``, 'string') }}",
+            "Eliminado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Eliminado', ``, 'string') }}",
+            "ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ID', ``, 'string') }}",
+            "Veterinario": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Veterinario', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Telefono",
+              "displayName": "Telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Veterinario",
+              "displayName": "Veterinario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Direccion",
+              "displayName": "Direccion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Creado",
+              "displayName": "Creado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Actualizado",
+              "displayName": "Actualizado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Eliminado",
+              "displayName": "Eliminado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1360,
         640
       ],
-      "id": "e06cfb76-55bf-49b0-bdcb-d3ced1b073a1",
-      "name": "Sede Modificacion Turno",
+      "id": "bd762575-2535-4423-b905-087633c2f6e5",
+      "name": "Domicilio Alta Turno",
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "T1oERU72F70WKHmb",
@@ -832,10 +832,10 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo",
+          "value": "19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM",
           "mode": "list",
-          "cachedResultName": "Zoovital (Sbox)",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNIlMG7SHIXUiphb5raDOV6xKraJvbf3011ko8qmXXo/edit?usp=drivesdk"
+          "cachedResultName": "Zoovital",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19lTrD1r4U3dVTEjONEeW3DwghupH2bbXZBoKYC5gdiM/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -847,7 +847,7 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ID": "={{ $('Map user text').item.json.ID }}",
+            "ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ID__using_to_match_', ``, 'string') }}",
             "Cliente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cliente', ``, 'string') }}",
             "Telefono": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Telefono', ``, 'string') }}",
             "Direccion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Direccion', ``, 'string') }}",
@@ -964,10 +964,10 @@
       "type": "n8n-nodes-base.googleSheetsTool",
       "typeVersion": 4.7,
       "position": [
-        1360,
-        384
+        1504,
+        528
       ],
-      "id": "d5faa237-5950-46a9-9254-19bb7cdae611",
+      "id": "8da434cb-aab0-498d-9c75-20c5399124bb",
       "name": "Domicilio Modificacion Turno",
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -1140,34 +1140,45 @@
         ]
       ]
     },
+    "Obtener Turnos Fisio": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alta Turnos Fisio": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modificacion Turnos Fisio": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Postgres Chat Memory": {
       "ai_memory": [
         [
           {
             "node": "AI Agent",
             "type": "ai_memory",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Sede Obtener Turnos": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Sede Alta Turno": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -1195,17 +1206,6 @@
         ]
       ]
     },
-    "Sede Modificacion Turno": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Domicilio Modificacion Turno": {
       "ai_tool": [
         [
@@ -1218,28 +1218,28 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "2589d973-2767-46f4-9edf-12c806742c30",
+  "versionId": "bfa8a1be-8fb8-4f66-bd21-619eb06d185a",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "914667f379206fe8d083188e17e5e435f986c59ab32d558e4d2d7255afc38315"
   },
-  "id": "qXcwfmOKIwNAiOFM",
+  "id": "g8buR80TU6IrHDnb",
   "tags": [
-    {
-      "createdAt": "2025-09-26T16:30:03.321Z",
-      "updatedAt": "2025-09-26T16:30:03.321Z",
-      "id": "TI6mB3GZwNS1U5T5",
-      "name": "Sbox"
-    },
     {
       "createdAt": "2025-09-26T16:29:58.595Z",
       "updatedAt": "2025-09-26T16:29:58.595Z",
       "id": "V7e6JxndFWlVnFiB",
       "name": "Autopia"
+    },
+    {
+      "createdAt": "2025-09-26T16:30:55.226Z",
+      "updatedAt": "2025-09-26T16:30:55.226Z",
+      "id": "hl93XjaQfewMAQV4",
+      "name": "Prod"
     }
   ]
 }
