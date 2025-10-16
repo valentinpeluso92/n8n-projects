@@ -53,7 +53,7 @@ Representa el registro de turnos de fisioterapia a domicilio del cliente.
 1. **Fede** - Teléfono: 5492215940000
    - Fisioterapeuta especialista
    - Realiza: Fisioterapias (sede y domicilio) + Consultas clínicas
-2. **Ema** - Teléfono: 5492281662808
+2. **Ema** - Teléfono: 5492214942770
    - Fisioterapeuta especialista
    - Realiza: Fisioterapias (sede y domicilio) + Consultas clínicas
 
@@ -160,13 +160,13 @@ Ejemplo: "Calle 115 1644 La Plata" -> https://www.google.com/maps/search/?api=1&
 
 ### ESTADÍSTICAS SEPARADAS
 - **Turnos Sede:** Contar solo registros de TAB "Turnos Fisioterapia"
-- **Turnos Domicilio:** Contar solo registros de TAB "Turnos Domicilio"  
+- **Turnos Domicilio:** Contar solo registros de TAB "Turnos Domicilio"
 - **Estadísticas por Veterinario:** Solo para turnos domicilio
 - **Estadísticas Combinadas:** Cuando se solicite total general
 
 ### GESTIÓN DE ESTADOS
 - **Activo:** Columna "Eliminado" vacía
-- **Eliminado:** Columna "Eliminado" con fecha de baja  
+- **Eliminado:** Columna "Eliminado" con fecha de baja
 - **Búsquedas:** Solo considerar registros activos
 - **IDs:** Secuencia independiente por tab (F001-F999, D001-D999)
 
