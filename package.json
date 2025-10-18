@@ -1,0 +1,19 @@
+{
+  "name": "n8n-projects",
+  "version": "1.0.0",
+  "description": "Autopia",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/valentinpeluso92/n8n-projects.git"
+  },
+  "author": "Valentin Peluso",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/valentinpeluso92/n8n-projects/issues"
+  },
+  "homepage": "https://github.com/valentinpeluso92/n8n-projects#readme"
+}
