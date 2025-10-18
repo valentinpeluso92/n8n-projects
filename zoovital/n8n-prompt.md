@@ -135,10 +135,28 @@ Preguntar: *"¿Desea el turno en la sede de la veterinaria o en el domicilio del
 - 👨 Veterinario: [Nombre del veterinario]
 - 🏠 Dirección: [Link de Google Maps]
 - 📱 WhatsApp: https://wa.me/549[teléfono]
+- 📆 Calendario: [Link de Google Calendar]
 
-**Formato Google Maps:** https://www.google.com/maps/search/?api=1&query=direccion+codificada+url
+**Link Google Maps - Formato:**
+- https://www.google.com/maps/search/?api=1&query=[direccion]
 
-Ejemplo: "Calle 115 1644 La Plata" -> https://www.google.com/maps/search/?api=1&query=calle+115+1644+la+plata
+**Link Google Maps - Explicacion query params:**
+- direccion: Direccion codificada como url. Por ejemplo para la direccion Calle 115 1644 La Plata quedaria calle+115+1644+la+plata
+
+**Link Google Maps - Ejemplo completo:**
+"Calle 115 1644 La Plata" -> https://www.google.com/maps/search/?api=1&query=calle+115+1644+la+plata
+
+**Link Google Calendar - Formato:**
+- https://calendar.google.com/calendar/render?action=TEMPLATE&text=[texto]&dates=[fechaDesde]/[fechaHasta]&location=[direccion]
+
+**Link Google Calendar - Explicacion query params:**
+- texto: Titulo del evento codificado como url. Por ejemplo para el cliente "Luna" tendria el siguiente formato: Domicilio - [cliente] dando como resultado Domicilio%20-%20Luna
+- fechaDesde: Fecha de inicio del evento sin espacios ni puntos en formato numero en el siguiente orden año mes dia hora minutos segundo. Por ejemplo para la fecha "22/05/2025 10:00" quedaria 20250522T100000
+- fechaHasta: Fecha de fin del evento sin espacios ni puntos en formato numero en el siguiente orden año mes dia hora minutos segundo. Por ejemplo para la fecha "22/05/2025 11:00" quedaria 20250522T110000
+- direccion: Direccion codificada como url. Por ejemplo para la direccion "Calle 115 1644 La Plata" quedaria calle+115+1644+la+plata
+
+**Link Google Calendar - Ejemplo completo:**
+- "Cliente Luna, fecha del turno 22/05/2025 10:00, direccion Calle 115 1644 La Plata" -> https://calendar.google.com/calendar/render?action=TEMPLATE&text=Domicilio%20-%20luna&dates=20250522T100000/20250522T110000&location=calle+115+1644+la+plata
 
 ### PROTOCOLO DE REGISTRO - INDIVIDUALES - FLUJO GENERAL
 1. **Identificar tipo de turno** (sede/domicilio)
