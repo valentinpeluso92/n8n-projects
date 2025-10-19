@@ -1,10 +1,10 @@
-import {Firestore} from "firebase-admin/firestore";
-import * as express from "express";
-import {HttpsError, Request} from "firebase-functions/v2/https";
-import {Client} from "./model/client";
-import { zoovitalFiltersUtilities } from "./utilities/filters";
+import {Firestore} from 'firebase-admin/firestore';
+import * as express from 'express';
+import {Request} from 'firebase-functions/v2/https';
+import {Client} from './model/client';
+import {zoovitalFiltersUtilities} from './utilities/filters';
 
-const COLLECTION_NAME = "sbox-zoovital-clients";
+const COLLECTION_NAME = 'sbox-zoovital-clients';
 
 // GET - Obtener cliente(s)
 const getClient = async (
@@ -13,23 +13,23 @@ const getClient = async (
   db: Firestore
 ) => {
   // Configurar CORS
-  res.set("Access-Control-Allow-Origin", "*");
-  res.set("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.set("Access-Control-Allow-Headers", "Content-Type");
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === "OPTIONS") {
-    res.status(204).send("");
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
     return;
   }
 
-  if (req.method !== "GET") {
-    return res.status(405).json({error: "Método no permitido. Usa GET."});
+  if (req.method !== 'GET') {
+    return res.status(405).json({error: 'Método no permitido. Usa GET.'});
   }
 
   try {
     const id: string = req.query.id as string;
     const name: string = req.query.name as string;
-    const threshold: number = req.query.threshold ? 
+    const threshold: number = req.query.threshold ?
       Math.max(0, Math.min(100, parseInt(req.query.threshold as string))) : 80;
 
     if (id) {
@@ -37,7 +37,7 @@ const getClient = async (
       const doc = await db.collection(COLLECTION_NAME).doc(id).get();
 
       if (!doc.exists) {
-        return res.status(404).json({error: "Cliente no encontrado"});
+        return res.status(404).json({error: 'Cliente no encontrado'});
       }
 
       return res.status(200).json({
@@ -61,8 +61,8 @@ const getClient = async (
         count: filteredClients.length,
         searchCriteria: {
           name: name,
-          threshold: threshold
-        }
+          threshold: threshold,
+        },
       });
     } else {
       // Obtener todos los clientes
@@ -79,10 +79,10 @@ const getClient = async (
         count: clients.length,
       });
     }
-  } catch (error: HttpsError | any) {
+  } catch (error) {
     return res.status(500).json({
-      error: "Error interno del servidor",
-      details: error.message,
+      error: 'Error interno del servidor',
+      details: (error as Error).message,
     });
   }
 };
