@@ -1,7 +1,8 @@
 import {Firestore} from "firebase-admin/firestore";
 import * as express from "express";
 import {HttpsError, Request} from "firebase-functions/v2/https";
-import {Client} from "./client";
+import {Client} from "./model/client";
+import { zoovitalFiltersUtilities } from "./utilities/filters";
 
 const COLLECTION_NAME = "sbox-zoovital-clients";
 
@@ -27,6 +28,9 @@ const getClient = async (
 
   try {
     const id: string = req.query.id as string;
+    const name: string = req.query.name as string;
+    const threshold: number = req.query.threshold ? 
+      Math.max(0, Math.min(100, parseInt(req.query.threshold as string))) : 80;
 
     if (id) {
       // Obtener un cliente específico
@@ -39,6 +43,26 @@ const getClient = async (
       return res.status(200).json({
         success: true,
         data: {id: doc.id, ...doc.data()},
+      });
+    } else if (name) {
+      // Filtrar clientes por nombre con threshold personalizable
+      const snapshot = await db.collection(COLLECTION_NAME).get();
+      const allClients: Client[] = [];
+
+      snapshot.forEach((doc) => {
+        allClients.push({id: doc.id, ...doc.data()} as Client);
+      });
+
+      const filteredClients = zoovitalFiltersUtilities.filterByName(allClients, name, threshold);
+
+      return res.status(200).json({
+        success: true,
+        data: filteredClients,
+        count: filteredClients.length,
+        searchCriteria: {
+          name: name,
+          threshold: threshold
+        }
       });
     } else {
       // Obtener todos los clientes
@@ -56,7 +80,6 @@ const getClient = async (
       });
     }
   } catch (error: HttpsError | any) {
-    console.error("Error en getClient:", error);
     return res.status(500).json({
       error: "Error interno del servidor",
       details: error.message,
