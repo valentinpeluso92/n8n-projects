@@ -1,13 +1,13 @@
-import {setGlobalOptions} from 'firebase-functions';
-import {HttpsOptions, onRequest, Request} from 'firebase-functions/v2/https';
+import { setGlobalOptions } from 'firebase-functions';
+import { HttpsOptions, onRequest, Request } from 'firebase-functions/v2/https';
 import * as logger from 'firebase-functions/logger';
 import * as express from 'express';
-import {sboxZoovital} from './zoovital/sbox-zoovital';
-import {Firestore, getFirestore} from 'firebase-admin/firestore';
-import {initializeApp} from 'firebase-admin/app';
-import {defineSecret} from 'firebase-functions/params';
+import { sboxZoovital } from './zoovital/sbox-zoovital';
+import { Firestore, getFirestore } from 'firebase-admin/firestore';
+import { initializeApp } from 'firebase-admin/app';
+import { defineSecret } from 'firebase-functions/params';
 
-setGlobalOptions({maxInstances: 10});
+setGlobalOptions({ maxInstances: 10 });
 
 const apiKeySecret = defineSecret('API_KEY');
 
@@ -16,8 +16,8 @@ initializeApp();
 const db: Firestore = getFirestore();
 
 export const helloWorld = onRequest((request, response) => {
-  logger.info('Hello logs!', {structuredData: true});
-  response.send({message: 'Hello from Firebase 2!'});
+  logger.info('Hello logs!', { structuredData: true });
+  response.send({ message: 'Hello from Firebase 2!' });
 });
 
 const opts: HttpsOptions = {

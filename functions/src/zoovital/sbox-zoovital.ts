@@ -1,10 +1,10 @@
 
 // === sbox-zoovital-refactored.ts ===
 
-import {Firestore} from 'firebase-admin/firestore';
-import {Request} from 'firebase-functions/v2/https';
+import { Firestore } from 'firebase-admin/firestore';
+import { Request } from 'firebase-functions/v2/https';
 import * as express from 'express';
-import {ClientController} from './controllers/clientController';
+import { ClientController } from './controllers/clientController';
 
 // Create controller instance
 let clientController: ClientController;

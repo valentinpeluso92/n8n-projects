@@ -1,11 +1,11 @@
 
 // === middleware/index.ts ===
 
-import {Request} from 'firebase-functions/v2/https';
+import { Request } from 'firebase-functions/v2/https';
 import * as express from 'express';
 import * as logger from 'firebase-functions/logger';
-import {ALLOWED_ORIGINS, ERROR_MESSAGES, HTTP_STATUS} from '../constants';
-import {ApiResponse, HttpMethod} from '../types/api';
+import { ALLOWED_ORIGINS, ERROR_MESSAGES, HTTP_STATUS } from '../constants';
+import { ApiResponse, HttpMethod } from '../types/api';
 
 export class MiddlewareError extends Error {
   constructor(
@@ -22,16 +22,17 @@ export const corsMiddleware = (
   res: express.Response,
   allowedMethods: string[] = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 ): boolean => {
-  const origin = req.get('Origin') || req.get('Referer') || '';
-  const requestOrigin = origin || (req.get('Referer') ? new URL(req.get('Referer')!).origin : '');
+  const referer = req.get('Referer') || '';
+  const origin = req.get('Origin') || referer || '';
+  const requestOrigin = origin || (referer ? new URL(referer).origin : '');
 
   // Validate origin for production
-  const isValidOrigin = !requestOrigin ||
-    ALLOWED_ORIGINS.some((allowed) => requestOrigin.startsWith(allowed)) ||
-    requestOrigin.includes('localhost'); // Allow localhost for development
+  const isValidOrigin = !requestOrigin
+    || ALLOWED_ORIGINS.some((allowed) => requestOrigin.startsWith(allowed))
+    || requestOrigin.includes('localhost'); // Allow localhost for development
 
   if (!isValidOrigin) {
-    logger.warn('Unauthorized origin attempt', {origin: requestOrigin});
+    logger.warn('Unauthorized origin attempt', { origin: requestOrigin });
     res.status(HTTP_STATUS.FORBIDDEN).json({
       success: false,
       error: 'Origen no autorizado',

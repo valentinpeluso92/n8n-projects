@@ -1,5 +1,5 @@
-import {stringsUtilities} from '../../utilities/strings';
-import {Client} from '../model/client';
+import { stringsUtilities } from '../../utilities/strings';
+import { Client } from '../model/client';
 
 // Función auxiliar para filtrar por nombre con fuzzy matching
 const filterByName = (clients: Client[], searchName: string, threshold = 80): Client[] => {

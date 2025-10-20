@@ -1,13 +1,13 @@
 
 // === services/clientService.ts ===
 
-import {Firestore, FieldValue, Query} from 'firebase-admin/firestore';
+import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
-import {Client} from '../model/client';
-import {FilterOptions} from '../../types/api';
-import {COLLECTION_NAMES} from '../../constants';
-import {zoovitalFiltersUtilities} from '../utilities/filters';
-import {ClientWithId} from '../types/api';
+import { Client } from '../model/client';
+import { FilterOptions } from '../../types/api';
+import { COLLECTION_NAMES } from '../../constants';
+import { zoovitalFiltersUtilities } from '../utilities/filters';
+import { ClientWithId } from '../types/api';
 
 export class ClientService {
   constructor(private db: Firestore) {}
@@ -25,7 +25,7 @@ export class ClientService {
         ...doc.data(),
       } as ClientWithId;
     } catch (error) {
-      logger.error('Error getting client by ID', {id, error});
+      logger.error('Error getting client by ID', { id, error });
       throw error;
     }
   }
@@ -57,7 +57,7 @@ export class ClientService {
 
       return clients;
     } catch (error) {
-      logger.error('Error getting all clients', {options, error});
+      logger.error('Error getting all clients', { options, error });
       throw error;
     }
   }
@@ -72,14 +72,14 @@ export class ClientService {
 
       const docRef = await this.db.collection(COLLECTION_NAMES.SBOX_ZOOVITAL_CLIENTS).add(newClient);
 
-      logger.info('Client created successfully', {id: docRef.id});
+      logger.info('Client created successfully', { id: docRef.id });
 
       return {
         id: docRef.id,
         data: clientData,
       };
     } catch (error) {
-      logger.error('Error creating client', {clientData, error});
+      logger.error('Error creating client', { clientData, error });
       throw error;
     }
   }
@@ -101,14 +101,14 @@ export class ClientService {
 
       await docRef.update(updatedData);
 
-      logger.info('Client updated successfully', {id});
+      logger.info('Client updated successfully', { id });
 
       return {
         id,
         data: updateData,
       };
     } catch (error) {
-      logger.error('Error updating client', {id, updateData, error});
+      logger.error('Error updating client', { id, updateData, error });
       throw error;
     }
   }
@@ -125,11 +125,11 @@ export class ClientService {
 
       await docRef.delete();
 
-      logger.info('Client deleted successfully', {id});
+      logger.info('Client deleted successfully', { id });
 
-      return {id};
+      return { id };
     } catch (error) {
-      logger.error('Error deleting client', {id, error});
+      logger.error('Error deleting client', { id, error });
       throw error;
     }
   }
@@ -150,11 +150,11 @@ export class ClientService {
         updatedAt: FieldValue.serverTimestamp(),
       });
 
-      logger.info('Client soft deleted successfully', {id});
+      logger.info('Client soft deleted successfully', { id });
 
-      return {id};
+      return { id };
     } catch (error) {
-      logger.error('Error soft deleting client', {id, error});
+      logger.error('Error soft deleting client', { id, error });
       throw error;
     }
   }

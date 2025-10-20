@@ -1,8 +1,8 @@
-import {Request} from 'firebase-functions/v2/https';
+import { Request } from 'firebase-functions/v2/https';
 import * as express from 'express';
-import {Firestore} from 'firebase-admin/firestore';
+import { Firestore } from 'firebase-admin/firestore';
 
-import {ClientService} from '../services/clientService';
+import { ClientService } from '../services/clientService';
 import {
   corsMiddleware,
   authMiddleware,
@@ -14,15 +14,15 @@ import {
   validateClientData,
   validateUpdateData,
   validateId,
-  validateThreshold,
   sanitizeClientData,
 } from '../validators';
 import {
   HTTP_STATUS,
   ERROR_MESSAGES,
 } from '../../constants';
-import {ApiResponse} from '../../types/api';
-import {ClientWithId} from '../types/api';
+import { ApiResponse } from '../../types/api';
+import { ClientWithId } from '../types/api';
+import { getThreshold } from '../../validators';
 
 export class ClientController {
   private clientService: ClientService;
@@ -42,7 +42,7 @@ export class ClientController {
 
       const id = req.query.id as string;
       const name = req.query.name as string;
-      const threshold = validateThreshold(req.query.threshold);
+      const threshold = getThreshold(req.query.threshold);
 
       let response: ApiResponse<ClientWithId | ClientWithId[]>;
 
@@ -72,7 +72,7 @@ export class ClientController {
         };
       } else {
         // Get all clients or filtered by name
-        const options = name ? {name, threshold} : {};
+        const options = name ? { name, threshold } : {};
         const clients = await this.clientService.getAll(options);
 
         response = {
@@ -82,7 +82,7 @@ export class ClientController {
         };
 
         if (name) {
-          response.searchCriteria = {name, threshold};
+          response.searchCriteria = { name, threshold };
         }
       }
 
