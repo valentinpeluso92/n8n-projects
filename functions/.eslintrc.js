@@ -31,7 +31,7 @@ module.exports = {
     'indent': ['error', 2],
     'max-len': ['error', { 'code': 120 }],
     'require-jsdoc': 0,
-    'operator-linebreak': ['error', 'before'],
+    'operator-linebreak': ['error', 'after'],
     'object-curly-spacing': ['error', 'always'],
     'arrow-parens': ['error', 'always'],
     '@typescript-eslint/no-unused-vars': ['error'],

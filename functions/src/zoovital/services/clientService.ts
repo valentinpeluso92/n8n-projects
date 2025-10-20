@@ -8,6 +8,7 @@ import { FilterOptions } from '../../types/api';
 import { COLLECTION_NAMES } from '../../constants';
 import { zoovitalFiltersUtilities } from '../utilities/filters';
 import { ClientWithId } from '../types/api';
+import { convertArrayTimestamps, convertObjectTimestamps } from '../../utilities/timestamp';
 
 export class ClientService {
   constructor(private db: Firestore) {}
@@ -20,10 +21,12 @@ export class ClientService {
         return null;
       }
 
-      return {
+      const rawData = {
         id: doc.id,
         ...doc.data(),
       } as ClientWithId;
+
+      return convertObjectTimestamps(rawData);
     } catch (error) {
       logger.error('Error getting client by ID', { id, error });
       throw error;
@@ -39,6 +42,10 @@ export class ClientService {
         query = query.limit(options.pagination.limit);
       }
 
+      if (options.pagination?.offset) {
+        query = query.offset(options.pagination.offset);
+      }
+
       const snapshot = await query.get();
       const clients: ClientWithId[] = [];
 
@@ -49,13 +56,15 @@ export class ClientService {
         } as ClientWithId);
       });
 
+      const clientsWithConvertedTimestamps = convertArrayTimestamps(clients);
+
       // Apply name filter if provided (consider moving to Firestore query for better performance)
       if (options.name) {
         const threshold = options.threshold || 80;
-        return zoovitalFiltersUtilities.filterByName(clients, options.name, threshold);
+        return zoovitalFiltersUtilities.filterByName(clientsWithConvertedTimestamps, options.name, threshold);
       }
 
-      return clients;
+      return clientsWithConvertedTimestamps;
     } catch (error) {
       logger.error('Error getting all clients', { options, error });
       throw error;
@@ -74,9 +83,15 @@ export class ClientService {
 
       logger.info('Client created successfully', { id: docRef.id });
 
+      const responseData = convertObjectTimestamps({
+        ...clientData,
+        createdAt: new Date().toISOString(), // Timestamp actual para la respuesta
+        updatedAt: new Date().toISOString(),
+      });
+
       return {
         id: docRef.id,
-        data: clientData,
+        data: responseData,
       };
     } catch (error) {
       logger.error('Error creating client', { clientData, error });
@@ -103,9 +118,14 @@ export class ClientService {
 
       logger.info('Client updated successfully', { id });
 
+      const responseData = convertObjectTimestamps({
+        ...updateData,
+        updatedAt: new Date().toISOString(), // Timestamp actual para la respuesta
+      });
+
       return {
         id,
-        data: updateData,
+        data: responseData,
       };
     } catch (error) {
       logger.error('Error updating client', { id, updateData, error });
