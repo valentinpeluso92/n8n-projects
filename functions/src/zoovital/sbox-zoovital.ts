@@ -7,11 +7,15 @@ import {zoovitalFiltersUtilities} from './utilities/filters';
 const COLLECTION_NAME = 'sbox-zoovital-clients';
 
 // GET - Obtener cliente(s)
-const getClient = async (req: Request, res: express.Response, db: Firestore) => {
+const getClient = async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
   // Configurar CORS
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.headers['x-api-key'] !== API_KEY) {
+    return res.status(401).json({error: 'No autorizado. API Key inválida.'});
+  }
 
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
@@ -84,11 +88,15 @@ const getClient = async (req: Request, res: express.Response, db: Firestore) => 
 };
 
 // POST - Crear nuevo cliente
-const postClient = async (req: Request, res: express.Response, db: Firestore) => {
+const postClient = async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
   // Configurar CORS
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.headers['x-api-key'] !== API_KEY) {
+    return res.status(401).json({error: 'No autorizado. API Key inválida.'});
+  }
 
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
@@ -134,11 +142,15 @@ const postClient = async (req: Request, res: express.Response, db: Firestore) =>
 };
 
 // PUT - Actualizar cliente
-const updateClient = async (req: Request, res: express.Response, db: Firestore) => {
+const updateClient = async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
   // Configurar CORS
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'PUT, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.headers['x-api-key'] !== API_KEY) {
+    return res.status(401).json({error: 'No autorizado. API Key inválida.'});
+  }
 
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
@@ -194,11 +206,15 @@ const updateClient = async (req: Request, res: express.Response, db: Firestore) 
 };
 
 // DELETE - Eliminar cliente
-const removeClient = async (req: Request, res: express.Response, db: Firestore) => {
+const removeClient = async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
   // Configurar CORS
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'DELETE, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.headers['x-api-key'] !== API_KEY) {
+    return res.status(401).json({error: 'No autorizado. API Key inválida.'});
+  }
 
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
