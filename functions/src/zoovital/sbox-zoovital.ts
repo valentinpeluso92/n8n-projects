@@ -1,269 +1,40 @@
-import {Firestore, FieldValue} from 'firebase-admin/firestore';
-import * as express from 'express';
+
+// === sbox-zoovital-refactored.ts ===
+
+import {Firestore} from 'firebase-admin/firestore';
 import {Request} from 'firebase-functions/v2/https';
-import {Client} from './model/client';
-import {zoovitalFiltersUtilities} from './utilities/filters';
+import * as express from 'express';
+import {ClientController} from './controllers/clientController';
 
-const COLLECTION_NAME = 'sbox-zoovital-clients';
+// Create controller instance
+let clientController: ClientController;
 
-// GET - Obtener cliente(s)
-const getClient = async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
-  // Configurar CORS
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.headers['x-api-key'] !== API_KEY) {
-    return res.status(401).json({error: 'No autorizado. API Key inválida.'});
+const initializeController = (db: Firestore): ClientController => {
+  if (!clientController) {
+    clientController = new ClientController(db);
   }
-
-  if (req.method === 'OPTIONS') {
-    res.status(204).send('');
-    return;
-  }
-
-  if (req.method !== 'GET') {
-    return res.status(405).json({error: 'Método no permitido. Usa GET.'});
-  }
-
-  try {
-    const id: string = req.query.id as string;
-    const name: string = req.query.name as string;
-    const threshold: number = req.query.threshold ?
-      Math.max(0, Math.min(100, parseInt(req.query.threshold as string))) : 80;
-
-    if (id) {
-      // Obtener un cliente específico
-      const doc = await db.collection(COLLECTION_NAME).doc(id).get();
-
-      if (!doc.exists) {
-        return res.status(404).json({error: 'Cliente no encontrado'});
-      }
-
-      return res.status(200).json({
-        success: true,
-        data: {id: doc.id, ...doc.data()},
-      });
-    } else if (name) {
-      // Filtrar clientes por nombre con threshold personalizable
-      const snapshot = await db.collection(COLLECTION_NAME).get();
-      const allClients: Client[] = [];
-
-      snapshot.forEach((doc) => {
-        allClients.push({id: doc.id, ...doc.data()} as Client);
-      });
-
-      const filteredClients = zoovitalFiltersUtilities.filterByName(allClients, name, threshold);
-
-      return res.status(200).json({
-        success: true,
-        data: filteredClients,
-        count: filteredClients.length,
-        searchCriteria: {
-          name: name,
-          threshold: threshold,
-        },
-      });
-    } else {
-      // Obtener todos los clientes
-      const snapshot = await db.collection(COLLECTION_NAME).get();
-      const clients: Client[] = [];
-
-      snapshot.forEach((doc) => {
-        clients.push({id: doc.id, ...doc.data()} as Client);
-      });
-
-      return res.status(200).json({
-        success: true,
-        data: clients,
-        count: clients.length,
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      error: 'Error interno del servidor',
-      details: (error as Error).message,
-    });
-  }
+  return clientController;
 };
 
-// POST - Crear nuevo cliente
-const postClient = async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
-  // Configurar CORS
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.headers['x-api-key'] !== API_KEY) {
-    return res.status(401).json({error: 'No autorizado. API Key inválida.'});
-  }
-
-  if (req.method === 'OPTIONS') {
-    res.status(204).send('');
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({error: 'Método no permitido. Usa POST.'});
-  }
-
-  try {
-    const clientData = req.body;
-
-    // Validación básica
-    if (!clientData || Object.keys(clientData).length === 0) {
-      return res.status(400).json({
-        error: 'Los datos del cliente son requeridos',
-      });
-    }
-
-    // Agregar timestamp de creación
-    const newClient = {
-      ...clientData,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    // Crear documento en Firestore
-    const docRef = await db.collection(COLLECTION_NAME).add(newClient);
-
-    return res.status(201).json({
-      success: true,
-      message: 'Cliente creado exitosamente',
-      data: {id: docRef.id, ...clientData},
-    });
-  } catch (error) {
-    console.error('Error en postClient:', error);
-    return res.status(500).json({
-      error: 'Error interno del servidor',
-      details: (error as Error).message,
-    });
-  }
-};
-
-// PUT - Actualizar cliente
-const updateClient = async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
-  // Configurar CORS
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'PUT, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.headers['x-api-key'] !== API_KEY) {
-    return res.status(401).json({error: 'No autorizado. API Key inválida.'});
-  }
-
-  if (req.method === 'OPTIONS') {
-    res.status(204).send('');
-    return;
-  }
-
-  if (req.method !== 'PUT') {
-    return res.status(405).json({error: 'Método no permitido. Usa PUT.'});
-  }
-
-  try {
-    const id: string = req.query.id as string;
-    const updateData = req.body;
-
-    if (!id) {
-      return res.status(400).json({error: 'ID del cliente es requerido'});
-    }
-
-    if (!updateData || Object.keys(updateData).length === 0) {
-      return res.status(400).json({
-        error: 'Los datos para actualizar son requeridos',
-      });
-    }
-
-    // Verificar si el documento existe
-    const docRef = db.collection(COLLECTION_NAME).doc(id);
-    const doc = await docRef.get();
-
-    if (!doc.exists) {
-      return res.status(404).json({error: 'Cliente no encontrado'});
-    }
-
-    // Actualizar documento
-    const updatedData = {
-      ...updateData,
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    await docRef.update(updatedData);
-
-    return res.status(200).json({
-      success: true,
-      message: 'Cliente actualizado exitosamente',
-      data: {id: id, ...updateData},
-    });
-  } catch (error) {
-    console.error('Error en updateClient:', error);
-    return res.status(500).json({
-      error: 'Error interno del servidor',
-      details: (error as Error).message,
-    });
-  }
-};
-
-// DELETE - Eliminar cliente
-const removeClient = async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
-  // Configurar CORS
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'DELETE, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.headers['x-api-key'] !== API_KEY) {
-    return res.status(401).json({error: 'No autorizado. API Key inválida.'});
-  }
-
-  if (req.method === 'OPTIONS') {
-    res.status(204).send('');
-    return;
-  }
-
-  if (req.method !== 'DELETE') {
-    return res.status(405).json({
-      error: 'Método no permitido. Usa DELETE.',
-    });
-  }
-
-  try {
-    const id = req.query.id as string;
-
-    if (!id) {
-      return res.status(400).json({
-        error: 'ID del cliente es requerido',
-      });
-    }
-
-    // Verificar si el documento existe
-    const docRef = db.collection(COLLECTION_NAME).doc(id);
-    const doc = await docRef.get();
-
-    if (!doc.exists) {
-      return res.status(404).json({error: 'Cliente no encontrado'});
-    }
-
-    // Eliminar documento
-    await docRef.delete();
-
-    return res.status(200).json({
-      success: true,
-      message: 'Cliente eliminado exitosamente',
-      data: {id: id},
-    });
-  } catch (error) {
-    console.error('Error en removeClient:', error);
-    return res.status(500).json({
-      error: 'Error interno del servidor',
-      details: (error as Error).message,
-    });
-  }
-};
-
+// Exported functions with improved architecture
 export const sboxZoovital = {
-  getClient,
-  postClient,
-  updateClient,
-  removeClient,
+  getClient: async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
+    const controller = initializeController(db);
+    return controller.getClient(req, res, API_KEY);
+  },
+
+  postClient: async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
+    const controller = initializeController(db);
+    return controller.postClient(req, res, API_KEY);
+  },
+
+  updateClient: async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
+    const controller = initializeController(db);
+    return controller.updateClient(req, res, API_KEY);
+  },
+
+  removeClient: async (req: Request, res: express.Response, db: Firestore, API_KEY: string) => {
+    const controller = initializeController(db);
+    return controller.removeClient(req, res, API_KEY);
+  },
 };
