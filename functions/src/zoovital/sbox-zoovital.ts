@@ -1,4 +1,4 @@
-import {Firestore} from 'firebase-admin/firestore';
+import {Firestore, FieldValue} from 'firebase-admin/firestore';
 import * as express from 'express';
 import {Request} from 'firebase-functions/v2/https';
 import {Client} from './model/client';
@@ -7,11 +7,7 @@ import {zoovitalFiltersUtilities} from './utilities/filters';
 const COLLECTION_NAME = 'sbox-zoovital-clients';
 
 // GET - Obtener cliente(s)
-const getClient = async (
-  req: Request,
-  res: express.Response,
-  db: Firestore
-) => {
+const getClient = async (req: Request, res: express.Response, db: Firestore) => {
   // Configurar CORS
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -87,174 +83,171 @@ const getClient = async (
   }
 };
 
-// // POST - Crear nuevo cliente
-// const postClient = async (req: Request, res: Response, db: Firestore) => {
-//   // Configurar CORS
-//   res.set('Access-Control-Allow-Origin', '*');
-//   res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-//   res.set('Access-Control-Allow-Headers', 'Content-Type');
+// POST - Crear nuevo cliente
+const postClient = async (req: Request, res: express.Response, db: Firestore) => {
+  // Configurar CORS
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
 
-//   if (req.method === 'OPTIONS') {
-//     res.status(204).send('');
-//     return;
-//   }
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
 
-//   if (req.method !== 'POST') {
-//     return res.status(405).json({ error: 'Método no permitido. Usa POST.' });
-//   }
+  if (req.method !== 'POST') {
+    return res.status(405).json({error: 'Método no permitido. Usa POST.'});
+  }
 
-//   try {
-//     const clientData = req.body;
+  try {
+    const clientData = req.body;
 
-//     // Validación básica
-//     if (!clientData || Object.keys(clientData).length === 0) {
-//       return res.status(400).json({
-//         error: 'Los datos del cliente son requeridos'
-//       });
-//     }
+    // Validación básica
+    if (!clientData || Object.keys(clientData).length === 0) {
+      return res.status(400).json({
+        error: 'Los datos del cliente son requeridos',
+      });
+    }
 
-//     // Agregar timestamp de creación
-//     const newClient = {
-//       ...clientData,
-//       createdAt: admin.firestore.FieldValue.serverTimestamp(),
-//       updatedAt: admin.firestore.FieldValue.serverTimestamp()
-//     };
+    // Agregar timestamp de creación
+    const newClient = {
+      ...clientData,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
 
-//     // Crear documento en Firestore
-//     const docRef = await db.collection(COLLECTION_NAME).add(newClient);
+    // Crear documento en Firestore
+    const docRef = await db.collection(COLLECTION_NAME).add(newClient);
 
-//     return res.status(201).json({
-//       success: true,
-//       message: 'Cliente creado exitosamente',
-//       data: { id: docRef.id, ...clientData }
-//     });
+    return res.status(201).json({
+      success: true,
+      message: 'Cliente creado exitosamente',
+      data: {id: docRef.id, ...clientData},
+    });
+  } catch (error) {
+    console.error('Error en postClient:', error);
+    return res.status(500).json({
+      error: 'Error interno del servidor',
+      details: (error as Error).message,
+    });
+  }
+};
 
-//   } catch (error) {
-//     console.error('Error en postClient:', error);
-//     return res.status(500).json({
-//       error: 'Error interno del servidor',
-//       details: error.message
-//     });
-//   }
-// }
+// PUT - Actualizar cliente
+const updateClient = async (req: Request, res: express.Response, db: Firestore) => {
+  // Configurar CORS
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'PUT, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
 
-// // PUT - Actualizar cliente
-// const updateClient = async (req: Request, res: Response, db: Firestore) => {
-//   // Configurar CORS
-//   res.set('Access-Control-Allow-Origin', '*');
-//   res.set('Access-Control-Allow-Methods', 'PUT, OPTIONS');
-//   res.set('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
 
-//   if (req.method === 'OPTIONS') {
-//     res.status(204).send('');
-//     return;
-//   }
+  if (req.method !== 'PUT') {
+    return res.status(405).json({error: 'Método no permitido. Usa PUT.'});
+  }
 
-//   if (req.method !== 'PUT') {
-//     return res.status(405).json({ error: 'Método no permitido. Usa PUT.' });
-//   }
+  try {
+    const id: string = req.query.id as string;
+    const updateData = req.body;
 
-//   try {
-//     const { id } = req.query;
-//     const updateData = req.body;
+    if (!id) {
+      return res.status(400).json({error: 'ID del cliente es requerido'});
+    }
 
-//     if (!id) {
-//       return res.status(400).json({ error: 'ID del cliente es requerido' });
-//     }
+    if (!updateData || Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        error: 'Los datos para actualizar son requeridos',
+      });
+    }
 
-//     if (!updateData || Object.keys(updateData).length === 0) {
-//       return res.status(400).json({
-//         error: 'Los datos para actualizar son requeridos'
-//       });
-//     }
+    // Verificar si el documento existe
+    const docRef = db.collection(COLLECTION_NAME).doc(id);
+    const doc = await docRef.get();
 
-//     // Verificar si el documento existe
-//     const docRef = db.collection(COLLECTION_NAME).doc(id);
-//     const doc = await docRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({error: 'Cliente no encontrado'});
+    }
 
-//     if (!doc.exists) {
-//       return res.status(404).json({ error: 'Cliente no encontrado' });
-//     }
+    // Actualizar documento
+    const updatedData = {
+      ...updateData,
+      updatedAt: FieldValue.serverTimestamp(),
+    };
 
-//     // Actualizar documento
-//     const updatedData = {
-//       ...updateData,
-//       updatedAt: admin.firestore.FieldValue.serverTimestamp()
-//     };
+    await docRef.update(updatedData);
 
-//     await docRef.update(updatedData);
+    return res.status(200).json({
+      success: true,
+      message: 'Cliente actualizado exitosamente',
+      data: {id: id, ...updateData},
+    });
+  } catch (error) {
+    console.error('Error en updateClient:', error);
+    return res.status(500).json({
+      error: 'Error interno del servidor',
+      details: (error as Error).message,
+    });
+  }
+};
 
-//     return res.status(200).json({
-//       success: true,
-//       message: 'Cliente actualizado exitosamente',
-//       data: { id: id, ...updateData }
-//     });
+// DELETE - Eliminar cliente
+const removeClient = async (req: Request, res: express.Response, db: Firestore) => {
+  // Configurar CORS
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'DELETE, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
 
-//   } catch (error) {
-//     console.error('Error en updateClient:', error);
-//     return res.status(500).json({
-//       error: 'Error interno del servidor',
-//       details: error.message
-//     });
-//   }
-// }
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
 
-// // DELETE - Eliminar cliente
-// const removeClient = async (req: Request, res: Response, db: Firestore) => {
-//   // Configurar CORS
-//   res.set('Access-Control-Allow-Origin', '*');
-//   res.set('Access-Control-Allow-Methods', 'DELETE, OPTIONS');
-//   res.set('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method !== 'DELETE') {
+    return res.status(405).json({
+      error: 'Método no permitido. Usa DELETE.',
+    });
+  }
 
-//   if (req.method === 'OPTIONS') {
-//     res.status(204).send('');
-//     return;
-//   }
+  try {
+    const id = req.query.id as string;
 
-//   if (req.method !== 'DELETE') {
-//     return res.status(405).json({
-//       error: 'Método no permitido. Usa DELETE.'
-//     });
-//   }
+    if (!id) {
+      return res.status(400).json({
+        error: 'ID del cliente es requerido',
+      });
+    }
 
-//   try {
-//     const { id } = req.query;
+    // Verificar si el documento existe
+    const docRef = db.collection(COLLECTION_NAME).doc(id);
+    const doc = await docRef.get();
 
-//     if (!id) {
-//       return res.status(400).json({
-//         error: 'ID del cliente es requerido'
-//       });
-//     }
+    if (!doc.exists) {
+      return res.status(404).json({error: 'Cliente no encontrado'});
+    }
 
-//     // Verificar si el documento existe
-//     const docRef = db.collection(COLLECTION_NAME).doc(id);
-//     const doc = await docRef.get();
+    // Eliminar documento
+    await docRef.delete();
 
-//     if (!doc.exists) {
-//       return res.status(404).json({ error: 'Cliente no encontrado' });
-//     }
-
-//     // Eliminar documento
-//     await docRef.delete();
-
-//     return res.status(200).json({
-//       success: true,
-//       message: 'Cliente eliminado exitosamente',
-//       data: { id: id }
-//     });
-
-//   } catch (error) {
-//     console.error('Error en removeClient:', error);
-//     return res.status(500).json({
-//       error: 'Error interno del servidor',
-//       details: error.message
-//     });
-//   }
-// };
+    return res.status(200).json({
+      success: true,
+      message: 'Cliente eliminado exitosamente',
+      data: {id: id},
+    });
+  } catch (error) {
+    console.error('Error en removeClient:', error);
+    return res.status(500).json({
+      error: 'Error interno del servidor',
+      details: (error as Error).message,
+    });
+  }
+};
 
 export const sboxZoovital = {
   getClient,
-  // postClient,
-  // updateClient,
-  // removeClient
+  postClient,
+  updateClient,
+  removeClient,
 };

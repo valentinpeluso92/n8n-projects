@@ -22,18 +22,18 @@ export const sboxZoovitalGetClient = onRequest(
     await sboxZoovital.getClient(request, response, db);
   }
 );
-// export const sboxZoovitalPostClient = onRequest(
-//   async (request: Request, response: Response) => {
-//     return await sboxZoovital.postClient(request, response, db);
-//   }
-// );
-// export const sboxZoovitalUpdateClient = onRequest(
-//   async (request: Request, response: Response) => {
-//     return await sboxZoovital.updateClient(request, response, db);
-//   }
-// );
-// export const sboxZoovitalRemoveClient = onRequest(
-//   async (request: Request, response: Response) => {
-//     return await sboxZoovital.removeClient(request, response, db);
-//   }
-// );
+export const sboxZoovitalPostClient = onRequest(
+  async (request: Request, response: express.Response) => {
+    await sboxZoovital.postClient(request, response, db);
+  }
+);
+export const sboxZoovitalUpdateClient = onRequest(
+  async (request: Request, response: express.Response) => {
+    await sboxZoovital.updateClient(request, response, db);
+  }
+);
+export const sboxZoovitalRemoveClient = onRequest(
+  async (request: Request, response: express.Response) => {
+    await sboxZoovital.removeClient(request, response, db);
+  }
+);
