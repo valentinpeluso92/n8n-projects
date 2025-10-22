@@ -22,7 +22,6 @@ import {
 } from '../../constants';
 import { ApiResponse } from '../../types/api';
 import { ClientWithId } from '../types/api';
-import { getThreshold } from '../../validators';
 
 export class ClientController {
   private clientService: ClientService;
@@ -42,51 +41,14 @@ export class ClientController {
 
       const id = req.query.id as string;
       const name = req.query.name as string;
-      const threshold = getThreshold(req.query.threshold);
-
-      let response: ApiResponse<ClientWithId | ClientWithId[]>;
 
       if (id) {
-        // Get specific client
-        const idError = validateId(id);
-        if (idError) {
-          res.status(HTTP_STATUS.BAD_REQUEST).json({
-            success: false,
-            error: idError,
-          } as ApiResponse);
-          return;
-        }
-
-        const client = await this.clientService.getById(id);
-        if (!client) {
-          res.status(HTTP_STATUS.NOT_FOUND).json({
-            success: false,
-            error: ERROR_MESSAGES.CLIENT_NOT_FOUND,
-          } as ApiResponse);
-          return;
-        }
-
-        response = {
-          success: true,
-          data: client,
-        };
+        await this.getClientById(req, res);
+      } else if (name && name.trim().length > 0) {
+        await this.getClientByName(req, res);
       } else {
-        // Get all clients or filtered by name
-        const options = name ? { name, threshold } : {};
-        const clients = await this.clientService.getAll(options);
-
-        response = {
-          success: true,
-          data: clients,
-          count: clients.length,
-        };
-
-        if (name) {
-          response.searchCriteria = { name, threshold };
-        }
+        await this.getAllClients(req, res);
       }
-
-      res.status(HTTP_STATUS.OK).json(response);
     } catch (error) {
       errorHandler(error, res, 'getClient');
     } finally {
@@ -238,5 +200,66 @@ export class ClientController {
     } finally {
       logCompletion();
     }
+  }
+
+  private async getClientById(req: Request, res: express.Response): Promise<void> {
+    const id = req.query.id as string;
+
+    const idError = validateId(id);
+    if (idError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: idError,
+      } as ApiResponse);
+      return;
+    }
+
+    const client = await this.clientService.getById(id);
+    if (!client) {
+      res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        error: ERROR_MESSAGES.CLIENT_NOT_FOUND,
+      } as ApiResponse);
+      return;
+    }
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: client,
+    });
+  }
+
+  private async getClientByName(req: Request, res: express.Response): Promise<void> {
+    const name = req.query.name as string;
+
+    const clients: ClientWithId[] = await this.clientService.searchByName({
+      pagination: {
+        limit: parseInt(req.query.limit as string) || 50,
+        offset: parseInt(req.query.offset as string) || 0,
+      },
+      name,
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: clients,
+      count: clients.length,
+      searchCriteria: { name },
+    });
+  }
+
+  private async getAllClients(req: Request, res: express.Response): Promise<void> {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    const clients = await this.clientService.getAll({
+      pagination: { limit, offset },
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: clients,
+      count: clients.length,
+    });
   }
 }

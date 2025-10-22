@@ -27,9 +27,9 @@ export const corsMiddleware = (
   const requestOrigin = origin || (referer ? new URL(referer).origin : '');
 
   // Validate origin for production
-  const isValidOrigin = !requestOrigin
-    || ALLOWED_ORIGINS.some((allowed) => requestOrigin.startsWith(allowed))
-    || requestOrigin.includes('localhost'); // Allow localhost for development
+  const isValidOrigin = !requestOrigin ||
+    ALLOWED_ORIGINS.some((allowed) => requestOrigin.startsWith(allowed)) ||
+    requestOrigin.includes('localhost'); // Allow localhost for development
 
   if (!isValidOrigin) {
     logger.warn('Unauthorized origin attempt', { origin: requestOrigin });

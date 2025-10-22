@@ -5,4 +5,8 @@ export type Client = {
   address: string;
   email: string;
   age: number;
+  nameLower: string;
+  nameWords: string[];
+  createdAt: string;
+  updatedAt: string;
 }

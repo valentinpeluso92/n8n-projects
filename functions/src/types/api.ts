@@ -10,7 +10,6 @@ export interface ApiResponse<T = any> {
 
 export interface SearchCriteria {
   name?: string;
-  threshold?: number;
 }
 
 export interface PaginationOptions {
@@ -21,7 +20,6 @@ export interface PaginationOptions {
 
 export interface FilterOptions {
   name?: string;
-  threshold?: number;
   pagination?: PaginationOptions;
 }
 
