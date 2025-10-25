@@ -28,18 +28,20 @@ import { ApiResponse } from '../../types/api';
 
 export class ShiftController {
   private shiftService: ShiftService;
+  private API_KEY: string;
 
-  constructor(db: Firestore) {
-    this.shiftService = new ShiftService(db);
+  constructor(db: Firestore, API_KEY: string, COLLECTION_NAME: string) {
+    this.shiftService = new ShiftService(db, COLLECTION_NAME);
+    this.API_KEY = API_KEY;
   }
 
-  async getShift(req: Request, res: express.Response, API_KEY: string): Promise<void> {
+  async getShift(req: Request, res: express.Response): Promise<void> {
     const logCompletion = requestLogger(req, 'GET');
 
     try {
       // Apply middleware
       if (!corsMiddleware(req, res, ['GET', 'OPTIONS'])) return;
-      if (!authMiddleware(req, res, API_KEY)) return;
+      if (!authMiddleware(req, res, this.API_KEY)) return;
       if (!methodMiddleware(req, res, 'GET')) return;
 
       const id = req.query.id as string;
@@ -131,13 +133,13 @@ export class ShiftController {
     }
   }
 
-  async postShift(req: Request, res: express.Response, API_KEY: string): Promise<void> {
+  async postShift(req: Request, res: express.Response): Promise<void> {
     const logCompletion = requestLogger(req, 'POST');
 
     try {
       // Apply middleware
       if (!corsMiddleware(req, res, ['POST', 'OPTIONS'])) return;
-      if (!authMiddleware(req, res, API_KEY)) return;
+      if (!authMiddleware(req, res, this.API_KEY)) return;
       if (!methodMiddleware(req, res, 'POST')) return;
 
       // Validar datos de entrada
@@ -181,13 +183,13 @@ export class ShiftController {
     }
   }
 
-  async updateShift(req: Request, res: express.Response, API_KEY: string): Promise<void> {
+  async updateShift(req: Request, res: express.Response): Promise<void> {
     const logCompletion = requestLogger(req, 'PUT');
 
     try {
       // Apply middleware
       if (!corsMiddleware(req, res, ['PUT', 'OPTIONS'])) return;
-      if (!authMiddleware(req, res, API_KEY)) return;
+      if (!authMiddleware(req, res, this.API_KEY)) return;
       if (!methodMiddleware(req, res, 'PUT')) return;
 
       // Validar ID
@@ -250,13 +252,13 @@ export class ShiftController {
     }
   }
 
-  async removeShift(req: Request, res: express.Response, API_KEY: string): Promise<void> {
+  async removeShift(req: Request, res: express.Response): Promise<void> {
     const logCompletion = requestLogger(req, 'DELETE');
 
     try {
       // Apply middleware
       if (!corsMiddleware(req, res, ['DELETE', 'OPTIONS'])) return;
-      if (!authMiddleware(req, res, API_KEY)) return;
+      if (!authMiddleware(req, res, this.API_KEY)) return;
       if (!methodMiddleware(req, res, 'DELETE')) return;
 
       // Validar ID
@@ -304,12 +306,12 @@ export class ShiftController {
     }
   }
 
-  async checkConflicts(req: Request, res: express.Response, API_KEY: string): Promise<void> {
+  async checkConflicts(req: Request, res: express.Response): Promise<void> {
     const logCompletion = requestLogger(req, 'GET');
 
     try {
       if (!corsMiddleware(req, res, ['GET', 'OPTIONS'])) return;
-      if (!authMiddleware(req, res, API_KEY)) return;
+      if (!authMiddleware(req, res, this.API_KEY)) return;
       if (!methodMiddleware(req, res, 'GET')) return;
 
       const date = req.query.date as string;

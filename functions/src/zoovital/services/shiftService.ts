@@ -5,16 +5,20 @@ import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { ShiftWithId } from '../types/api';
 import { convertObjectTimestamps, convertArrayTimestamps } from '../../utilities/timestamp';
-import { COLLECTION_NAMES, SHIFT_STATUS } from '../../constants';
+import { SHIFT_STATUS } from '../../constants';
 import { FilterOptions } from '../../types/api';
 import { Shift } from '../model/shift';
 
 export class ShiftService {
-  constructor(private db: Firestore) {}
+  private COLLECTION_NAME: string;
+
+  constructor(private db: Firestore, COLLECTION_NAME: string) {
+    this.COLLECTION_NAME = COLLECTION_NAME;
+  }
 
   async getById(id: string): Promise<ShiftWithId | null> {
     try {
-      const doc = await this.db.collection(COLLECTION_NAMES.SHIFTS).doc(id).get();
+      const doc = await this.db.collection(this.COLLECTION_NAME).doc(id).get();
 
       if (!doc.exists) {
         return null;
@@ -34,7 +38,7 @@ export class ShiftService {
 
   async getAll(options: FilterOptions = {}): Promise<ShiftWithId[]> {
     try {
-      let query: Query = this.db.collection(COLLECTION_NAMES.SHIFTS);
+      let query: Query = this.db.collection(this.COLLECTION_NAME);
 
       // Ordenar por fecha por defecto
       query = query.orderBy('date', 'desc');
@@ -67,7 +71,7 @@ export class ShiftService {
 
   async getByClientId(clientId: string, options: FilterOptions = {}): Promise<ShiftWithId[]> {
     try {
-      let query: Query = this.db.collection(COLLECTION_NAMES.SHIFTS)
+      let query: Query = this.db.collection(this.COLLECTION_NAME)
         .where('clientId', '==', clientId)
         .orderBy('date', 'desc');
 
@@ -106,7 +110,7 @@ export class ShiftService {
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
 
-      let query: Query = this.db.collection(COLLECTION_NAMES.SHIFTS)
+      let query: Query = this.db.collection(this.COLLECTION_NAME)
         .where('date', '>=', startOfDay)
         .where('date', '<=', endOfDay)
         .orderBy('date', 'asc');
@@ -140,7 +144,7 @@ export class ShiftService {
   async create(shiftData: Partial<Shift>): Promise<{ id: string; data: ShiftWithId }> {
     try {
       // Verificar que el cliente existe
-      const clientDoc = await this.db.collection(COLLECTION_NAMES.CLIENTS).doc(shiftData.clientId as string).get();
+      const clientDoc = await this.db.collection(this.COLLECTION_NAME).doc(shiftData.clientId as string).get();
       if (!clientDoc.exists) {
         throw new Error('Cliente no encontrado');
       }
@@ -154,7 +158,7 @@ export class ShiftService {
         updatedAt: FieldValue.serverTimestamp(),
       };
 
-      const docRef = await this.db.collection(COLLECTION_NAMES.SHIFTS).add(newShift);
+      const docRef = await this.db.collection(this.COLLECTION_NAME).add(newShift);
 
       logger.info('Shift created successfully', {
         id: docRef.id,
@@ -183,7 +187,7 @@ export class ShiftService {
 
   async update(id: string, updateData: Partial<Shift>): Promise<{ id: string; data: Partial<ShiftWithId> }> {
     try {
-      const docRef = this.db.collection(COLLECTION_NAMES.SHIFTS).doc(id);
+      const docRef = this.db.collection(this.COLLECTION_NAME).doc(id);
 
       // Verificar que el turno existe
       const doc = await docRef.get();
@@ -193,7 +197,7 @@ export class ShiftService {
 
       // Si se actualiza clientId, verificar que el cliente existe
       if (updateData.clientId) {
-        const clientDoc = await this.db.collection(COLLECTION_NAMES.CLIENTS).doc(updateData.clientId).get();
+        const clientDoc = await this.db.collection(this.COLLECTION_NAME).doc(updateData.clientId).get();
         if (!clientDoc.exists) {
           throw new Error('Cliente no encontrado');
         }
@@ -227,7 +231,7 @@ export class ShiftService {
 
   async delete(id: string): Promise<{ id: string }> {
     try {
-      const docRef = this.db.collection(COLLECTION_NAMES.SHIFTS).doc(id);
+      const docRef = this.db.collection(this.COLLECTION_NAME).doc(id);
 
       const doc = await docRef.get();
       if (!doc.exists) {
@@ -247,7 +251,7 @@ export class ShiftService {
 
   async softDelete(id: string): Promise<{ id: string }> {
     try {
-      const docRef = this.db.collection(COLLECTION_NAMES.SHIFTS).doc(id);
+      const docRef = this.db.collection(this.COLLECTION_NAME).doc(id);
 
       const doc = await docRef.get();
       if (!doc.exists) {
@@ -274,7 +278,7 @@ export class ShiftService {
       const startTime = new Date(date);
       const endTime = new Date(date.getTime() + (duration * 60000)); // duration en minutos
 
-      const query: Query = this.db.collection(COLLECTION_NAMES.SHIFTS)
+      const query: Query = this.db.collection(this.COLLECTION_NAME)
         .where('date', '>=', startTime)
         .where('date', '<', endTime)
         .where('status', '==', SHIFT_STATUS.SCHEDULED);

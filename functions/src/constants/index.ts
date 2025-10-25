@@ -1,7 +1,6 @@
-// Todo - Que el nombre de la coleccion viaje como argumento al controller
 export const COLLECTION_NAMES = {
-  CLIENTS: 'sbox-zoovital-clients',
-  SHIFTS: 'sbox-zoovital-shifts',
+  SBOX_ZOOVITAL_CLIENTS: 'sbox-zoovital-clients',
+  SVOX_ZOOVITAL_SHIFTS: 'sbox-zoovital-shifts',
 } as const;
 
 export const HTTP_STATUS = {
