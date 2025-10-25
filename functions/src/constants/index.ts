@@ -20,22 +20,6 @@ export const ALLOWED_ORIGINS = [
   'https://n8n.srv955597.hstgr.cloud',
 ] as const;
 
-export const ERROR_MESSAGES = {
-  UNAUTHORIZED: 'No autorizado. API Key inválida.',
-  METHOD_NOT_ALLOWED: 'Método no permitido',
-  CLIENT_NOT_FOUND: 'Cliente no encontrado',
-  SHIFT_NOT_FOUND: 'Turno no encontrado',
-  CLIENT_DATA_REQUIRED: 'Los datos del cliente son requeridos',
-  SHIFT_DATA_REQUIRED: 'Los datos del turno son requeridos',
-  CLIENT_ID_REQUIRED: 'ID del cliente es requerido',
-  SHIFT_ID_REQUIRED: 'ID del turno es requerido',
-  UPDATE_DATA_REQUIRED: 'Los datos para actualizar son requeridos',
-  INVALID_DATE: 'Fecha inválida',
-  DATE_IN_PAST: 'La fecha no puede ser en el pasado',
-  SCHEDULE_CONFLICT: 'Conflicto de horarios',
-  INTERNAL_SERVER_ERROR: 'Error interno del servidor',
-} as const;
-
 export const DEFAULT_THRESHOLD = 80;
 export const MAX_THRESHOLD = 100;
 export const MIN_THRESHOLD = 0;

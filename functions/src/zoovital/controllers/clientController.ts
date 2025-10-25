@@ -16,12 +16,10 @@ import {
   validateId,
   sanitizeClientData,
 } from '../validators/clientValidators';
-import {
-  HTTP_STATUS,
-  ERROR_MESSAGES,
-} from '../../constants';
+import { HTTP_STATUS } from '../../constants';
 import { ApiResponse } from '../../types/api';
 import { ClientWithId } from '../types/api';
+import { ErrorMessagesEnum } from '../enums/errorMessages';
 
 export class ClientController {
   private clientService: ClientService;
@@ -144,7 +142,7 @@ export class ClientController {
         if (serviceError instanceof Error && serviceError.message === 'Client not found') {
           res.status(HTTP_STATUS.NOT_FOUND).json({
             success: false,
-            error: ERROR_MESSAGES.CLIENT_NOT_FOUND,
+            error: ErrorMessagesEnum.CLIENT_NOT_FOUND,
           } as ApiResponse);
           return;
         }
@@ -191,7 +189,7 @@ export class ClientController {
         if (serviceError instanceof Error && serviceError.message === 'Client not found') {
           res.status(HTTP_STATUS.NOT_FOUND).json({
             success: false,
-            error: ERROR_MESSAGES.CLIENT_NOT_FOUND,
+            error: ErrorMessagesEnum.CLIENT_NOT_FOUND,
           } as ApiResponse);
           return;
         }
@@ -220,7 +218,7 @@ export class ClientController {
     if (!client) {
       res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
-        error: ERROR_MESSAGES.CLIENT_NOT_FOUND,
+        error: ErrorMessagesEnum.CLIENT_NOT_FOUND,
       } as ApiResponse);
       return;
     }

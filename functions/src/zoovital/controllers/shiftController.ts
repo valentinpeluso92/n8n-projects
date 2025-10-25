@@ -19,11 +19,9 @@ import {
   validateShiftId,
   sanitizeShiftData,
 } from '../validators/shiftValidators';
-import {
-  HTTP_STATUS,
-  ERROR_MESSAGES,
-} from '../../constants';
+import { HTTP_STATUS } from '../../constants';
 import { ApiResponse } from '../../types/api';
+import { ErrorMessagesEnum } from '../enums/errorMessages';
 
 export class ShiftController {
   private shiftService: ShiftService;
@@ -104,7 +102,7 @@ export class ShiftController {
         if (serviceError instanceof Error && serviceError.message === 'Cliente no encontrado') {
           res.status(HTTP_STATUS.BAD_REQUEST).json({
             success: false,
-            error: ERROR_MESSAGES.CLIENT_NOT_FOUND,
+            error: ErrorMessagesEnum.CLIENT_NOT_FOUND,
           } as ApiResponse);
           return;
         }
@@ -165,14 +163,14 @@ export class ShiftController {
           if (serviceError.message === 'Turno no encontrado') {
             res.status(HTTP_STATUS.NOT_FOUND).json({
               success: false,
-              error: ERROR_MESSAGES.SHIFT_NOT_FOUND,
+              error: ErrorMessagesEnum.SHIFT_NOT_FOUND,
             } as ApiResponse);
             return;
           }
           if (serviceError.message === 'Cliente no encontrado') {
             res.status(HTTP_STATUS.BAD_REQUEST).json({
               success: false,
-              error: ERROR_MESSAGES.CLIENT_NOT_FOUND,
+              error: ErrorMessagesEnum.CLIENT_NOT_FOUND,
             } as ApiResponse);
             return;
           }
@@ -227,7 +225,7 @@ export class ShiftController {
         if (serviceError instanceof Error && serviceError.message === 'Turno no encontrado') {
           res.status(HTTP_STATUS.NOT_FOUND).json({
             success: false,
-            error: ERROR_MESSAGES.SHIFT_NOT_FOUND,
+            error: ErrorMessagesEnum.SHIFT_NOT_FOUND,
           } as ApiResponse);
           return;
         }
@@ -264,7 +262,7 @@ export class ShiftController {
       if (isNaN(searchDate.getTime())) {
         res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
-          error: ERROR_MESSAGES.INVALID_DATE,
+          error: ErrorMessagesEnum.INVALID_DATE,
         } as ApiResponse);
         return;
       }
@@ -299,7 +297,7 @@ export class ShiftController {
     if (!shift) {
       res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
-        error: ERROR_MESSAGES.SHIFT_NOT_FOUND,
+        error: ErrorMessagesEnum.SHIFT_NOT_FOUND,
       } as ApiResponse);
       return;
     }
@@ -332,7 +330,7 @@ export class ShiftController {
     if (isNaN(searchDate.getTime())) {
       res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        error: ERROR_MESSAGES.INVALID_DATE,
+        error: ErrorMessagesEnum.INVALID_DATE,
       } as ApiResponse);
       return;
     }
@@ -360,7 +358,7 @@ export class ShiftController {
     if (isNaN(dateFrom.getTime()) || isNaN(dateTo.getTime())) {
       res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        error: ERROR_MESSAGES.INVALID_DATE,
+        error: ErrorMessagesEnum.INVALID_DATE,
       } as ApiResponse);
       return;
     }

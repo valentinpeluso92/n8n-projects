@@ -4,8 +4,9 @@
 import { Request } from 'firebase-functions/v2/https';
 import * as express from 'express';
 import * as logger from 'firebase-functions/logger';
-import { ALLOWED_ORIGINS, ERROR_MESSAGES, HTTP_STATUS } from '../constants';
+import { ALLOWED_ORIGINS, HTTP_STATUS } from '../constants';
 import { ApiResponse, HttpMethod } from '../types/api';
+import { ErrorMessagesEnum } from '../enums/errorMessages';
 
 export class MiddlewareError extends Error {
   constructor(
@@ -60,7 +61,7 @@ export const authMiddleware = (
     logger.warn('Missing API key in request');
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: false,
-      error: ERROR_MESSAGES.UNAUTHORIZED,
+      error: ErrorMessagesEnum.UNAUTHORIZED,
       details: 'X-API-Key header is required',
     } as ApiResponse);
     return false;
@@ -72,7 +73,7 @@ export const authMiddleware = (
     });
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: false,
-      error: ERROR_MESSAGES.UNAUTHORIZED,
+      error: ErrorMessagesEnum.UNAUTHORIZED,
     } as ApiResponse);
     return false;
   }
@@ -97,7 +98,7 @@ export const methodMiddleware = (
     });
     res.status(HTTP_STATUS.METHOD_NOT_ALLOWED).json({
       success: false,
-      error: `${ERROR_MESSAGES.METHOD_NOT_ALLOWED}. Usa ${allowedMethod}.`,
+      error: `${ErrorMessagesEnum.METHOD_NOT_ALLOWED}. Usa ${allowedMethod}.`,
     } as ApiResponse);
     return false;
   }
@@ -150,7 +151,7 @@ export const errorHandler = (
 
   res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
     success: false,
-    error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+    error: ErrorMessagesEnum.INTERNAL_SERVER_ERROR,
     details: error instanceof Error ? error.message : String(error),
   } as ApiResponse);
 };
