@@ -1,6 +1,3 @@
-
-// === services/clientService.ts ===
-
 import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { Client } from '../model/client';
@@ -14,7 +11,7 @@ export class ClientService {
 
   async getById(id: string): Promise<ClientWithId | null> {
     try {
-      const doc = await this.db.collection(COLLECTION_NAMES.SBOX_ZOOVITAL_CLIENTS).doc(id).get();
+      const doc = await this.db.collection(COLLECTION_NAMES.CLIENTS).doc(id).get();
 
       if (!doc.exists) {
         return null;
@@ -34,7 +31,7 @@ export class ClientService {
 
   async getAll(options: FilterOptions = {}): Promise<ClientWithId[]> {
     try {
-      let query: Query = this.db.collection(COLLECTION_NAMES.SBOX_ZOOVITAL_CLIENTS);
+      let query: Query = this.db.collection(COLLECTION_NAMES.CLIENTS);
 
       // Limitar resultados para fuzzy matching posterior
       query = query.limit(options.pagination?.limit || 50);
@@ -76,7 +73,7 @@ export class ClientService {
         return [];
       }
 
-      let query: Query = this.db.collection(COLLECTION_NAMES.SBOX_ZOOVITAL_CLIENTS);
+      let query: Query = this.db.collection(COLLECTION_NAMES.CLIENTS);
 
       if (words.length === 1) {
         query = query.where('nameWords', 'array-contains', words[0]);
@@ -134,7 +131,7 @@ export class ClientService {
         updatedAt: FieldValue.serverTimestamp(),
       };
 
-      const docRef = await this.db.collection(COLLECTION_NAMES.SBOX_ZOOVITAL_CLIENTS).add(newClient);
+      const docRef = await this.db.collection(COLLECTION_NAMES.CLIENTS).add(newClient);
 
       logger.info('Client created successfully', { id: docRef.id });
 
@@ -156,7 +153,7 @@ export class ClientService {
 
   async update(id: string, updateData: Partial<Client>): Promise<{ id: string; data: Partial<Client> }> {
     try {
-      const docRef = this.db.collection(COLLECTION_NAMES.SBOX_ZOOVITAL_CLIENTS).doc(id);
+      const docRef = this.db.collection(COLLECTION_NAMES.CLIENTS).doc(id);
 
       // Check if document exists
       const doc = await docRef.get();
@@ -195,7 +192,7 @@ export class ClientService {
 
   async delete(id: string): Promise<{ id: string }> {
     try {
-      const docRef = this.db.collection(COLLECTION_NAMES.SBOX_ZOOVITAL_CLIENTS).doc(id);
+      const docRef = this.db.collection(COLLECTION_NAMES.CLIENTS).doc(id);
 
       // Check if document exists
       const doc = await docRef.get();
@@ -217,7 +214,7 @@ export class ClientService {
   // Soft delete alternative
   async softDelete(id: string): Promise<{ id: string }> {
     try {
-      const docRef = this.db.collection(COLLECTION_NAMES.SBOX_ZOOVITAL_CLIENTS).doc(id);
+      const docRef = this.db.collection(COLLECTION_NAMES.CLIENTS).doc(id);
 
       const doc = await docRef.get();
       if (!doc.exists) {

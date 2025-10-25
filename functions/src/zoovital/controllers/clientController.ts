@@ -15,7 +15,7 @@ import {
   validateUpdateData,
   validateId,
   sanitizeClientData,
-} from '../validators';
+} from '../validators/clientValidators';
 import {
   HTTP_STATUS,
   ERROR_MESSAGES,

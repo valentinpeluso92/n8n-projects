@@ -1,7 +1,7 @@
 import { setGlobalOptions } from 'firebase-functions';
 import { HttpsOptions, onRequest, Request } from 'firebase-functions/v2/https';
 import * as express from 'express';
-import { sboxZoovital } from './zoovital/sbox-zoovital';
+import { sboxZoovital } from './zoovital';
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 import { initializeApp } from 'firebase-admin/app';
 import { defineSecret } from 'firebase-functions/params';
@@ -45,5 +45,40 @@ export const sboxZoovitalRemoveClient = onRequest(
   async (request: Request, response: express.Response) => {
     const API_KEY = apiKeySecret.value();
     await sboxZoovital.removeClient(request, response, db, API_KEY);
+  }
+);
+export const sboxZoovitalGetShift = onRequest(
+  opts,
+  async (request: Request, response: express.Response) => {
+    const API_KEY = apiKeySecret.value();
+    await sboxZoovital.getShift(request, response, db, API_KEY);
+  }
+);
+export const sboxZoovitalPostShift = onRequest(
+  opts,
+  async (request: Request, response: express.Response) => {
+    const API_KEY = apiKeySecret.value();
+    await sboxZoovital.postShift(request, response, db, API_KEY);
+  }
+);
+export const sboxZoovitalUpdateShift = onRequest(
+  opts,
+  async (request: Request, response: express.Response) => {
+    const API_KEY = apiKeySecret.value();
+    await sboxZoovital.updateShift(request, response, db, API_KEY);
+  }
+);
+export const sboxZoovitalRemoveShift = onRequest(
+  opts,
+  async (request: Request, response: express.Response) => {
+    const API_KEY = apiKeySecret.value();
+    await sboxZoovital.removeShift(request, response, db, API_KEY);
+  }
+);
+export const sboxZoovitalCheckConflicts = onRequest(
+  opts,
+  async (request: Request, response: express.Response) => {
+    const API_KEY = apiKeySecret.value();
+    await sboxZoovital.checkConflicts(request, response, db, API_KEY);
   }
 );
