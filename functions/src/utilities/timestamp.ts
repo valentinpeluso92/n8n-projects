@@ -95,7 +95,7 @@ export const convertObjectTimestamps = <T extends TimestampFields>(
   const converter = format === 'iso' ? convertTimestampToISO : convertTimestampToUnix;
 
   // Lista de campos que pueden contener timestamps
-  const timestampFields = ['createdAt', 'updatedAt', 'deletedAt'];
+  const timestampFields = ['createdAt', 'updatedAt', 'deletedAt', 'date'];
 
   timestampFields.forEach((field) => {
     if (converted[field]) {
