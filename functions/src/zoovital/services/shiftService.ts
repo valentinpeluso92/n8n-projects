@@ -3,10 +3,9 @@
 
 import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
-import { ShiftWithId } from '../types/api';
+import { ShiftFilterOptions, ShiftWithId } from '../types/api';
 import { convertObjectTimestamps, convertArrayTimestamps } from '../../utilities/timestamp';
 import { Shift } from '../model/shift';
-import { FilterOptions } from '../../types/api';
 import { ShiftStatusEnum } from '../enums/shiftStatus';
 import { ShiftPriorityEnum } from '../enums/shiftPriority';
 
@@ -37,12 +36,38 @@ export class ShiftService {
     }
   }
 
-  async getAll(options: FilterOptions = {}): Promise<ShiftWithId[]> {
+  async getAll(options: ShiftFilterOptions = { filter: {} }): Promise<ShiftWithId[]> {
     try {
       let query: Query = this.db.collection(this.COLLECTION_NAME);
+      const { filter } = options;
 
-      // Ordenar por fecha por defecto
-      query = query.orderBy('date', 'desc');
+      // Aplicar filtros si están presentes
+      if (filter.clientId) {
+        query = query.where('clientId', '==', filter.clientId);
+      }
+
+      if (filter.date) {
+        const date = new Date(filter.date);
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+        query = query.where('date', '>=', startOfDay).where('date', '<=', endOfDay);
+      }
+
+      if (filter.dateFrom && filter.dateTo) {
+        const dateFrom = new Date(filter.dateFrom);
+        const dateTo = new Date(filter.dateTo);
+        query = query.where('date', '>=', dateFrom).where('date', '<=', dateTo);
+      }
+
+      if (filter.type) {
+        query = query.where('type', '==', filter.type);
+      }
+
+      if (filter.priority) {
+        query = query.where('priority', '==', filter.priority);
+      }
 
       // Aplicar filtros si están presentes
       if (options.pagination?.limit) {
@@ -63,144 +88,14 @@ export class ShiftService {
         } as ShiftWithId);
       });
 
+      logger.info('Shifts retrieved', {
+        filter,
+        count: shifts.length,
+      });
+
       return convertArrayTimestamps(shifts);
     } catch (error) {
       logger.error('Error getting all shifts', { options, error });
-      throw error;
-    }
-  }
-
-  async getByClientId(clientId: string, options: FilterOptions = {}): Promise<ShiftWithId[]> {
-    try {
-      let query: Query = this.db.collection(this.COLLECTION_NAME)
-        .where('clientId', '==', clientId);
-
-      if (options.pagination?.limit) {
-        query = query.limit(options.pagination.limit);
-      }
-
-      const snapshot = await query.get();
-      const shifts: ShiftWithId[] = [];
-
-      snapshot.forEach((doc) => {
-        shifts.push({
-          id: doc.id,
-          ...doc.data(),
-        } as ShiftWithId);
-      });
-
-      logger.info('Shifts retrieved for client', {
-        clientId,
-        count: shifts.length,
-      });
-
-      return convertArrayTimestamps(shifts);
-    } catch (error) {
-      logger.error('Error getting shifts by client ID', { clientId, error });
-      throw error;
-    }
-  }
-
-  async getByType(type: string, options: FilterOptions = {}): Promise<ShiftWithId[]> {
-    try {
-      let query: Query = this.db.collection(this.COLLECTION_NAME)
-        .where('type', '==', type);
-
-      if (options.pagination?.limit) {
-        query = query.limit(options.pagination.limit);
-      }
-
-      const snapshot = await query.get();
-      const shifts: ShiftWithId[] = [];
-
-      snapshot.forEach((doc) => {
-        shifts.push({
-          id: doc.id,
-          ...doc.data(),
-        } as ShiftWithId);
-      });
-
-      logger.info('Shifts retrieved for type', {
-        type,
-        count: shifts.length,
-      });
-
-      return convertArrayTimestamps(shifts);
-    } catch (error) {
-      logger.error('Error getting shifts by type', { type, error });
-      throw error;
-    }
-  }
-
-  async getByDate(date: Date, options: FilterOptions = {}): Promise<ShiftWithId[]> {
-    try {
-      // Crear rango del día
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
-
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      let query: Query = this.db.collection(this.COLLECTION_NAME)
-        .where('date', '>=', startOfDay)
-        .where('date', '<=', endOfDay)
-        .orderBy('date', 'asc');
-
-      if (options.pagination?.limit) {
-        query = query.limit(options.pagination.limit);
-      }
-
-      const snapshot = await query.get();
-      const shifts: ShiftWithId[] = [];
-
-      snapshot.forEach((doc) => {
-        shifts.push({
-          id: doc.id,
-          ...doc.data(),
-        } as ShiftWithId);
-      });
-
-      logger.info('Shifts retrieved for date', {
-        date: date.toISOString().split('T')[0],
-        count: shifts.length,
-      });
-
-      return convertArrayTimestamps(shifts);
-    } catch (error) {
-      logger.error('Error getting shifts by date', { date, error });
-      throw error;
-    }
-  }
-
-  async getByDateRange(dateFrom: Date, dateTo: Date, options: FilterOptions = {}): Promise<ShiftWithId[]> {
-    try {
-      let query: Query = this.db.collection(this.COLLECTION_NAME)
-        .where('date', '>=', dateFrom)
-        .where('date', '<=', dateTo);
-
-      if (options.pagination?.limit) {
-        query = query.limit(options.pagination.limit);
-      }
-
-      const snapshot = await query.get();
-      const shifts: ShiftWithId[] = [];
-
-      snapshot.forEach((doc) => {
-        shifts.push({
-          id: doc.id,
-          ...doc.data(),
-        } as ShiftWithId);
-      });
-
-      logger.info('Shifts retrieved for date range', {
-        dateFrom: dateFrom.toISOString().split('T')[0],
-        dateTo: dateTo.toISOString().split('T')[0],
-        count: shifts.length,
-      });
-
-      return convertArrayTimestamps(shifts);
-    } catch (error) {
-      logger.error('Error getting shifts by date range', { dateFrom, dateTo, error });
       throw error;
     }
   }

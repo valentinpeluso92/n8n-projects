@@ -14,10 +14,11 @@ import {
   errorHandler,
 } from '../../middleware';
 import {
-  validateShiftData,
+  validatePostShiftData,
   validateUpdateShiftData,
   validateShiftId,
   sanitizeShiftData,
+  validateGetShiftsFilter,
 } from '../validators/shiftValidators';
 import { HTTP_STATUS } from '../../constants';
 import { ApiResponse } from '../../types/api';
@@ -41,25 +42,10 @@ export class ShiftController {
       if (!authMiddleware(req, res, this.API_KEY)) return;
       if (!methodMiddleware(req, res, 'GET')) return;
 
-      const id = req.query.id as string;
-      const clientId = req.query.clientId as string;
-      const date = req.query.date as string;
-      const dateTo = req.query.dateTo as string;
-      const dateFrom = req.query.dateFrom as string;
-      const type = req.query.type as string;
-
-      if (id) {
-        await this.getShiftById(req, res, id);
-      } else if (clientId) {
-        await this.getShiftsByClientId(req, res, clientId);
-      } else if (type) {
-        await this.getShiftsByType(req, res, type);
-      } else if (date) {
-        await this.getShiftsByDate(req, res, date);
-      } else if (dateTo && dateFrom) {
-        await this.getShiftsByDateRange(req, res, dateFrom, dateTo);
+      if (req.query.id) {
+        await this.getShiftById(req, res);
       } else {
-        await this.getAllShifts(req, res);
+        await this.getShiftsByFilter(req, res);
       }
     } catch (error) {
       errorHandler(error, res, 'getShift');
@@ -78,7 +64,7 @@ export class ShiftController {
       if (!methodMiddleware(req, res, 'POST')) return;
 
       // Validar datos de entrada
-      const validation = validateShiftData(req.body);
+      const validation = validatePostShiftData(req.body);
       if (!validation.isValid) {
         res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
@@ -285,8 +271,9 @@ export class ShiftController {
     }
   }
 
-  private async getShiftById(req: Request, res: express.Response, id: string): Promise<void> {
-    // Obtener turno específico por ID
+  private async getShiftById(req: Request, res: express.Response): Promise<void> {
+    const id = req.query.id as string;
+
     const idError = validateShiftId(id);
     if (idError) {
       res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -312,95 +299,35 @@ export class ShiftController {
     });
   }
 
-  private async getShiftsByClientId(req: Request, res: express.Response, clientId: string): Promise<void> {
-    const shifts = await this.shiftService.getByClientId(clientId, {
-      pagination: {
-        limit: parseInt(req.query.limit as string) || 50,
-      },
-    });
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: shifts,
-      count: shifts.length,
-      searchCriteria: { clientId },
-    });
-  }
-
-  private async getShiftsByType(req: Request, res: express.Response, type: string): Promise<void> {
-    const shifts = await this.shiftService.getByType(type, {
-      pagination: {
-        limit: parseInt(req.query.limit as string) || 50,
-      },
-    });
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: shifts,
-      count: shifts.length,
-      searchCriteria: { type },
-    });
-  }
-
-  private async getShiftsByDate(req: Request, res: express.Response, dateStr: string): Promise<void> {
-    // Obtener turnos por fecha
-    const searchDate = new Date(dateStr);
-    if (isNaN(searchDate.getTime())) {
+  private async getShiftsByFilter(req: Request, res: express.Response): Promise<void> {
+    const validation = validateGetShiftsFilter(req.query);
+    if (!validation.isValid) {
       res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        error: ErrorMessagesEnum.INVALID_DATE,
+        error: validation.errors.join(', '),
       } as ApiResponse);
       return;
     }
 
-    const shifts = await this.shiftService.getByDate(searchDate, {
-      pagination: {
-        limit: parseInt(req.query.limit as string) || 50,
-      },
-    });
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: shifts,
-      count: shifts.length,
-      searchCriteria: { date: dateStr },
-    });
-  }
-
-  private async getShiftsByDateRange(
-    req: Request, res: express.Response, dateFromStr: string, dateToStr: string
-  ): Promise<void> {
-    const dateFrom = new Date(dateFromStr);
-    const dateTo = new Date(dateToStr);
-
-    if (isNaN(dateFrom.getTime()) || isNaN(dateTo.getTime())) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        error: ErrorMessagesEnum.INVALID_DATE,
-      } as ApiResponse);
-      return;
-    }
-
-    const shifts = await this.shiftService.getByDateRange(dateFrom, dateTo, {
-      pagination: {
-        limit: parseInt(req.query.limit as string) || 50,
-      },
-    });
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: shifts,
-      count: shifts.length,
-      searchCriteria: { dateFrom: dateFromStr, dateTo: dateToStr },
-    });
-  }
-
-  private async getAllShifts(req: Request, res: express.Response): Promise<void> {
-    const limit = parseInt(req.query.limit as string) || 10;
+    const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
+    const clientId = req.query.clientId as string;
+    const date = req.query.date as string;
+    const dateTo = req.query.dateTo as string;
+    const dateFrom = req.query.dateFrom as string;
+    const type = req.query.type as string;
+    const priority = req.query.priority as string;
 
     const shifts = await this.shiftService.getAll({
       pagination: { limit, offset },
+      filter: {
+        clientId,
+        date,
+        dateTo,
+        dateFrom,
+        type,
+        priority,
+      },
     });
 
     res.status(HTTP_STATUS.OK).json({

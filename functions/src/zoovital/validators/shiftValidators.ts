@@ -4,7 +4,36 @@ import { ShiftStatusEnum } from '../enums/shiftStatus';
 import { ShiftTypeEnum } from '../enums/shitType';
 import { Shift } from '../model/shift';
 
-export const validateShiftData = (data: any): ValidationResult => {
+export const validateGetShiftsFilter = (filter: any): ValidationResult => {
+  const errors: string[] = [];
+
+  if (filter.date !== undefined && !isValidDate(filter.date)) {
+    errors.push('Formato de fecha inválido para el filtro de fecha');
+  }
+
+  if (filter.dateFrom !== undefined && !isValidDate(filter.dateFrom)) {
+    errors.push('Formato de fecha inválido para dateFrom');
+  }
+
+  if (filter.dateTo !== undefined && !isValidDate(filter.dateTo)) {
+    errors.push('Formato de fecha inválido para dateTo');
+  }
+
+  if (filter.type !== undefined && !Object.values(ShiftTypeEnum).includes(filter.type)) {
+    errors.push(`Tipo de turno inválido en el filtro. Valores permitidos: ${Object.values(ShiftTypeEnum).join(', ')}`);
+  }
+
+  if (filter.priority !== undefined && !Object.values(ShiftPriorityEnum).includes(filter.priority)) {
+    errors.push(`Prioridad inválida en el filtro. Valores permitidos: ${Object.values(ShiftPriorityEnum).join(', ')}`);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+export const validatePostShiftData = (data: any): ValidationResult => {
   const errors: string[] = [];
 
   if (!data || typeof data !== 'object') {
@@ -20,25 +49,12 @@ export const validateShiftData = (data: any): ValidationResult => {
   // Validar date (requerido)
   if (data.date === undefined) {
     errors.push('La fecha del turno es requerida');
-  } else {
-    const date = new Date(data.date);
-    if (isNaN(date.getTime())) {
-      errors.push('Formato de fecha inválido');
-    } else {
-      // Validar que la fecha no sea en el pasado (opcional)
-      const now = new Date();
-      now.setHours(0, 0, 0, 0); // Inicio del día actual
-      if (date < now) {
-        errors.push('La fecha del turno no puede ser en el pasado');
-      }
-
-      // Validar que la fecha no sea muy lejana (opcional)
-      const maxDate = new Date();
-      maxDate.setFullYear(maxDate.getFullYear() + 1); // Máximo 1 año
-      if (date > maxDate) {
-        errors.push('La fecha del turno no puede ser más de un año en el futuro');
-      }
-    }
+  } else if (!isValidDate(data.date)) {
+    errors.push('Formato de fecha inválido');
+  } else if (isPastDate(data.date)) {
+    errors.push('La fecha del turno no puede ser en el pasado');
+  } else if (isFutureDate(data.date)) {
+    errors.push('La fecha del turno no puede ser más de un año en el futuro');
   }
 
   if (data.type === undefined) {
@@ -58,11 +74,8 @@ export const validateShiftData = (data: any): ValidationResult => {
   }
 
   // Validar duration (opcional)
-  if (data.duration !== undefined) {
-    const duration = parseInt(data.duration);
-    if (isNaN(duration) || duration < 15 || duration > 480) { // 15 min - 8 horas
-      errors.push('La duración debe ser entre 15 y 480 minutos');
-    }
+  if (data.duration !== undefined && !isValidDuration(data.duration)) {
+    errors.push('La duración debe ser entre 15 y 480 minutos');
   }
 
   // Validar notes (opcional)
@@ -101,17 +114,10 @@ export const validateUpdateShiftData = (data: any): ValidationResult => {
     }
   }
 
-  if (data.date !== undefined) {
-    const date = new Date(data.date);
-    if (isNaN(date.getTime())) {
-      errors.push('Formato de fecha inválido');
-    } else {
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      if (date < now) {
-        errors.push('La fecha del turno no puede ser en el pasado');
-      }
-    }
+  if (data.date !== undefined && !isValidDate(data.date)) {
+    errors.push('Formato de fecha inválido');
+  } else if (data.date !== undefined && isPastDate(data.date)) {
+    errors.push('La fecha del turno no puede ser en el pasado');
   }
 
   if (data.type !== undefined && !Object.values(ShiftTypeEnum).includes(data.type)) {
@@ -126,11 +132,8 @@ export const validateUpdateShiftData = (data: any): ValidationResult => {
     errors.push(`Estado inválido. Valores permitidos: ${Object.values(ShiftStatusEnum).join(', ')}`);
   }
 
-  if (data.duration !== undefined) {
-    const duration = parseInt(data.duration);
-    if (isNaN(duration) || duration < 15 || duration > 480) {
-      errors.push('La duración debe ser entre 15 y 480 minutos');
-    }
+  if (data.duration !== undefined && !isValidDuration(data.duration)) {
+    errors.push('La duración debe ser entre 15 y 480 minutos');
   }
 
   if (data.notes !== undefined && typeof data.notes !== 'string') {
@@ -197,6 +200,29 @@ export const sanitizeShiftData = (data: any): Partial<Shift> => {
   }
 
   return sanitized;
+};
+
+export const isValidDate = (dateStr: string): boolean => {
+  return !isNaN((new Date(dateStr)).getTime());
+};
+
+export const isPastDate = (dateStr: string): boolean => {
+  const date = new Date(dateStr);
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return date < now;
+};
+
+export const isFutureDate = (dateStr: string): boolean => {
+  const date = new Date(dateStr);
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() + 1); // Máximo 1 año
+  return date > maxDate;
+};
+
+export const isValidDuration = (durationStr: string): boolean => {
+  const duration = parseInt(durationStr);
+  return !isNaN(duration) && duration >= 15 && duration <= 480;
 };
 
 // export const validateScheduleConflict = async (
