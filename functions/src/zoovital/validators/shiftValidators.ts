@@ -1,5 +1,7 @@
 import { ValidationResult } from '../../types/api';
+import { ShiftPriorityEnum } from '../enums/shiftPriority';
 import { ShiftStatusEnum } from '../enums/shiftStatus';
+import { ShiftTypeEnum } from '../enums/shitType';
 import { Shift } from '../model/shift';
 
 export const validateShiftData = (data: any): ValidationResult => {
@@ -16,7 +18,7 @@ export const validateShiftData = (data: any): ValidationResult => {
   }
 
   // Validar date (requerido)
-  if (!data.date) {
+  if (data.date === undefined) {
     errors.push('La fecha del turno es requerida');
   } else {
     const date = new Date(data.date);
@@ -39,8 +41,19 @@ export const validateShiftData = (data: any): ValidationResult => {
     }
   }
 
+  if (data.type === undefined) {
+    errors.push('El tipo de turno es requerido');
+  } else if (!Object.values(ShiftTypeEnum).includes(data.type)) {
+    errors.push(`Tipo de turno inválido. Valores permitidos: ${Object.values(ShiftTypeEnum).join(', ')}`);
+  }
+
+  // Validar priority (opcional)
+  if (data.priority !== undefined && !Object.values(ShiftPriorityEnum).includes(data.priority)) {
+    errors.push(`Prioridad inválida. Valores permitidos: ${Object.values(ShiftPriorityEnum).join(', ')}`);
+  }
+
   // Validar status (opcional)
-  if (data.status && !Object.values(ShiftStatusEnum).includes(data.status)) {
+  if (data.status !== undefined && !Object.values(ShiftStatusEnum).includes(data.status)) {
     errors.push(`Estado inválido. Valores permitidos: ${Object.values(ShiftStatusEnum).join(', ')}`);
   }
 
@@ -99,6 +112,14 @@ export const validateUpdateShiftData = (data: any): ValidationResult => {
         errors.push('La fecha del turno no puede ser en el pasado');
       }
     }
+  }
+
+  if (data.type !== undefined && !Object.values(ShiftTypeEnum).includes(data.type)) {
+    errors.push(`Tipo de turno inválido. Valores permitidos: ${Object.values(ShiftTypeEnum).join(', ')}`);
+  }
+
+  if (data.priority !== undefined && !Object.values(ShiftPriorityEnum).includes(data.priority)) {
+    errors.push(`Prioridad inválida. Valores permitidos: ${Object.values(ShiftPriorityEnum).join(', ')}`);
   }
 
   if (data.status !== undefined && !Object.values(ShiftStatusEnum).includes(data.status)) {

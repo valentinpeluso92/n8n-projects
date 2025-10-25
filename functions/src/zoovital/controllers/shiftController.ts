@@ -46,11 +46,14 @@ export class ShiftController {
       const date = req.query.date as string;
       const dateTo = req.query.dateTo as string;
       const dateFrom = req.query.dateFrom as string;
+      const type = req.query.type as string;
 
       if (id) {
         await this.getShiftById(req, res, id);
       } else if (clientId) {
         await this.getShiftsByClientId(req, res, clientId);
+      } else if (type) {
+        await this.getShiftsByType(req, res, type);
       } else if (date) {
         await this.getShiftsByDate(req, res, date);
       } else if (dateTo && dateFrom) {
@@ -321,6 +324,21 @@ export class ShiftController {
       data: shifts,
       count: shifts.length,
       searchCriteria: { clientId },
+    });
+  }
+
+  private async getShiftsByType(req: Request, res: express.Response, type: string): Promise<void> {
+    const shifts = await this.shiftService.getByType(type, {
+      pagination: {
+        limit: parseInt(req.query.limit as string) || 50,
+      },
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: shifts,
+      count: shifts.length,
+      searchCriteria: { type },
     });
   }
 

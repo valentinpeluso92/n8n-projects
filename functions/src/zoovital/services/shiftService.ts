@@ -8,6 +8,7 @@ import { convertObjectTimestamps, convertArrayTimestamps } from '../../utilities
 import { Shift } from '../model/shift';
 import { FilterOptions } from '../../types/api';
 import { ShiftStatusEnum } from '../enums/shiftStatus';
+import { ShiftPriorityEnum } from '../enums/shiftPriority';
 
 export class ShiftService {
   private COLLECTION_NAME: string;
@@ -100,6 +101,37 @@ export class ShiftService {
     }
   }
 
+  async getByType(type: string, options: FilterOptions = {}): Promise<ShiftWithId[]> {
+    try {
+      let query: Query = this.db.collection(this.COLLECTION_NAME)
+        .where('type', '==', type);
+
+      if (options.pagination?.limit) {
+        query = query.limit(options.pagination.limit);
+      }
+
+      const snapshot = await query.get();
+      const shifts: ShiftWithId[] = [];
+
+      snapshot.forEach((doc) => {
+        shifts.push({
+          id: doc.id,
+          ...doc.data(),
+        } as ShiftWithId);
+      });
+
+      logger.info('Shifts retrieved for type', {
+        type,
+        count: shifts.length,
+      });
+
+      return convertArrayTimestamps(shifts);
+    } catch (error) {
+      logger.error('Error getting shifts by type', { type, error });
+      throw error;
+    }
+  }
+
   async getByDate(date: Date, options: FilterOptions = {}): Promise<ShiftWithId[]> {
     try {
       // Crear rango del día
@@ -144,8 +176,7 @@ export class ShiftService {
     try {
       let query: Query = this.db.collection(this.COLLECTION_NAME)
         .where('date', '>=', dateFrom)
-        .where('date', '<=', dateTo)
-        .orderBy('date', 'asc');
+        .where('date', '<=', dateTo);
 
       if (options.pagination?.limit) {
         query = query.limit(options.pagination.limit);
@@ -187,6 +218,7 @@ export class ShiftService {
         date: new Date(shiftData.date as string),
         status: shiftData.status || ShiftStatusEnum.SCHEDULED,
         duration: shiftData.duration || 30,
+        priority: shiftData.priority || ShiftPriorityEnum.MEDIUM,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       };
