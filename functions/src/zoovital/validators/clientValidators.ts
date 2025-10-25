@@ -3,9 +3,6 @@
 
 import { Client } from '../model/client';
 import { ValidationResult } from '../../types/api';
-import {
-  isValidAddress, isValidAge, isValidBody, isValidEmail, isValidId, isValidName, isValidPhone,
-} from '../../validators';
 
 export const validateClientData = (data: any): ValidationResult => {
   const errors: string[] = [];
@@ -60,7 +57,7 @@ export const validateUpdateData = (data: any): ValidationResult => {
   }
 
   if (!isValidPhone(data.phone)) {
-    errors.push('El teléfono debe ser una cadena de texto');
+    errors.push('El teléfono debe ser una cadena de texto de 10 dígitos');
   }
 
   if (!isValidAge(data.age)) {
@@ -93,6 +90,7 @@ export const sanitizeClientData = (data: any): Partial<Client> => {
 
   if (data.phone && typeof data.phone === 'string') {
     sanitized.phone = data.phone.trim();
+    sanitized.whatsappLink = `https://wa.me/549${sanitized.phone?.replace(/\D/g, '')}`;
   }
 
   if (data.age && Number.isInteger(data.age)) {
@@ -101,6 +99,8 @@ export const sanitizeClientData = (data: any): Partial<Client> => {
 
   if (data.address && typeof data.address === 'string') {
     sanitized.address = data.address.trim();
+    sanitized.googleMapsLink =
+      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(sanitized.address || '')}`;
   }
 
   // Add other fields as needed
@@ -112,3 +112,43 @@ export const sanitizeClientData = (data: any): Partial<Client> => {
 
   return sanitized;
 };
+
+export const isValidName = (name: any, required = false): boolean => {
+  return required ?
+    name && typeof name === 'string' && name.trim().length > 0 :
+    !name || (typeof name === 'string' && name.trim().length > 0);
+};
+
+export const isValidEmail = (email: any, required = false): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return required ?
+    email && typeof email === 'string' && emailRegex.test(email) :
+    !email || (typeof email === 'string' && emailRegex.test(email));
+};
+
+export const isValidPhone = (phone: any, required = false): boolean => {
+  return required ?
+    phone && typeof phone === 'string' && phone.trim().length === 10 :
+    !phone || (typeof phone === 'string' && phone.trim().length === 10);
+};
+
+export const isValidAge = (age: any, required = false): boolean => {
+  return required ?
+    Number.isInteger(age) && age >= 0 && age <= 150 :
+    age === undefined || (Number.isInteger(age) && age >= 0 && age <= 150);
+};
+
+export const isValidAddress = (address: any, required = false): boolean => {
+  return required ?
+    address && typeof address === 'string' && address.trim().length > 0 :
+    !address || (typeof address === 'string' && address.trim().length > 0);
+};
+
+export const isValidBody = (body: any): boolean => {
+  return !!body && typeof body === 'object' && Object.keys(body).length > 0;
+};
+
+export const isValidId = (id: any): boolean => {
+  return !!id && typeof id === 'string' && id.trim().length > 0;
+};
+
