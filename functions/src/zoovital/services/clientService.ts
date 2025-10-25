@@ -1,8 +1,7 @@
 import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { Client } from '../model/client';
-import { FilterOptions } from '../../types/api';
-import { ClientWithId } from '../types/api';
+import { ClientFilterOptions, ClientWithId } from '../types/api';
 import { convertArrayTimestamps, convertObjectTimestamps } from '../../utilities/timestamp';
 
 export class ClientService {
@@ -32,7 +31,7 @@ export class ClientService {
     }
   }
 
-  async getAll(options: FilterOptions = {}): Promise<ClientWithId[]> {
+  async getAll(options: ClientFilterOptions = {}): Promise<ClientWithId[]> {
     try {
       let query: Query = this.db.collection(this.COLLECTION_NAME);
 
@@ -61,7 +60,7 @@ export class ClientService {
     }
   }
 
-  async searchByName(options: FilterOptions = {}): Promise<ClientWithId[]> {
+  async searchByName(options: ClientFilterOptions = {}): Promise<ClientWithId[]> {
     try {
       const { pagination, name } = options;
       const limit = pagination?.limit || 50;

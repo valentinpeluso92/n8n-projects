@@ -246,7 +246,6 @@ export class ClientController {
       success: true,
       data: clients,
       count: clients.length,
-      searchCriteria: { name },
     });
   }
 

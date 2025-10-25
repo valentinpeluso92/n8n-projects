@@ -3,10 +3,9 @@
 
 import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
-import { ShiftWithId } from '../types/api';
+import { ShiftFilterOptions, ShiftWithId } from '../types/api';
 import { convertObjectTimestamps, convertArrayTimestamps } from '../../utilities/timestamp';
 import { SHIFT_STATUS } from '../../constants';
-import { FilterOptions } from '../../types/api';
 import { Shift } from '../model/shift';
 
 export class ShiftService {
@@ -36,7 +35,7 @@ export class ShiftService {
     }
   }
 
-  async getAll(options: FilterOptions = {}): Promise<ShiftWithId[]> {
+  async getAll(options: ShiftFilterOptions = {}): Promise<ShiftWithId[]> {
     try {
       let query: Query = this.db.collection(this.COLLECTION_NAME);
 
@@ -69,7 +68,7 @@ export class ShiftService {
     }
   }
 
-  async getByClientId(clientId: string, options: FilterOptions = {}): Promise<ShiftWithId[]> {
+  async getByClientId(clientId: string, options: ShiftFilterOptions = {}): Promise<ShiftWithId[]> {
     try {
       let query: Query = this.db.collection(this.COLLECTION_NAME)
         .where('clientId', '==', clientId)
@@ -101,7 +100,7 @@ export class ShiftService {
     }
   }
 
-  async getByDate(date: Date, options: FilterOptions = {}): Promise<ShiftWithId[]> {
+  async getByDate(date: Date, options: ShiftFilterOptions = {}): Promise<ShiftWithId[]> {
     try {
       // Crear rango del día
       const startOfDay = new Date(date);

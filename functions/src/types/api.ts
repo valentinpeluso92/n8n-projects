@@ -9,7 +9,6 @@ export interface ApiResponse<T = any> {
   hasConflicts?: boolean;
 }
 
-// TODO - Separar en un search criteria por entidad
 export interface SearchCriteria {
   name?: string;
   clientId?: string;
@@ -34,18 +33,9 @@ export interface PaginationMeta {
   totalPages?: number;
 }
 
-// TODO - Separar en un filter options por entidad
 export interface FilterOptions {
-  name?: string;
   pagination?: PaginationOptions;
   includeDeleted?: boolean;
-  clientId?: string;
-  date?: string;
-  status?: string;
-  dateRange?: {
-    from: string;
-    to: string;
-  };
 }
 
 export interface ValidationResult {
