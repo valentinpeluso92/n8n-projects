@@ -40,12 +40,5 @@ export const DEFAULT_THRESHOLD = 80;
 export const MAX_THRESHOLD = 100;
 export const MIN_THRESHOLD = 0;
 
-export const SHIFT_STATUS = {
-  SCHEDULED: 'scheduled',
-  COMPLETED: 'completed',
-  CANCELLED: 'cancelled',
-  NO_SHOW: 'no-show',
-} as const;
-
 export const DEFAULT_SHIFT_DURATION = 60; // 60 minutos
 export const MAX_SHIFTS_PER_DAY = 20;

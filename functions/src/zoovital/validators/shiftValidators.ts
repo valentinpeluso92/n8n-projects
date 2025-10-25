@@ -1,8 +1,5 @@
-
-// === validators/shiftValidators.ts ===
-
-import { SHIFT_STATUS } from '../../constants';
 import { ValidationResult } from '../../types/api';
+import { ShiftStatusEnum } from '../enums/shiftStatus';
 import { Shift } from '../model/shift';
 
 export const validateShiftData = (data: any): ValidationResult => {
@@ -43,8 +40,8 @@ export const validateShiftData = (data: any): ValidationResult => {
   }
 
   // Validar status (opcional)
-  if (data.status && !Object.values(SHIFT_STATUS).includes(data.status)) {
-    errors.push(`Estado inválido. Valores permitidos: ${Object.values(SHIFT_STATUS).join(', ')}`);
+  if (data.status && !Object.values(ShiftStatusEnum).includes(data.status)) {
+    errors.push(`Estado inválido. Valores permitidos: ${Object.values(ShiftStatusEnum).join(', ')}`);
   }
 
   // Validar duration (opcional)
@@ -104,8 +101,8 @@ export const validateUpdateShiftData = (data: any): ValidationResult => {
     }
   }
 
-  if (data.status !== undefined && !Object.values(SHIFT_STATUS).includes(data.status)) {
-    errors.push(`Estado inválido. Valores permitidos: ${Object.values(SHIFT_STATUS).join(', ')}`);
+  if (data.status !== undefined && !Object.values(ShiftStatusEnum).includes(data.status)) {
+    errors.push(`Estado inválido. Valores permitidos: ${Object.values(ShiftStatusEnum).join(', ')}`);
   }
 
   if (data.duration !== undefined) {
@@ -155,7 +152,7 @@ export const sanitizeShiftData = (data: any): Partial<Shift> => {
     }
   }
 
-  if (data.status && Object.values(SHIFT_STATUS).includes(data.status)) {
+  if (data.status && Object.values(ShiftStatusEnum).includes(data.status)) {
     sanitized.status = data.status;
   }
 

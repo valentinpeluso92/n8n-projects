@@ -5,9 +5,9 @@ import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { ShiftWithId } from '../types/api';
 import { convertObjectTimestamps, convertArrayTimestamps } from '../../utilities/timestamp';
-import { SHIFT_STATUS } from '../../constants';
 import { Shift } from '../model/shift';
 import { FilterOptions } from '../../types/api';
+import { ShiftStatusEnum } from '../enums/shiftStatus';
 
 export class ShiftService {
   private COLLECTION_NAME: string;
@@ -185,7 +185,7 @@ export class ShiftService {
       const newShift = {
         ...shiftData,
         date: new Date(shiftData.date as string),
-        status: shiftData.status || SHIFT_STATUS.SCHEDULED,
+        status: shiftData.status || ShiftStatusEnum.SCHEDULED,
         duration: shiftData.duration || 30,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
@@ -292,7 +292,7 @@ export class ShiftService {
       }
 
       await docRef.update({
-        status: SHIFT_STATUS.CANCELLED,
+        status: ShiftStatusEnum.CANCELLED,
         deletedAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
@@ -314,7 +314,7 @@ export class ShiftService {
       const query: Query = this.db.collection(this.COLLECTION_NAME)
         .where('date', '>=', startTime)
         .where('date', '<', endTime)
-        .where('status', '==', SHIFT_STATUS.SCHEDULED);
+        .where('status', '==', ShiftStatusEnum.SCHEDULED);
 
       const snapshot = await query.get();
       const conflicts: ShiftWithId[] = [];
