@@ -1,8 +1,9 @@
 import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { Client } from '../model/client';
-import { ClientFilterOptions, ClientWithId } from '../types/api';
+import { ClientWithId } from '../types/api';
 import { convertArrayTimestamps, convertObjectTimestamps } from '../../utilities/timestamp';
+import { FilterOptions } from '../../types/api';
 
 export class ClientService {
   private COLLECTION_NAME: string;
@@ -31,7 +32,7 @@ export class ClientService {
     }
   }
 
-  async getAll(options: ClientFilterOptions = {}): Promise<ClientWithId[]> {
+  async getAll(options: FilterOptions = {}): Promise<ClientWithId[]> {
     try {
       let query: Query = this.db.collection(this.COLLECTION_NAME);
 
@@ -60,9 +61,9 @@ export class ClientService {
     }
   }
 
-  async searchByName(options: ClientFilterOptions = {}): Promise<ClientWithId[]> {
+  async searchByName(name: string, options: FilterOptions = {}): Promise<ClientWithId[]> {
     try {
-      const { pagination, name } = options;
+      const { pagination } = options;
       const limit = pagination?.limit || 50;
       const searchTerm = (name as string);
       const words: string[] = searchTerm
@@ -115,9 +116,7 @@ export class ClientService {
       // Convertir timestamps
       return convertArrayTimestamps(finalResults);
     } catch (error) {
-      const { name } = options;
-      const searchTerm = (name as string);
-      logger.error('Error in advanced name search', { searchTerm, options, error });
+      logger.error('Error in advanced name search', { searchTerm: name, options, error });
       throw error;
     }
   }

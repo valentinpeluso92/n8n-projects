@@ -234,18 +234,18 @@ export class ClientController {
   private async getClientByName(req: Request, res: express.Response): Promise<void> {
     const name = req.query.name as string;
 
-    const clients: ClientWithId[] = await this.clientService.searchByName({
+    const clients: ClientWithId[] = await this.clientService.searchByName(name, {
       pagination: {
         limit: parseInt(req.query.limit as string) || 50,
         offset: parseInt(req.query.offset as string) || 0,
       },
-      name,
     });
 
     res.status(HTTP_STATUS.OK).json({
       success: true,
       data: clients,
       count: clients.length,
+      searchCriteria: { name },
     });
   }
 

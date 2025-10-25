@@ -23,7 +23,6 @@ import {
   HTTP_STATUS,
   ERROR_MESSAGES,
 } from '../../constants';
-import { ShiftWithId } from '../types/api';
 import { ApiResponse } from '../../types/api';
 
 export class ShiftController {
@@ -47,85 +46,20 @@ export class ShiftController {
       const id = req.query.id as string;
       const clientId = req.query.clientId as string;
       const date = req.query.date as string;
-
-      let response: ApiResponse<ShiftWithId | ShiftWithId[]>;
+      const dateTo = req.query.dateTo as string;
+      const dateFrom = req.query.dateFrom as string;
 
       if (id) {
-        // Obtener turno específico por ID
-        const idError = validateShiftId(id);
-        if (idError) {
-          res.status(HTTP_STATUS.BAD_REQUEST).json({
-            success: false,
-            error: idError,
-          } as ApiResponse);
-          return;
-        }
-
-        const shift = await this.shiftService.getById(id);
-        if (!shift) {
-          res.status(HTTP_STATUS.NOT_FOUND).json({
-            success: false,
-            error: ERROR_MESSAGES.SHIFT_NOT_FOUND,
-          } as ApiResponse);
-          return;
-        }
-
-        response = {
-          success: true,
-          data: shift,
-        };
+        await this.getShiftById(req, res, id);
       } else if (clientId) {
-        // Obtener turnos por cliente
-        const shifts = await this.shiftService.getByClientId(clientId, {
-          pagination: {
-            limit: parseInt(req.query.limit as string) || 50,
-          },
-        });
-
-        response = {
-          success: true,
-          data: shifts,
-          count: shifts.length,
-        };
+        await this.getShiftsByClientId(req, res, clientId);
       } else if (date) {
-        // Obtener turnos por fecha
-        const searchDate = new Date(date);
-        if (isNaN(searchDate.getTime())) {
-          res.status(HTTP_STATUS.BAD_REQUEST).json({
-            success: false,
-            error: ERROR_MESSAGES.INVALID_DATE,
-          } as ApiResponse);
-          return;
-        }
-
-        const shifts = await this.shiftService.getByDate(searchDate, {
-          pagination: {
-            limit: parseInt(req.query.limit as string) || 50,
-          },
-        });
-
-        response = {
-          success: true,
-          data: shifts,
-          count: shifts.length,
-        };
+        await this.getShiftsByDate(req, res, date);
+      } else if (dateTo && dateFrom) {
+        await this.getShiftsByDateRange(req, res, dateFrom, dateTo);
       } else {
-        // Obtener todos los turnos con paginación
-        const limit = parseInt(req.query.limit as string) || 10;
-        const offset = parseInt(req.query.offset as string) || 0;
-
-        const shifts = await this.shiftService.getAll({
-          pagination: { limit, offset },
-        });
-
-        response = {
-          success: true,
-          data: shifts,
-          count: shifts.length,
-        };
+        await this.getAllShifts(req, res);
       }
-
-      res.status(HTTP_STATUS.OK).json(response);
     } catch (error) {
       errorHandler(error, res, 'getShift');
     } finally {
@@ -348,5 +282,115 @@ export class ShiftController {
     } finally {
       logCompletion();
     }
+  }
+
+  private async getShiftById(req: Request, res: express.Response, id: string): Promise<void> {
+    // Obtener turno específico por ID
+    const idError = validateShiftId(id);
+    if (idError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: idError,
+      } as ApiResponse);
+      return;
+    }
+
+    const shift = await this.shiftService.getById(id);
+    if (!shift) {
+      res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        error: ERROR_MESSAGES.SHIFT_NOT_FOUND,
+      } as ApiResponse);
+      return;
+    }
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: shift,
+      searchCriteria: { id },
+    });
+  }
+
+  private async getShiftsByClientId(req: Request, res: express.Response, clientId: string): Promise<void> {
+    const shifts = await this.shiftService.getByClientId(clientId, {
+      pagination: {
+        limit: parseInt(req.query.limit as string) || 50,
+      },
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: shifts,
+      count: shifts.length,
+      searchCriteria: { clientId },
+    });
+  }
+
+  private async getShiftsByDate(req: Request, res: express.Response, dateStr: string): Promise<void> {
+    // Obtener turnos por fecha
+    const searchDate = new Date(dateStr);
+    if (isNaN(searchDate.getTime())) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: ERROR_MESSAGES.INVALID_DATE,
+      } as ApiResponse);
+      return;
+    }
+
+    const shifts = await this.shiftService.getByDate(searchDate, {
+      pagination: {
+        limit: parseInt(req.query.limit as string) || 50,
+      },
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: shifts,
+      count: shifts.length,
+      searchCriteria: { date: dateStr },
+    });
+  }
+
+  private async getShiftsByDateRange(
+    req: Request, res: express.Response, dateFromStr: string, dateToStr: string
+  ): Promise<void> {
+    const dateFrom = new Date(dateFromStr);
+    const dateTo = new Date(dateToStr);
+
+    if (isNaN(dateFrom.getTime()) || isNaN(dateTo.getTime())) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: ERROR_MESSAGES.INVALID_DATE,
+      } as ApiResponse);
+      return;
+    }
+
+    const shifts = await this.shiftService.getByDateRange(dateFrom, dateTo, {
+      pagination: {
+        limit: parseInt(req.query.limit as string) || 50,
+      },
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: shifts,
+      count: shifts.length,
+      searchCriteria: { dateFrom: dateFromStr, dateTo: dateToStr },
+    });
+  }
+
+  private async getAllShifts(req: Request, res: express.Response): Promise<void> {
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    const shifts = await this.shiftService.getAll({
+      pagination: { limit, offset },
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: shifts,
+      count: shifts.length,
+    });
   }
 }

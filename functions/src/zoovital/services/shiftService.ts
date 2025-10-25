@@ -3,10 +3,11 @@
 
 import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
-import { ShiftFilterOptions, ShiftWithId } from '../types/api';
+import { ShiftWithId } from '../types/api';
 import { convertObjectTimestamps, convertArrayTimestamps } from '../../utilities/timestamp';
 import { SHIFT_STATUS } from '../../constants';
 import { Shift } from '../model/shift';
+import { FilterOptions } from '../../types/api';
 
 export class ShiftService {
   private COLLECTION_NAME: string;
@@ -35,7 +36,7 @@ export class ShiftService {
     }
   }
 
-  async getAll(options: ShiftFilterOptions = {}): Promise<ShiftWithId[]> {
+  async getAll(options: FilterOptions = {}): Promise<ShiftWithId[]> {
     try {
       let query: Query = this.db.collection(this.COLLECTION_NAME);
 
@@ -68,7 +69,7 @@ export class ShiftService {
     }
   }
 
-  async getByClientId(clientId: string, options: ShiftFilterOptions = {}): Promise<ShiftWithId[]> {
+  async getByClientId(clientId: string, options: FilterOptions = {}): Promise<ShiftWithId[]> {
     try {
       let query: Query = this.db.collection(this.COLLECTION_NAME)
         .where('clientId', '==', clientId)
@@ -100,7 +101,7 @@ export class ShiftService {
     }
   }
 
-  async getByDate(date: Date, options: ShiftFilterOptions = {}): Promise<ShiftWithId[]> {
+  async getByDate(date: Date, options: FilterOptions = {}): Promise<ShiftWithId[]> {
     try {
       // Crear rango del día
       const startOfDay = new Date(date);
@@ -136,6 +137,40 @@ export class ShiftService {
       return convertArrayTimestamps(shifts);
     } catch (error) {
       logger.error('Error getting shifts by date', { date, error });
+      throw error;
+    }
+  }
+
+  async getByDateRange(dateFrom: Date, dateTo: Date, options: FilterOptions = {}): Promise<ShiftWithId[]> {
+    try {
+      let query: Query = this.db.collection(this.COLLECTION_NAME)
+        .where('date', '>=', dateFrom)
+        .where('date', '<=', dateTo)
+        .orderBy('date', 'asc');
+
+      if (options.pagination?.limit) {
+        query = query.limit(options.pagination.limit);
+      }
+
+      const snapshot = await query.get();
+      const shifts: ShiftWithId[] = [];
+
+      snapshot.forEach((doc) => {
+        shifts.push({
+          id: doc.id,
+          ...doc.data(),
+        } as ShiftWithId);
+      });
+
+      logger.info('Shifts retrieved for date range', {
+        dateFrom: dateFrom.toISOString().split('T')[0],
+        dateTo: dateTo.toISOString().split('T')[0],
+        count: shifts.length,
+      });
+
+      return convertArrayTimestamps(shifts);
+    } catch (error) {
+      logger.error('Error getting shifts by date range', { dateFrom, dateTo, error });
       throw error;
     }
   }
