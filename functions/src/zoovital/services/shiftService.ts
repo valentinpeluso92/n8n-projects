@@ -72,8 +72,7 @@ export class ShiftService {
   async getByClientId(clientId: string, options: FilterOptions = {}): Promise<ShiftWithId[]> {
     try {
       let query: Query = this.db.collection(this.COLLECTION_NAME)
-        .where('clientId', '==', clientId)
-        .orderBy('date', 'desc');
+        .where('clientId', '==', clientId);
 
       if (options.pagination?.limit) {
         query = query.limit(options.pagination.limit);
