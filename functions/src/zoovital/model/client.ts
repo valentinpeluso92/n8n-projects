@@ -2,8 +2,6 @@ export type Client = {
   id: string;
   name: string;
   phone: string;
-  whatsappLink?: string;
-  googleMapsLink?: string;
   address: string;
   email: string;
   age: number;
@@ -11,4 +9,4 @@ export type Client = {
   nameWords: string[];
   createdAt: string;
   updatedAt: string;
-}
+};

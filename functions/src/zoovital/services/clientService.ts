@@ -1,9 +1,9 @@
 import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { Client } from '../model/client';
-import { ClientWithId } from '../types/api';
-import { convertArrayTimestamps, convertObjectTimestamps } from '../../utilities/timestamp';
+import { ClientResponse } from '../types/api';
 import { FilterOptions } from '../../types/api';
+import { mapClientsToResponse, mapClientToResponse } from '../helpers/clientResponse';
 
 export class ClientService {
   private COLLECTION_NAME: string;
@@ -12,7 +12,7 @@ export class ClientService {
     this.COLLECTION_NAME = COLLECTION_NAME;
   }
 
-  async getById(id: string): Promise<ClientWithId | null> {
+  async getById(id: string): Promise<ClientResponse | null> {
     try {
       const doc = await this.db.collection(this.COLLECTION_NAME).doc(id).get();
 
@@ -23,16 +23,16 @@ export class ClientService {
       const rawData = {
         id: doc.id,
         ...doc.data(),
-      } as ClientWithId;
+      } as ClientResponse;
 
-      return convertObjectTimestamps(rawData);
+      return mapClientToResponse(rawData);
     } catch (error) {
       logger.error('Error getting client by ID', { id, error });
       throw error;
     }
   }
 
-  async getAll(options: FilterOptions = {}): Promise<ClientWithId[]> {
+  async getAll(options: FilterOptions = {}): Promise<ClientResponse[]> {
     try {
       let query: Query = this.db.collection(this.COLLECTION_NAME);
 
@@ -44,16 +44,16 @@ export class ClientService {
       }
 
       const snapshot = await query.get();
-      const clients: ClientWithId[] = [];
+      const clients: ClientResponse[] = [];
 
       snapshot.forEach((doc) => {
         clients.push({
           id: doc.id,
           ...doc.data(),
-        } as ClientWithId);
+        } as ClientResponse);
       });
 
-      const clientsWithConvertedTimestamps = convertArrayTimestamps(clients);
+      const clientsWithConvertedTimestamps = mapClientsToResponse(clients);
       return clientsWithConvertedTimestamps;
     } catch (error) {
       logger.error('Error getting all clients', { options, error });
@@ -61,7 +61,7 @@ export class ClientService {
     }
   }
 
-  async searchByName(name: string, options: FilterOptions = {}): Promise<ClientWithId[]> {
+  async searchByName(name: string, options: FilterOptions = {}): Promise<ClientResponse[]> {
     try {
       const { pagination } = options;
       const limit = pagination?.limit || 50;
@@ -88,10 +88,10 @@ export class ClientService {
       query = query.limit(firestoreLimit);
 
       const snapshot = await query.get();
-      const candidates: ClientWithId[] = [];
+      const candidates: ClientResponse[] = [];
 
       snapshot.forEach((doc) => {
-        candidates.push({ id: doc.id, ...doc.data() } as ClientWithId);
+        candidates.push({ id: doc.id, ...doc.data() } as ClientResponse);
       });
 
       const filteredResults = candidates.filter((client) => {
@@ -113,8 +113,7 @@ export class ClientService {
         },
       });
 
-      // Convertir timestamps
-      return convertArrayTimestamps(finalResults);
+      return mapClientsToResponse(finalResults);
     } catch (error) {
       logger.error('Error in advanced name search', { searchTerm: name, options, error });
       throw error;
@@ -136,11 +135,7 @@ export class ClientService {
 
       logger.info('Client created successfully', { id: docRef.id });
 
-      const responseData = convertObjectTimestamps({
-        ...clientData,
-        createdAt: new Date().toISOString(), // Timestamp actual para la respuesta
-        updatedAt: new Date().toISOString(),
-      });
+      const responseData = mapClientToResponse(newClient as any);
 
       return {
         id: docRef.id,
@@ -176,10 +171,7 @@ export class ClientService {
 
       logger.info('Client updated successfully', { id });
 
-      const responseData = convertObjectTimestamps({
-        ...updateData,
-        updatedAt: new Date().toISOString(), // Timestamp actual para la respuesta
-      });
+      const responseData = mapClientToResponse(updatedData as any);
 
       return {
         id,

@@ -18,7 +18,7 @@ import {
 } from '../validators/clientValidators';
 import { HTTP_STATUS } from '../../constants';
 import { ApiResponse } from '../../types/api';
-import { ClientWithId } from '../types/api';
+import { ClientResponse } from '../types/api';
 import { ErrorMessagesEnum } from '../enums/errorMessages';
 
 export class ClientController {
@@ -232,7 +232,7 @@ export class ClientController {
   private async getClientByName(req: Request, res: express.Response): Promise<void> {
     const name = req.query.name as string;
 
-    const clients: ClientWithId[] = await this.clientService.searchByName(name, {
+    const clients: ClientResponse[] = await this.clientService.searchByName(name, {
       pagination: {
         limit: parseInt(req.query.limit as string) || 50,
         offset: parseInt(req.query.offset as string) || 0,

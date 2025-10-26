@@ -2,9 +2,10 @@ import { FilterOptions } from '../../types/api';
 import { Client } from '../model/client';
 import { Shift } from '../model/shift';
 
-export interface ClientWithId extends Client {
-  id: string;
-}
+export type ClientResponse = {
+  whatsappLink: string;
+  googleMapsLink: string;
+} & Client;
 
 export interface ShiftWithId extends Shift {
   id: string;

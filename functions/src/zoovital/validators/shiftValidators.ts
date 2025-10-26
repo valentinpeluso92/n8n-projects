@@ -168,12 +168,9 @@ export const sanitizeShiftData = (data: any): Partial<Shift> => {
     sanitized.clientId = data.clientId.trim();
   }
 
-  if (data.date) {
+  if (data.date && isValidDate(data.date)) {
     // Asegurar que sea una fecha válida
-    const date = new Date(data.date);
-    if (!isNaN(date.getTime())) {
-      sanitized.date = date;
-    }
+    sanitized.date = new Date(data.date);
   }
 
   if (data.status && Object.values(ShiftStatusEnum).includes(data.status)) {
@@ -184,11 +181,8 @@ export const sanitizeShiftData = (data: any): Partial<Shift> => {
     sanitized.notes = data.notes.trim();
   }
 
-  if (data.duration) {
-    const duration = parseInt(data.duration);
-    if (!isNaN(duration) && duration >= 15 && duration <= 480) {
-      sanitized.duration = duration;
-    }
+  if (data.duration && isValidDuration(data.duration)) {
+    sanitized.duration = parseInt(data.duration);
   }
 
   if (data.veterinarian && typeof data.veterinarian === 'string') {
@@ -222,7 +216,7 @@ export const isFutureDate = (dateStr: string): boolean => {
 
 export const isValidDuration = (durationStr: string): boolean => {
   const duration = parseInt(durationStr);
-  return !isNaN(duration) && duration >= 15 && duration <= 480;
+  return !isNaN(duration) && duration >= 30 && duration <= 60;
 };
 
 // export const validateScheduleConflict = async (

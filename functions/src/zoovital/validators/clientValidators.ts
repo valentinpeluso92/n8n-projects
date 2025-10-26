@@ -90,7 +90,6 @@ export const sanitizeClientData = (data: any): Partial<Client> => {
 
   if (data.phone && typeof data.phone === 'string') {
     sanitized.phone = data.phone.trim();
-    sanitized.whatsappLink = `https://wa.me/549${sanitized.phone?.replace(/\D/g, '')}`;
   }
 
   if (data.age && Number.isInteger(data.age)) {
@@ -99,8 +98,6 @@ export const sanitizeClientData = (data: any): Partial<Client> => {
 
   if (data.address && typeof data.address === 'string') {
     sanitized.address = data.address.trim();
-    sanitized.googleMapsLink =
-      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(sanitized.address || '')}`;
   }
 
   // Add other fields as needed
