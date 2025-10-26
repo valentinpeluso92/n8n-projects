@@ -15,10 +15,10 @@ import {
   validateUpdateData,
   validateId,
   sanitizeClientData,
+  validateGetClientsFilter,
 } from '../validators/clientValidators';
 import { HTTP_STATUS } from '../../constants';
 import { ApiResponse } from '../../types/api';
-import { ClientResponse } from '../types/api';
 import { ErrorMessagesEnum } from '../enums/errorMessages';
 
 export class ClientController {
@@ -39,15 +39,10 @@ export class ClientController {
       if (!authMiddleware(req, res, this.API_KEY)) return;
       if (!methodMiddleware(req, res, 'GET')) return;
 
-      const id = req.query.id as string;
-      const name = req.query.name as string;
-
-      if (id) {
+      if (req.query.id) {
         await this.getClientById(req, res);
-      } else if (name && name.trim().length > 0) {
-        await this.getClientByName(req, res);
       } else {
-        await this.getAllClients(req, res);
+        await this.getClientsByFilters(req, res);
       }
     } catch (error) {
       errorHandler(error, res, 'getClient');
@@ -229,30 +224,35 @@ export class ClientController {
     });
   }
 
-  private async getClientByName(req: Request, res: express.Response): Promise<void> {
-    const name = req.query.name as string;
+  private async getClientsByFilters(req: Request, res: express.Response): Promise<void> {
+    const validation = validateGetClientsFilter(req.query);
+    if (!validation.isValid) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: validation.errors.join(', '),
+      } as ApiResponse);
+      return;
+    }
 
-    const clients: ClientResponse[] = await this.clientService.searchByName(name, {
-      pagination: {
-        limit: parseInt(req.query.limit as string) || 50,
-        offset: parseInt(req.query.offset as string) || 0,
-      },
-    });
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: clients,
-      count: clients.length,
-      searchCriteria: { name },
-    });
-  }
-
-  private async getAllClients(req: Request, res: express.Response): Promise<void> {
-    const limit = parseInt(req.query.limit as string) || 10;
+    const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
+    const name = req.query.name as string;
+    const email = req.query.email as string;
+    const phone = req.query.phone as string;
+    const age = req.query.age as string;
+    const address = req.query.address as string;
+    const clientIds = req.query.clientIds as string;
 
     const clients = await this.clientService.getAll({
       pagination: { limit, offset },
+      filter: {
+        name,
+        email,
+        phone,
+        age,
+        address,
+        clientIds,
+      },
     });
 
     res.status(HTTP_STATUS.OK).json({

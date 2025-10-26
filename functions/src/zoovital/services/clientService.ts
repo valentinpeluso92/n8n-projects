@@ -1,8 +1,7 @@
-import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
+import { Firestore, FieldValue, Query, FieldPath } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { Client } from '../model/client';
-import { ClientResponse } from '../types/api';
-import { FilterOptions } from '../../types/api';
+import { ClientFilterOptions, ClientResponse } from '../types/api';
 import { mapClientsToResponse, mapClientToResponse } from '../helpers/clientResponse';
 
 export class ClientService {
@@ -32,9 +31,50 @@ export class ClientService {
     }
   }
 
-  async getAll(options: FilterOptions = {}): Promise<ClientResponse[]> {
+  async getAll(options: ClientFilterOptions = { filter: {} }): Promise<ClientResponse[]> {
     try {
       let query: Query = this.db.collection(this.COLLECTION_NAME);
+      const { filter } = options;
+
+      let words: string[] = [];
+
+      if (filter.name) {
+        words = filter.name
+          .toLowerCase()
+          .split(' ')
+          .map((word: string) => word.trim())
+          .filter((word: string) => word.length > 0);
+
+        if (words.length === 1) {
+          query = query.where('nameWords', 'array-contains', words[0]);
+        } else {
+          query = query.where('nameWords', 'array-contains-any', words.slice(0, 10));
+        }
+      }
+
+      if (filter.email) {
+        query = query.where('email', '==', filter.email);
+      }
+
+      if (filter.phone) {
+        query = query.where('phone', '==', filter.phone);
+      }
+
+      if (filter.age) {
+        const ageNum = parseInt(filter.age, 10);
+        if (!isNaN(ageNum)) {
+          query = query.where('age', '==', ageNum);
+        }
+      }
+
+      if (filter.address) {
+        query = query.where('address', '==', filter.address);
+      }
+
+      if (filter.clientIds) {
+        const clientIdsArray = filter.clientIds.split(',').map((id) => id.trim());
+        query = query.where(FieldPath.documentId(), 'in', clientIdsArray);
+      }
 
       // Limitar resultados para fuzzy matching posterior
       query = query.limit(options.pagination?.limit || 50);
@@ -53,69 +93,24 @@ export class ClientService {
         } as ClientResponse);
       });
 
-      const clientsWithConvertedTimestamps = mapClientsToResponse(clients);
-      return clientsWithConvertedTimestamps;
-    } catch (error) {
-      logger.error('Error getting all clients', { options, error });
-      throw error;
-    }
-  }
-
-  async searchByName(name: string, options: FilterOptions = {}): Promise<ClientResponse[]> {
-    try {
-      const { pagination } = options;
-      const limit = pagination?.limit || 50;
-      const searchTerm = (name as string);
-      const words: string[] = searchTerm
-        .toLowerCase()
-        .split(' ')
-        .map((word: string) => word.trim())
-        .filter((word: string) => word.length > 0);
-
-      if (!words.length) {
-        return [];
-      }
-
-      let query: Query = this.db.collection(this.COLLECTION_NAME);
-
-      if (words.length === 1) {
-        query = query.where('nameWords', 'array-contains', words[0]);
-      } else {
-        query = query.where('nameWords', 'array-contains-any', words.slice(0, 10));
-      }
-
-      const firestoreLimit = Math.max(limit * 3, 100);
-      query = query.limit(firestoreLimit);
-
-      const snapshot = await query.get();
-      const candidates: ClientResponse[] = [];
-
-      snapshot.forEach((doc) => {
-        candidates.push({ id: doc.id, ...doc.data() } as ClientResponse);
-      });
-
-      const filteredResults = candidates.filter((client) => {
+      const filteredResults = clients.filter((client) => {
         const clientNameWords = client.nameWords || [];
-        return words.every((searchWord) =>
+        // Verificar que todos los términos de búsqueda estén presentes en el nombre del cliente
+        return words.length === 0 || words.every((searchWord) =>
           clientNameWords.some((clientWord) =>
             clientWord.includes(searchWord) || searchWord.includes(clientWord)
           )
         );
       });
 
-      const finalResults = filteredResults.slice(0, limit);
-
-      logger.info('Advanced search performance', {
-        searchTerm,
-        results: finalResults.length,
-        strategies: {
-          words: words.join(', '),
-        },
+      logger.info('Clients retrieved', {
+        filter,
+        count: filteredResults.length,
       });
 
-      return mapClientsToResponse(finalResults);
+      return mapClientsToResponse(filteredResults);
     } catch (error) {
-      logger.error('Error in advanced name search', { searchTerm: name, options, error });
+      logger.error('Error getting all clients', { options, error });
       throw error;
     }
   }

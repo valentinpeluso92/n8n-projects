@@ -7,6 +7,17 @@ export type ClientResponse = {
   googleMapsLink: string;
 } & Client;
 
+export interface ClientFilterOptions extends FilterOptions {
+  filter: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    age?: string;
+    address?: string;
+    clientIds?: string;
+  }
+}
+
 export interface ShiftWithId extends Shift {
   id: string;
 }

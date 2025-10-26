@@ -4,6 +4,40 @@
 import { Client } from '../model/client';
 import { ValidationResult } from '../../types/api';
 
+export const validateGetClientsFilter = (filter: any): ValidationResult => {
+  const errors: string[] = [];
+
+  // Required fields validation
+  if (!isValidName(filter.name)) {
+    errors.push('El nombre del cliente es requerido');
+  }
+
+  if (!isValidEmail(filter.email)) {
+    errors.push('El formato del email no es válido');
+  }
+
+  if (!isValidPhone(filter.phone)) {
+    errors.push('El teléfono del cliente es requerido y debe ser una cadena de texto');
+  }
+
+  if (!isValidAge(filter.age)) {
+    errors.push('La edad debe ser un número entero entre 0 y 150');
+  }
+
+  if (!isValidAddress(filter.address)) {
+    errors.push('La dirección debe ser una cadena de texto');
+  }
+
+  if (!isValidListOfIds(filter.clientIds)) {
+    errors.push('La lista de IDs de clientes no es válida');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
 export const validateClientData = (data: any): ValidationResult => {
   const errors: string[] = [];
 
@@ -139,6 +173,14 @@ export const isValidAddress = (address: any, required = false): boolean => {
   return required ?
     address && typeof address === 'string' && address.trim().length > 0 :
     !address || (typeof address === 'string' && address.trim().length > 0);
+};
+
+export const isValidListOfIds = (ids: any, required = false): boolean => {
+  const validListOfIdsFn = (idsStr: string): boolean => idsStr.split(',').every((id: string) => isValidId(id.trim()));
+
+  return required ?
+    typeof ids === 'string' && validListOfIdsFn(ids) :
+    !ids || (typeof ids === 'string' && validListOfIdsFn(ids));
 };
 
 export const isValidBody = (body: any): boolean => {
