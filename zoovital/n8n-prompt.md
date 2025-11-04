@@ -101,8 +101,8 @@ Preguntar: *"¿Desea el turno en la sede de la veterinaria o en el domicilio del
 - **Paralelización:** NO permitida (1 turno por slot)
 - **Veterinario:** Específico que registra el turno
 - **Horarios:** Slots de 1 hora (30min consulta + 30min desplazamiento)
-  - Lunes a Viernes: 9:30-10:30, 10:30-11:30, 11:30-12:30 | 16:00-17:00, 17:00-18:00, 18:00-19:00
-  - Sábados: 9:30-10:30, 10:30-11:30, 11:30-12:30
+  - Lunes a Viernes: 7:00, 7:30, 8:00, 8:30, 9:00 | 18:00, 18:30, 19:00, 19:30, 20:00
+  - Sábados: 13:30, 14:00, 14:30
 - **Disponibilidad:** 1 - turnos_registrados_no_eliminados
 
 ### VALIDACIONES OBLIGATORIAS - TURNOS EN SEDE
