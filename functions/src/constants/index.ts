@@ -1,8 +1,3 @@
-export const COLLECTION_NAMES = {
-  SBOX_ZOOVITAL_CLIENTS: 'sbox-zoovital-clients',
-  SVOX_ZOOVITAL_SHIFTS: 'sbox-zoovital-shifts',
-} as const;
-
 export const HTTP_STATUS = {
   OK: 200,
   CREATED: 201,

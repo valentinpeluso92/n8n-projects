@@ -28,8 +28,8 @@ export class ShiftController {
   private shiftService: ShiftService;
   private API_KEY: string;
 
-  constructor(db: Firestore, API_KEY: string, COLLECTION_NAME: string) {
-    this.shiftService = new ShiftService(db, COLLECTION_NAME);
+  constructor(db: Firestore, API_KEY: string) {
+    this.shiftService = new ShiftService(db);
     this.API_KEY = API_KEY;
   }
 
@@ -78,7 +78,7 @@ export class ShiftController {
 
       try {
         // Crear turno
-        const result = await this.shiftService.create(sanitizedData);
+        const result = await this.shiftService.create(req, sanitizedData);
 
         const response: ApiResponse = {
           success: true,
@@ -138,7 +138,7 @@ export class ShiftController {
       const sanitizedData = sanitizeShiftData(req.body);
 
       try {
-        const result = await this.shiftService.update(id, sanitizedData);
+        const result = await this.shiftService.update(req, id, sanitizedData);
 
         const response: ApiResponse = {
           success: true,
@@ -198,9 +198,9 @@ export class ShiftController {
       try {
         let result;
         if (soft) {
-          result = await this.shiftService.softDelete(id);
+          result = await this.shiftService.softDelete(req, id);
         } else {
-          result = await this.shiftService.delete(id);
+          result = await this.shiftService.delete(req, id);
         }
 
         const response: ApiResponse = {
@@ -227,50 +227,6 @@ export class ShiftController {
     }
   }
 
-  async checkConflicts(req: Request, res: express.Response): Promise<void> {
-    const logCompletion = requestLogger(req, 'GET');
-
-    try {
-      if (!corsMiddleware(req, res, ['GET', 'OPTIONS'])) return;
-      if (!authMiddleware(req, res, this.API_KEY)) return;
-      if (!methodMiddleware(req, res, 'GET')) return;
-
-      const date = req.query.date as string;
-      const duration = parseInt(req.query.duration as string) || 60;
-      const excludeId = req.query.excludeId as string;
-
-      if (!date) {
-        res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          error: 'Fecha es requerida para verificar conflictos',
-        } as ApiResponse);
-        return;
-      }
-
-      const searchDate = new Date(date);
-      if (isNaN(searchDate.getTime())) {
-        res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          error: ErrorMessagesEnum.INVALID_DATE,
-        } as ApiResponse);
-        return;
-      }
-
-      const conflicts = await this.shiftService.checkScheduleConflicts(searchDate, duration, excludeId);
-
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        data: conflicts,
-        count: conflicts.length,
-        hasConflicts: conflicts.length > 0,
-      });
-    } catch (error) {
-      errorHandler(error, res, 'checkConflicts');
-    } finally {
-      logCompletion();
-    }
-  }
-
   private async getShiftById(req: Request, res: express.Response): Promise<void> {
     const id = req.query.id as string;
 
@@ -283,7 +239,7 @@ export class ShiftController {
       return;
     }
 
-    const shift = await this.shiftService.getById(id);
+    const shift = await this.shiftService.getById(req, id);
     if (!shift) {
       res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
@@ -318,17 +274,20 @@ export class ShiftController {
     const type = req.query.type as string;
     const priority = req.query.priority as string;
 
-    const shifts = await this.shiftService.getAll({
-      pagination: { limit, offset },
-      filter: {
-        clientId,
-        date,
-        dateTo,
-        dateFrom,
-        type,
-        priority,
-      },
-    });
+    const shifts = await this.shiftService.getAll(
+      req,
+      {
+        pagination: { limit, offset },
+        filter: {
+          clientId,
+          date,
+          dateTo,
+          dateFrom,
+          type,
+          priority,
+        },
+      }
+    );
 
     res.status(HTTP_STATUS.OK).json({
       success: true,

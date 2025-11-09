@@ -2,9 +2,21 @@ import { ShiftPriorityEnum } from '../enums/shiftPriority';
 import { ShiftStatusEnum } from '../enums/shiftStatus';
 import { ShiftTypeEnum } from '../enums/shitType';
 
-export type ShiftStatus = keyof typeof ShiftStatusEnum;
-export type ShiftType = keyof typeof ShiftTypeEnum;
-export type ShiftPriority = keyof typeof ShiftPriorityEnum;
+export type ShiftStatus =
+  ShiftStatusEnum.SCHEDULED |
+  ShiftStatusEnum.COMPLETED |
+  ShiftStatusEnum.CANCELLED |
+  ShiftStatusEnum.NO_SHOW;
+
+export type ShiftType =
+  ShiftTypeEnum.HOME |
+  ShiftTypeEnum.CLINIC;
+
+export type ShiftPriority =
+  ShiftPriorityEnum.LOW |
+  ShiftPriorityEnum.MEDIUM |
+  ShiftPriorityEnum.HIGH |
+  ShiftPriorityEnum.URGENT;
 
 export interface Shift {
   clientId: string;

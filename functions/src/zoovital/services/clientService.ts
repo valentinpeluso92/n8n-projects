@@ -1,19 +1,21 @@
+import { Request } from 'firebase-functions/v2/https';
 import { Firestore, FieldValue, Query, FieldPath } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { Client } from '../model/client';
 import { ClientFilterOptions, ClientResponse } from '../types/api';
 import { mapClientsToResponse, mapClientToResponse } from '../helpers/clientResponse';
+import { getCollectionName } from '../../utilities/collections';
+
+const CLIENT_ID = 'zoovital';
+const COLLECTION_ID = 'clients';
 
 export class ClientService {
-  private COLLECTION_NAME: string;
+  constructor(private db: Firestore) {}
 
-  constructor(private db: Firestore, COLLECTION_NAME: string) {
-    this.COLLECTION_NAME = COLLECTION_NAME;
-  }
-
-  async getById(id: string): Promise<ClientResponse | null> {
+  async getById(req: Request, id: string): Promise<ClientResponse | null> {
     try {
-      const doc = await this.db.collection(this.COLLECTION_NAME).doc(id).get();
+      const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
+      const doc = await this.db.collection(COLLECTION_NAME).doc(id).get();
 
       if (!doc.exists) {
         return null;
@@ -31,9 +33,10 @@ export class ClientService {
     }
   }
 
-  async getAll(options: ClientFilterOptions = { filter: {} }): Promise<ClientResponse[]> {
+  async getAll(req: Request, options: ClientFilterOptions = { filter: {} }): Promise<ClientResponse[]> {
     try {
-      let query: Query = this.db.collection(this.COLLECTION_NAME);
+      const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
+      let query: Query = this.db.collection(COLLECTION_NAME);
       const { filter } = options;
 
       let words: string[] = [];
@@ -115,8 +118,9 @@ export class ClientService {
     }
   }
 
-  async create(clientData: Partial<Client>): Promise<{ id: string; data: Partial<Client> }> {
+  async create(req: Request, clientData: Partial<Client>): Promise<{ id: string; data: Partial<Client> }> {
     try {
+      const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
       const newClient = {
         ...clientData,
         // Campos optimizados para búsqueda
@@ -126,7 +130,7 @@ export class ClientService {
         updatedAt: FieldValue.serverTimestamp(),
       };
 
-      const docRef = await this.db.collection(this.COLLECTION_NAME).add(newClient);
+      const docRef = await this.db.collection(COLLECTION_NAME).add(newClient);
 
       logger.info('Client created successfully', { id: docRef.id });
 
@@ -142,9 +146,10 @@ export class ClientService {
     }
   }
 
-  async update(id: string, updateData: Partial<Client>): Promise<{ id: string; data: Partial<Client> }> {
+  async update(req: Request, id: string, updateData: Partial<Client>): Promise<{ id: string; data: Partial<Client> }> {
     try {
-      const docRef = this.db.collection(this.COLLECTION_NAME).doc(id);
+      const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
+      const docRef = this.db.collection(COLLECTION_NAME).doc(id);
 
       // Check if document exists
       const doc = await docRef.get();
@@ -178,9 +183,10 @@ export class ClientService {
     }
   }
 
-  async delete(id: string): Promise<{ id: string }> {
+  async delete(req: Request, id: string): Promise<{ id: string }> {
     try {
-      const docRef = this.db.collection(this.COLLECTION_NAME).doc(id);
+      const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
+      const docRef = this.db.collection(COLLECTION_NAME).doc(id);
 
       // Check if document exists
       const doc = await docRef.get();
@@ -199,10 +205,10 @@ export class ClientService {
     }
   }
 
-  // Soft delete alternative
-  async softDelete(id: string): Promise<{ id: string }> {
+  async softDelete(req: Request, id: string): Promise<{ id: string }> {
     try {
-      const docRef = this.db.collection(this.COLLECTION_NAME).doc(id);
+      const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
+      const docRef = this.db.collection(COLLECTION_NAME).doc(id);
 
       const doc = await docRef.get();
       if (!doc.exists) {

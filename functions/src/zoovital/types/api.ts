@@ -18,9 +18,10 @@ export interface ClientFilterOptions extends FilterOptions {
   }
 }
 
-export interface ShiftWithId extends Shift {
-  id: string;
-}
+export type ShiftResponse = {
+  client: ClientResponse | null;
+  googleCalendarLink: string;
+} & Shift;
 
 export interface ShiftFilterOptions extends FilterOptions {
   filter: {

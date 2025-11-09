@@ -25,8 +25,8 @@ export class ClientController {
   private clientService: ClientService;
   private API_KEY: string;
 
-  constructor(db: Firestore, API_KEY: string, COLLECTION_NAME: string) {
-    this.clientService = new ClientService(db, COLLECTION_NAME);
+  constructor(db: Firestore, API_KEY: string) {
+    this.clientService = new ClientService(db);
     this.API_KEY = API_KEY;
   }
 
@@ -74,7 +74,7 @@ export class ClientController {
       const sanitizedData = sanitizeClientData(req.body);
 
       // Create client
-      const result = await this.clientService.create(sanitizedData);
+      const result = await this.clientService.create(req, sanitizedData);
 
       const response: ApiResponse = {
         success: true,
@@ -124,7 +124,7 @@ export class ClientController {
       const sanitizedData = sanitizeClientData(req.body);
 
       try {
-        const result = await this.clientService.update(id, sanitizedData);
+        const result = await this.clientService.update(req, id, sanitizedData);
 
         const response: ApiResponse = {
           success: true,
@@ -171,7 +171,7 @@ export class ClientController {
       }
 
       try {
-        const result = await this.clientService.delete(id);
+        const result = await this.clientService.delete(req, id);
 
         const response: ApiResponse = {
           success: true,
@@ -209,7 +209,7 @@ export class ClientController {
       return;
     }
 
-    const client = await this.clientService.getById(id);
+    const client = await this.clientService.getById(req, id);
     if (!client) {
       res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
@@ -243,17 +243,20 @@ export class ClientController {
     const address = req.query.address as string;
     const clientIds = req.query.clientIds as string;
 
-    const clients = await this.clientService.getAll({
-      pagination: { limit, offset },
-      filter: {
-        name,
-        email,
-        phone,
-        age,
-        address,
-        clientIds,
-      },
-    });
+    const clients = await this.clientService.getAll(
+      req,
+      {
+        pagination: { limit, offset },
+        filter: {
+          name,
+          email,
+          phone,
+          age,
+          address,
+          clientIds,
+        },
+      }
+    );
 
     res.status(HTTP_STATUS.OK).json({
       success: true,

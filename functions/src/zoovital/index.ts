@@ -1,6 +1,3 @@
-
-// === sbox-zoovital-refactored.ts ===
-
 import { Firestore } from 'firebase-admin/firestore';
 import { Request } from 'firebase-functions/v2/https';
 import * as express from 'express';
@@ -11,16 +8,16 @@ import { ShiftController } from './controllers/shiftController';
 let clientController: ClientController;
 let shiftController: ShiftController;
 
-const initializeShiftController = (db: Firestore, API_KEY: string, COLLECTION_NAME: string): ShiftController => {
+const initializeShiftController = (db: Firestore, API_KEY: string): ShiftController => {
   if (!shiftController) {
-    shiftController = new ShiftController(db, API_KEY, COLLECTION_NAME);
+    shiftController = new ShiftController(db, API_KEY);
   }
   return shiftController;
 };
 
-const initializeController = (db: Firestore, API_KEY: string, COLLECTION_NAME: string): ClientController => {
+const initializeController = (db: Firestore, API_KEY: string): ClientController => {
   if (!clientController) {
-    clientController = new ClientController(db, API_KEY, COLLECTION_NAME);
+    clientController = new ClientController(db, API_KEY);
   }
   return clientController;
 };
@@ -29,10 +26,9 @@ const getClient = async (
   req: Request,
   res: express.Response,
   db: Firestore,
-  API_KEY: string,
-  COLLECTION_NAME: string
+  API_KEY: string
 ) => {
-  const controller = initializeController(db, API_KEY, COLLECTION_NAME);
+  const controller = initializeController(db, API_KEY);
   return controller.getClient(req, res);
 };
 
@@ -40,10 +36,9 @@ const postClient = async (
   req: Request,
   res: express.Response,
   db: Firestore,
-  API_KEY: string,
-  COLLECTION_NAME: string
+  API_KEY: string
 ) => {
-  const controller = initializeController(db, API_KEY, COLLECTION_NAME);
+  const controller = initializeController(db, API_KEY);
   return controller.postClient(req, res);
 };
 
@@ -51,10 +46,9 @@ const updateClient = async (
   req: Request,
   res: express.Response,
   db: Firestore,
-  API_KEY: string,
-  COLLECTION_NAME: string
+  API_KEY: string
 ) => {
-  const controller = initializeController(db, API_KEY, COLLECTION_NAME);
+  const controller = initializeController(db, API_KEY);
   return controller.updateClient(req, res);
 };
 
@@ -62,10 +56,9 @@ const removeClient = async (
   req: Request,
   res: express.Response,
   db: Firestore,
-  API_KEY: string,
-  COLLECTION_NAME: string
+  API_KEY: string
 ) => {
-  const controller = initializeController(db, API_KEY, COLLECTION_NAME);
+  const controller = initializeController(db, API_KEY);
   return controller.removeClient(req, res);
 };
 
@@ -73,10 +66,9 @@ const getShift = async (
   req: Request,
   res: express.Response,
   db: Firestore,
-  API_KEY: string,
-  COLLECTION_NAME: string
+  API_KEY: string
 ) => {
-  const controller = initializeShiftController(db, API_KEY, COLLECTION_NAME);
+  const controller = initializeShiftController(db, API_KEY);
   return controller.getShift(req, res);
 };
 
@@ -84,10 +76,9 @@ const postShift = async (
   req: Request,
   res: express.Response,
   db: Firestore,
-  API_KEY: string,
-  COLLECTION_NAME: string
+  API_KEY: string
 ) => {
-  const controller = initializeShiftController(db, API_KEY, COLLECTION_NAME);
+  const controller = initializeShiftController(db, API_KEY);
   return controller.postShift(req, res);
 };
 
@@ -95,10 +86,9 @@ const updateShift = async (
   req: Request,
   res: express.Response,
   db: Firestore,
-  API_KEY: string,
-  COLLECTION_NAME: string
+  API_KEY: string
 ) => {
-  const controller = initializeShiftController(db, API_KEY, COLLECTION_NAME);
+  const controller = initializeShiftController(db, API_KEY);
   return controller.updateShift(req, res);
 };
 
@@ -106,26 +96,14 @@ const removeShift = async (
   req: Request,
   res: express.Response,
   db: Firestore,
-  API_KEY: string,
-  COLLECTION_NAME: string
+  API_KEY: string
 ) => {
-  const controller = initializeShiftController(db, API_KEY, COLLECTION_NAME);
+  const controller = initializeShiftController(db, API_KEY);
   return controller.removeShift(req, res);
 };
 
-const checkConflicts = async (
-  req: Request,
-  res: express.Response,
-  db: Firestore,
-  API_KEY: string,
-  COLLECTION_NAME: string
-) => {
-  const controller = initializeShiftController(db, API_KEY, COLLECTION_NAME);
-  return controller.checkConflicts(req, res);
-};
-
 // Exported functions with improved architecture
-export const sboxZoovital = {
+export const zoovitalApi = {
   getClient,
   postClient,
   updateClient,
@@ -134,5 +112,4 @@ export const sboxZoovital = {
   postShift,
   updateShift,
   removeShift,
-  checkConflicts,
 };

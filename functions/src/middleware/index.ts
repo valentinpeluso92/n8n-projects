@@ -1,6 +1,3 @@
-
-// === middleware/index.ts ===
-
 import { Request } from 'firebase-functions/v2/https';
 import * as express from 'express';
 import * as logger from 'firebase-functions/logger';
