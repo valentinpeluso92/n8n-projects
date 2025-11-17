@@ -2,7 +2,7 @@ import { Request } from 'firebase-functions/v2/https';
 import * as express from 'express';
 import * as logger from 'firebase-functions/logger';
 import { ALLOWED_ORIGINS, HTTP_STATUS } from '../constants';
-import { ApiResponse, HttpMethod } from '../types/api';
+import { ApiError, ApiResponse, HttpMethod } from '../types/api';
 import { ErrorMessagesEnum } from '../enums/errorMessages';
 
 export class MiddlewareError extends Error {
@@ -150,5 +150,22 @@ export const errorHandler = (
     success: false,
     error: ErrorMessagesEnum.INTERNAL_SERVER_ERROR,
     details: error instanceof Error ? error.message : String(error),
+  } as ApiResponse);
+};
+
+export const knownErrorHandler = (
+  error: ApiError,
+  res: express.Response
+): void => {
+  logger.error('Known error occurred', {
+    code: error.code,
+    message: error.message,
+    errors: error.errors,
+  });
+
+  res.status(error.code).json({
+    success: false,
+    error: (error as any).message,
+    data: (error as any).data || null,
   } as ApiResponse);
 };

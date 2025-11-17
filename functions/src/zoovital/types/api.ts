@@ -1,4 +1,4 @@
-import { FilterOptions } from '../../types/api';
+import { ApiError, FilterOptions } from '../../types/api';
 import { Client } from '../model/client';
 import { Shift } from '../model/shift';
 
@@ -23,6 +23,12 @@ export type ShiftResponse = {
   googleCalendarLink: string;
 } & Shift;
 
+export type ShiftAvailability = {
+  currentShifts: number;
+  maxAllowed: number;
+  availableSpots: number;
+};
+
 export interface ShiftFilterOptions extends FilterOptions {
   filter: {
     clientId?: string;
@@ -33,3 +39,20 @@ export interface ShiftFilterOptions extends FilterOptions {
     priority?: string;
   }
 }
+
+export type ApiSuccess = {
+  code: number;
+}
+
+export type ShiftCreateSuccessResponse = { id: string; data: ShiftResponse } & ApiSuccess;
+export type ShiftCreateAvailabilityErrorResponse = {
+  data: ShiftAvailability;
+} & ApiError;
+export type ShiftCreateScheduleErrorResponse = ApiError;
+export type ShiftCreateClientNotFoundErrorResponse = ApiError;
+
+export type ShiftCreateResponse =
+  | ShiftCreateSuccessResponse
+  | ShiftCreateAvailabilityErrorResponse
+  | ShiftCreateScheduleErrorResponse
+  | ShiftCreateClientNotFoundErrorResponse;

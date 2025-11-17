@@ -9,6 +9,12 @@ export interface ApiResponse<T = any> {
   hasConflicts?: boolean;
 }
 
+export type ApiError = {
+  code: number;
+  message: string;
+  errors: string[];
+}
+
 export interface SearchCriteria {
   name?: string;
   clientId?: string;

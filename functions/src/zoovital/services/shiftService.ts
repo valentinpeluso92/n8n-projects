@@ -1,13 +1,17 @@
 import { Request } from 'firebase-functions/v2/https';
 import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
-import { ShiftFilterOptions, ShiftResponse } from '../types/api';
-import { Shift } from '../model/shift';
+import { ShiftCreateResponse, ShiftFilterOptions, ShiftResponse } from '../types/api';
+import { Shift, ShiftType } from '../model/shift';
 import { ShiftStatusEnum } from '../enums/shiftStatus';
 import { ShiftPriorityEnum } from '../enums/shiftPriority';
 import { mapShiftsToResponse, mapShiftToResponse } from '../helpers/shiftResponse';
 import { getCollectionName } from '../../utilities/collections';
 import { ClientService } from './clientService';
+import { getSlotForDateTime, validateScheduleTime } from '../validators/scheduleValidators';
+import { ShiftTypeEnum } from '../enums/shitType';
+import { HTTP_STATUS } from '../../constants';
+import { sanitizeShiftData, validatePostShiftData } from '../validators/shiftValidators';
 
 const CLIENT_ID = 'zoovital';
 const COLLECTION_ID = 'shifts';
@@ -117,51 +121,97 @@ export class ShiftService {
     }
   }
 
-  async create(req: Request, shiftData: Partial<Shift>): Promise<{ id: string; data: ShiftResponse }> {
-    try {
-      const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
-      // Verificar que el cliente existe
-      const clientDoc = await this.db.collection(COLLECTION_NAME).doc(shiftData.clientId as string).get();
-      if (!clientDoc.exists) {
-        throw new Error('Cliente no encontrado');
-      }
+  async create(req: Request): Promise<ShiftCreateResponse> {
+    const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
 
-      const newShift = {
-        ...shiftData,
-        date: new Date(shiftData.date as string),
-        status: shiftData.status || ShiftStatusEnum.SCHEDULED,
-        duration: shiftData.duration || 30,
-        priority: shiftData.priority || ShiftPriorityEnum.MEDIUM,
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      };
-
-      const docRef = await this.db.collection(COLLECTION_NAME).add(newShift);
-
-      logger.info('Shift created successfully', {
-        id: docRef.id,
-        clientId: shiftData.clientId,
-        date: shiftData.date,
-      });
-
-      const responseData = {
-        id: docRef.id,
-        ...shiftData as Partial<ShiftResponse>,
-        status: newShift.status,
-        duration: newShift.duration,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as ShiftResponse;
-
-      responseData.client = await this.clientService.getById(req, responseData.clientId as string);
+    // Validar datos de entrada
+    const validation = validatePostShiftData(req.body);
+    if (!validation.isValid) {
       return {
-        id: docRef.id,
-        data: mapShiftToResponse(responseData),
+        code: HTTP_STATUS.BAD_REQUEST,
+        message: 'Datos inválidos',
+        errors: validation.errors,
       };
-    } catch (error) {
-      logger.error('Error creating shift', { shiftData, error });
-      throw error;
     }
+
+    // Sanitizar datos
+    const shiftData: Partial<Shift> = sanitizeShiftData(req.body);
+
+    // Verificar que el cliente existe
+    const clientDoc = await this.db.collection(COLLECTION_NAME).doc(shiftData.clientId as string).get();
+    if (!clientDoc.exists) {
+      return {
+        code: HTTP_STATUS.NOT_FOUND,
+        message: 'Cliente no encontrado',
+        errors: ['El cliente especificado no existe'],
+      };
+    }
+
+    const newShift = {
+      ...shiftData,
+      date: new Date(shiftData.date as string),
+      status: shiftData.status || ShiftStatusEnum.SCHEDULED,
+      duration: shiftData.duration || 30,
+      priority: shiftData.priority || ShiftPriorityEnum.MEDIUM,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+
+    const scheduleValidation = validateScheduleTime(
+      newShift.type as ShiftType,
+      newShift.date.toISOString()
+    );
+
+    if (!scheduleValidation.isValid) {
+      return {
+        code: HTTP_STATUS.BAD_REQUEST,
+        message: 'Horario inválido',
+        errors: scheduleValidation.errors,
+      };
+    }
+
+    const availabilityCheck = await this.checkSlotAvailability(
+      req,
+      newShift.type as ShiftType,
+      newShift.date.toISOString()
+    );
+
+    if (!availabilityCheck.available) {
+      return {
+        code: HTTP_STATUS.CONFLICT,
+        message: 'Horario no disponible',
+        errors: availabilityCheck.errors,
+        data: {
+          currentShifts: availabilityCheck.currentCount,
+          maxAllowed: availabilityCheck.maxAllowed,
+          availableSpots: availabilityCheck.maxAllowed - availabilityCheck.currentCount,
+        },
+      };
+    }
+
+    const docRef = await this.db.collection(COLLECTION_NAME).add(newShift);
+
+    logger.info('Shift created successfully', {
+      id: docRef.id,
+      clientId: shiftData.clientId,
+      date: shiftData.date,
+    });
+
+    const responseData = {
+      id: docRef.id,
+      ...shiftData as Partial<ShiftResponse>,
+      status: newShift.status,
+      duration: newShift.duration,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } as ShiftResponse;
+
+    responseData.client = await this.clientService.getById(req, responseData.clientId as string);
+    return {
+      code: HTTP_STATUS.CREATED,
+      id: docRef.id,
+      data: mapShiftToResponse(responseData),
+    };
   }
 
   async update(
@@ -257,6 +307,80 @@ export class ShiftService {
     } catch (error) {
       logger.error('Error soft deleting shift', { id, error });
       throw error;
+    }
+  }
+
+  private async checkSlotAvailability(
+    req: Request,
+    shiftType: ShiftType,
+    scheduledDate: string,
+    excludeShiftId?: string
+  ): Promise<{ available: boolean; currentCount: number; maxAllowed: number; errors: string[] }> {
+    try {
+      const date = new Date(scheduledDate);
+      const slotConfig = getSlotForDateTime(shiftType, scheduledDate);
+
+      if (!slotConfig) {
+        return {
+          available: false,
+          currentCount: 0,
+          maxAllowed: 0,
+          errors: ['Horario no disponible'],
+        };
+      }
+
+      // Calcular inicio y fin del slot
+      const slotStart = new Date(date);
+      const [startHours, startMinutes] = slotConfig.slot.start.split(':').map(Number);
+      slotStart.setHours(startHours, startMinutes, 0, 0);
+
+      const slotEnd = new Date(date);
+      const [endHours, endMinutes] = slotConfig.slot.end.split(':').map(Number);
+      slotEnd.setHours(endHours, endMinutes, 0, 0);
+
+      const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
+      const query: Query = this.db.collection(COLLECTION_NAME)
+        .where('type', '==', shiftType)
+        .where('date', '>=', slotStart)
+        .where('date', '<', slotEnd)
+        .where('status', 'in', [
+          ShiftStatusEnum.SCHEDULED,
+        ]);
+
+      const querySnapshot = await query.get();
+      let currentCount = 0;
+
+      querySnapshot.docs.forEach((doc) => {
+        // Excluir el turno actual si estamos actualizando
+        if (!excludeShiftId || doc.id !== excludeShiftId) {
+          currentCount++;
+        }
+      });
+
+      const available = currentCount < slotConfig.maxConcurrent;
+      const errors: string[] = [];
+
+      if (!available) {
+        if (shiftType === ShiftTypeEnum.HOME) {
+          errors.push('Este horario ya está ocupado para turnos a domicilio');
+        } else {
+          errors.push(`Este horario está completo (${currentCount}/${slotConfig.maxConcurrent} turnos)`);
+        }
+      }
+
+      return {
+        available,
+        currentCount,
+        maxAllowed: slotConfig.maxConcurrent,
+        errors,
+      };
+    } catch (error) {
+      return {
+        available: false,
+        currentCount: 0,
+        maxAllowed: 0,
+        errors: ['Error al verificar disponibilidad del horario'],
+      };
     }
   }
 }

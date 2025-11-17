@@ -12,17 +12,18 @@ import {
   methodMiddleware,
   requestLogger,
   errorHandler,
+  knownErrorHandler,
 } from '../../middleware';
 import {
-  validatePostShiftData,
   validateUpdateShiftData,
   validateShiftId,
   sanitizeShiftData,
   validateGetShiftsFilter,
 } from '../validators/shiftValidators';
 import { HTTP_STATUS } from '../../constants';
-import { ApiResponse } from '../../types/api';
+import { ApiError, ApiResponse } from '../../types/api';
 import { ErrorMessagesEnum } from '../enums/errorMessages';
+import { ShiftCreateResponse, ShiftCreateSuccessResponse } from '../types/api';
 
 export class ShiftController {
   private shiftService: ShiftService;
@@ -57,46 +58,26 @@ export class ShiftController {
   async postShift(req: Request, res: express.Response): Promise<void> {
     const logCompletion = requestLogger(req, 'POST');
 
-    try {
-      // Apply middleware
-      if (!corsMiddleware(req, res, ['POST', 'OPTIONS'])) return;
-      if (!authMiddleware(req, res, this.API_KEY)) return;
-      if (!methodMiddleware(req, res, 'POST')) return;
+    // Apply middleware
+    if (!corsMiddleware(req, res, ['POST', 'OPTIONS'])) return;
+    if (!authMiddleware(req, res, this.API_KEY)) return;
+    if (!methodMiddleware(req, res, 'POST')) return;
 
-      // Validar datos de entrada
-      const validation = validatePostShiftData(req.body);
-      if (!validation.isValid) {
-        res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          error: validation.errors.join(', '),
-        } as ApiResponse);
+    try {
+      // Crear turno
+      const result: ShiftCreateResponse = await this.shiftService.create(req);
+      if (result.code !== HTTP_STATUS.CREATED) {
+        knownErrorHandler(result as ApiError, res);
         return;
       }
 
-      // Sanitizar datos
-      const sanitizedData = sanitizeShiftData(req.body);
+      const response: ApiResponse = {
+        success: true,
+        message: 'Turno creado exitosamente',
+        data: (result as ShiftCreateSuccessResponse).data,
+      };
 
-      try {
-        // Crear turno
-        const result = await this.shiftService.create(req, sanitizedData);
-
-        const response: ApiResponse = {
-          success: true,
-          message: 'Turno creado exitosamente',
-          data: result.data,
-        };
-
-        res.status(HTTP_STATUS.CREATED).json(response);
-      } catch (serviceError) {
-        if (serviceError instanceof Error && serviceError.message === 'Cliente no encontrado') {
-          res.status(HTTP_STATUS.BAD_REQUEST).json({
-            success: false,
-            error: ErrorMessagesEnum.CLIENT_NOT_FOUND,
-          } as ApiResponse);
-          return;
-        }
-        throw serviceError;
-      }
+      res.status(HTTP_STATUS.CREATED).json(response);
     } catch (error) {
       errorHandler(error, res, 'postShift');
     } finally {
