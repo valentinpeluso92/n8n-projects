@@ -220,6 +220,11 @@ export class ShiftService {
     updateData: Partial<Shift>
   ): Promise<{ id: string; data: Partial<ShiftResponse> }> {
     try {
+      // Validar ID
+      if (!id || typeof id !== 'string' || id.trim().length === 0) {
+        throw new Error('ID del turno es requerido y debe ser válido');
+      }
+
       const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
       const docRef = this.db.collection(COLLECTION_NAME).doc(id);
 

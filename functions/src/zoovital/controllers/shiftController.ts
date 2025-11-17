@@ -94,16 +94,7 @@ export class ShiftController {
       if (!authMiddleware(req, res, this.API_KEY)) return;
       if (!methodMiddleware(req, res, 'PUT')) return;
 
-      // Validar ID
       const id = req.query.id as string;
-      const idError = validateShiftId(id);
-      if (idError) {
-        res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          error: idError,
-        } as ApiResponse);
-        return;
-      }
 
       // Validar datos de actualización
       const validation = validateUpdateShiftData(req.body);
@@ -130,6 +121,13 @@ export class ShiftController {
         res.status(HTTP_STATUS.OK).json(response);
       } catch (serviceError) {
         if (serviceError instanceof Error) {
+          if (serviceError.message === 'ID del turno es requerido y debe ser válido') {
+            res.status(HTTP_STATUS.BAD_REQUEST).json({
+              success: false,
+              error: serviceError.message,
+            } as ApiResponse);
+            return;
+          }
           if (serviceError.message === 'Turno no encontrado') {
             res.status(HTTP_STATUS.NOT_FOUND).json({
               success: false,
