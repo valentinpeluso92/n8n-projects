@@ -1,18 +1,13 @@
 export interface ApiResponse<T = any> {
   success: boolean;
+  httpStatus: number;
   data?: T;
   message?: string;
-  error?: string;
+  errors?: string[];
   details?: string;
   count?: number;
   searchCriteria?: SearchCriteria;
   hasConflicts?: boolean;
-}
-
-export type ApiError = {
-  code: number;
-  message: string;
-  errors: string[];
 }
 
 export interface SearchCriteria {
@@ -51,7 +46,3 @@ export interface ValidationResult {
 
 // HTTP Method types
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS';
-
-// Response helpers
-export type SuccessResponse<T> = Required<Pick<ApiResponse<T>, 'success' | 'data'>>;
-export type ErrorResponse = Required<Pick<ApiResponse, 'success' | 'error'>>;

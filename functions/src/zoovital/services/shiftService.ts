@@ -1,7 +1,7 @@
 import { Request } from 'firebase-functions/v2/https';
 import { Firestore, FieldValue, Query } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
-import { ShiftCreateResponse, ShiftFilterOptions, ShiftResponse } from '../types/api';
+import { ShiftCreateResponse, ShiftFilterOptions, ShiftGetByIdResponse, ShiftResponse } from '../types/api';
 import { Shift, ShiftType } from '../model/shift';
 import { ShiftStatusEnum } from '../enums/shiftStatus';
 import { ShiftPriorityEnum } from '../enums/shiftPriority';
@@ -11,7 +11,7 @@ import { ClientService } from './clientService';
 import { getSlotForDateTime, validateScheduleTime } from '../validators/scheduleValidators';
 import { ShiftTypeEnum } from '../enums/shitType';
 import { HTTP_STATUS } from '../../constants';
-import { sanitizeShiftData, validatePostShiftData } from '../validators/shiftValidators';
+import { sanitizeShiftData, validatePostShiftData, validateShiftId } from '../validators/shiftValidators';
 
 const CLIENT_ID = 'zoovital';
 const COLLECTION_ID = 'shifts';
@@ -23,26 +23,43 @@ export class ShiftService {
     this.clientService = new ClientService(db);
   }
 
-  async getById(req: Request, id: string): Promise<ShiftResponse | null> {
-    try {
-      const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
-      const doc = await this.db.collection(COLLECTION_NAME).doc(id).get();
+  async getById(req: Request): Promise<ShiftGetByIdResponse> {
+    const id = req.query.id as string;
 
-      if (!doc.exists) {
-        return null;
-      }
-
-      const rawData = {
-        id: doc.id,
-        ...doc.data() as Partial<ShiftResponse>,
-      } as ShiftResponse;
-
-      rawData.client = await this.clientService.getById(req, rawData.clientId as string);
-      return mapShiftToResponse(rawData);
-    } catch (error) {
-      logger.error('Error getting shift by ID', { id, error });
-      throw error;
+    const idError = validateShiftId(id);
+    if (idError) {
+      return {
+        success: false,
+        httpStatus: HTTP_STATUS.BAD_REQUEST,
+        message: 'ID inválido',
+        errors: [idError],
+      };
     }
+
+    const COLLECTION_NAME = getCollectionName(req, CLIENT_ID, COLLECTION_ID);
+    const doc = await this.db.collection(COLLECTION_NAME).doc(id).get();
+
+    if (!doc.exists) {
+      return {
+        success: false,
+        httpStatus: HTTP_STATUS.NOT_FOUND,
+        message: 'Turno no encontrado',
+        errors: ['El turno con el ID especificado no existe'],
+      };
+    }
+
+    const rawData = {
+      id: doc.id,
+      ...doc.data() as Partial<ShiftResponse>,
+    } as ShiftResponse;
+
+    rawData.client = await this.clientService.getById(req, rawData.clientId as string);
+
+    return {
+      success: true,
+      httpStatus: HTTP_STATUS.OK,
+      data: mapShiftToResponse(rawData),
+    };
   }
 
   async getAll(req: Request, options: ShiftFilterOptions = { filter: {} }): Promise<ShiftResponse[]> {
@@ -128,7 +145,8 @@ export class ShiftService {
     const validation = validatePostShiftData(req.body);
     if (!validation.isValid) {
       return {
-        code: HTTP_STATUS.BAD_REQUEST,
+        success: false,
+        httpStatus: HTTP_STATUS.BAD_REQUEST,
         message: 'Datos inválidos',
         errors: validation.errors,
       };
@@ -141,7 +159,8 @@ export class ShiftService {
     const clientDoc = await this.db.collection(COLLECTION_NAME).doc(shiftData.clientId as string).get();
     if (!clientDoc.exists) {
       return {
-        code: HTTP_STATUS.NOT_FOUND,
+        success: false,
+        httpStatus: HTTP_STATUS.NOT_FOUND,
         message: 'Cliente no encontrado',
         errors: ['El cliente especificado no existe'],
       };
@@ -164,7 +183,8 @@ export class ShiftService {
 
     if (!scheduleValidation.isValid) {
       return {
-        code: HTTP_STATUS.BAD_REQUEST,
+        success: false,
+        httpStatus: HTTP_STATUS.BAD_REQUEST,
         message: 'Horario inválido',
         errors: scheduleValidation.errors,
       };
@@ -178,7 +198,8 @@ export class ShiftService {
 
     if (!availabilityCheck.available) {
       return {
-        code: HTTP_STATUS.CONFLICT,
+        success: false,
+        httpStatus: HTTP_STATUS.CONFLICT,
         message: 'Horario no disponible',
         errors: availabilityCheck.errors,
         data: {
@@ -208,9 +229,11 @@ export class ShiftService {
 
     responseData.client = await this.clientService.getById(req, responseData.clientId as string);
     return {
-      code: HTTP_STATUS.CREATED,
-      id: docRef.id,
-      data: mapShiftToResponse(responseData),
+      success: true,
+      httpStatus: HTTP_STATUS.CREATED,
+      data: {
+        ...mapShiftToResponse(responseData),
+      },
     };
   }
 

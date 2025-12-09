@@ -2,7 +2,7 @@ import { Request } from 'firebase-functions/v2/https';
 import * as express from 'express';
 import * as logger from 'firebase-functions/logger';
 import { ALLOWED_ORIGINS, HTTP_STATUS } from '../constants';
-import { ApiError, ApiResponse, HttpMethod } from '../types/api';
+import { ApiResponse, HttpMethod } from '../types/api';
 import { ErrorMessagesEnum } from '../enums/errorMessages';
 
 export class MiddlewareError extends Error {
@@ -33,8 +33,8 @@ export const corsMiddleware = (
     logger.warn('Unauthorized origin attempt', { origin: requestOrigin });
     res.status(HTTP_STATUS.FORBIDDEN).json({
       success: false,
-      error: 'Origen no autorizado',
-    } as ApiResponse);
+      errors: ['Origen no autorizado'],
+    });
     return false;
   }
 
@@ -58,9 +58,9 @@ export const authMiddleware = (
     logger.warn('Missing API key in request');
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: false,
-      error: ErrorMessagesEnum.UNAUTHORIZED,
+      errors: [ErrorMessagesEnum.UNAUTHORIZED],
       details: 'X-API-Key header is required',
-    } as ApiResponse);
+    });
     return false;
   }
 
@@ -70,8 +70,8 @@ export const authMiddleware = (
     });
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: false,
-      error: ErrorMessagesEnum.UNAUTHORIZED,
-    } as ApiResponse);
+      errors: [ErrorMessagesEnum.UNAUTHORIZED],
+    });
     return false;
   }
 
@@ -95,8 +95,8 @@ export const methodMiddleware = (
     });
     res.status(HTTP_STATUS.METHOD_NOT_ALLOWED).json({
       success: false,
-      error: `${ErrorMessagesEnum.METHOD_NOT_ALLOWED}. Usa ${allowedMethod}.`,
-    } as ApiResponse);
+      errors: [`${ErrorMessagesEnum.METHOD_NOT_ALLOWED}. Usa ${allowedMethod}.`],
+    });
     return false;
   }
 
@@ -141,31 +141,31 @@ export const errorHandler = (
   if (error instanceof MiddlewareError) {
     res.status(error.statusCode).json({
       success: false,
-      error: error.message,
-    } as ApiResponse);
+      errors: [error.message],
+    });
     return;
   }
 
   res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
     success: false,
-    error: ErrorMessagesEnum.INTERNAL_SERVER_ERROR,
+    errors: [ErrorMessagesEnum.INTERNAL_SERVER_ERROR],
     details: error instanceof Error ? error.message : String(error),
-  } as ApiResponse);
+  });
 };
 
 export const knownErrorHandler = (
-  error: ApiError,
+  error: ApiResponse,
   res: express.Response
 ): void => {
   logger.error('Known error occurred', {
-    code: error.code,
+    code: error.httpStatus,
     message: error.message,
     errors: error.errors,
   });
 
-  res.status(error.code).json({
+  res.status(error.httpStatus).json({
     success: false,
-    error: (error as any).message,
-    data: (error as any).data || null,
-  } as ApiResponse);
+    errors: [error.message],
+    data: error.data || null,
+  });
 };

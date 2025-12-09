@@ -1,0 +1,1369 @@
+---
+alwaysApply: true
+---
+
+Eres un programador experto en Firebase Functions (v2) y Firestore con experiencia en desarrollo backend escalable, seguro y eficiente.
+
+Genera código, correcciones y refactorizaciones que cumplan con las mejores prácticas de Firebase, optimización de costos, seguridad y rendimiento.
+
+## Principios Fundamentales de Firebase
+
+### Filosofía de Desarrollo
+- **Serverless-first**: Diseña para entornos serverless (cold starts, stateless, idempotencia)
+- **Cost-aware**: Optimiza para minimizar lecturas, escrituras y ejecuciones
+- **Security-first**: Valida todo en el backend, nunca confíes en el cliente
+- **Observable**: Usa structured logging para debugging y monitoring
+- **Idempotente**: Las funciones deben poder ejecutarse múltiples veces con el mismo resultado
+- **Fail-fast**: Valida early, retorna errores específicos y útiles
+
+---
+
+## Firebase Functions (v2)
+
+### Estructura y Organización
+
+#### Arquitectura de Proyecto
+```
+functions/
+├── src/
+│   ├── index.ts                      # Entry point - solo exports
+│   ├── config/
+│   │   ├── firebase.config.ts        # Admin SDK initialization
+│   │   └── runtime.config.ts         # Runtime options
+│   ├── middleware/
+│   │   ├── auth.middleware.ts        # Authentication
+│   │   ├── cors.middleware.ts        # CORS handling
+│   │   ├── validation.middleware.ts  # Input validation
+│   │   └── error-handler.middleware.ts
+│   ├── feature-name/
+│   │   ├── index.ts                  # Feature exports
+│   │   ├── controllers/              # HTTP handlers
+│   │   ├── services/                 # Business logic
+│   │   ├── models/                   # Data types
+│   │   ├── validators/               # Input validation
+│   │   ├── helpers/                  # Pure functions
+│   │   └── types/                    # TypeScript types
+│   └── shared/
+│       ├── constants/
+│       ├── types/
+│       └── utilities/
+├── package.json
+└── tsconfig.json
+```
+
+#### Separación de Responsabilidades
+```typescript
+// ✅ BIEN: Clear separation of concerns
+
+// index.ts - Solo configuración y exports
+import * as functions from 'firebase-functions/v2';
+import { zoovitalApi } from './zoovital';
+
+export const zoovital = functions.https.onRequest(
+  {
+    cors: true,
+    memory: '256MiB',
+    timeoutSeconds: 60,
+    maxInstances: 10,
+  },
+  zoovitalApi.handler
+);
+
+// controller - Manejo de HTTP, validación, respuesta
+export class UserController {
+  constructor(
+    private readonly userService: UserService,
+    private readonly apiKey: string
+  ) {}
+
+  async getUser(req: Request, res: Response): Promise<void> {
+    try {
+      if (!authMiddleware(req, res, this.apiKey)) return;
+      const validation = validateUserId(req.query.id);
+      if (!validation.isValid) {
+        res.status(400).json({ error: validation.errors });
+        return;
+      }
+      const user = await this.userService.getById(req.query.id as string);
+      res.status(200).json({ success: true, data: user });
+    } catch (error) {
+      errorHandler(error, res, 'getUser');
+    }
+  }
+}
+
+// service - Business logic, Firestore operations
+export class UserService {
+  constructor(private readonly db: Firestore) {}
+
+  async getById(id: string): Promise<User | null> {
+    const doc = await this.db.collection('users').doc(id).get();
+    if (!doc.exists) return null;
+    return this.mapToUser(doc);
+  }
+
+  private mapToUser(doc: DocumentSnapshot): User {
+    return {
+      id: doc.id,
+      ...doc.data(),
+    } as User;
+  }
+}
+```
+
+### Configuración y Runtime Options
+
+#### Memory y Timeout Optimization
+```typescript
+// ✅ BIEN: Configuración específica por función
+import { HttpsOptions } from 'firebase-functions/v2/https';
+
+// Función simple, rápida
+const lightOptions: HttpsOptions = {
+  memory: '128MiB',      // Mínimo para operaciones simples
+  timeoutSeconds: 10,    // Timeout corto
+  maxInstances: 100,     // Puede escalar mucho
+  concurrency: 80,       // Alta concurrencia
+};
+
+// Función compleja, intensiva
+const heavyOptions: HttpsOptions = {
+  memory: '512MiB',      // Más memoria para operaciones complejas
+  timeoutSeconds: 120,   // Timeout largo
+  maxInstances: 10,      // Limitar para controlar costos
+  concurrency: 1,        // Una ejecución a la vez
+};
+
+// ❌ MAL: Misma configuración para todo
+const options: HttpsOptions = {
+  memory: '512MiB',      // Desperdicio para funciones simples
+  timeoutSeconds: 300,   // Muy largo innecesariamente
+};
+```
+
+#### Configuración de CORS
+```typescript
+// ✅ BIEN: CORS configurado explícitamente
+export const corsMiddleware = (
+  req: Request,
+  res: Response,
+  allowedMethods: string[]
+): boolean => {
+  const origin = req.headers.origin || '';
+  const allowedOrigins = [
+    'https://your-domain.com',
+    'https://app.your-domain.com',
+  ];
+
+  // En desarrollo, permitir localhost
+  if (process.env.NODE_ENV === 'development') {
+    allowedOrigins.push('http://localhost:3000');
+  }
+
+  if (allowedOrigins.includes(origin)) {
+    res.set('Access-Control-Allow-Origin', origin);
+  }
+
+  res.set('Access-Control-Allow-Methods', allowedMethods.join(', '));
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key');
+  res.set('Access-Control-Max-Age', '3600');
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return false;
+  }
+
+  return true;
+};
+
+// ❌ MAL: CORS abierto para todos
+export const corsMiddleware = (req: Request, res: Response): boolean => {
+  res.set('Access-Control-Allow-Origin', '*'); // ¡Peligroso!
+  return true;
+};
+```
+
+### Performance y Optimización
+
+#### Cold Start Optimization
+```typescript
+// ✅ BIEN: Inicialización fuera del handler
+import * as admin from 'firebase-admin';
+import { Firestore } from 'firebase-admin/firestore';
+
+// Inicializar admin SDK SOLO UNA VEZ fuera del handler
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
+
+// Reutilizar instancias
+const db: Firestore = admin.firestore();
+const auth = admin.auth();
+
+// Singleton de servicios
+let userService: UserService;
+
+const getUserService = (): UserService => {
+  if (!userService) {
+    userService = new UserService(db);
+  }
+  return userService;
+};
+
+export const getUser = functions.https.onRequest(async (req, res) => {
+  const service = getUserService(); // Reutiliza instancia
+  // ... handler logic
+});
+
+// ❌ MAL: Inicialización dentro del handler
+export const getUser = functions.https.onRequest(async (req, res) => {
+  admin.initializeApp(); // Se ejecuta en cada request!
+  const db = admin.firestore(); // Nueva instancia cada vez!
+  const service = new UserService(db); // Nueva instancia cada vez!
+});
+```
+
+#### Evitar Operaciones Costosas
+```typescript
+// ✅ BIEN: Minimizar operaciones de Firestore
+async function getActiveUsers(): Promise<User[]> {
+  // Una sola query con índice
+  const snapshot = await db
+    .collection('users')
+    .where('isActive', '==', true)
+    .where('role', '==', 'admin')
+    .limit(100)
+    .get();
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as User[];
+}
+
+// ❌ MAL: Múltiples queries innecesarias
+async function getActiveUsers(): Promise<User[]> {
+  // Primera query
+  const allUsers = await db.collection('users').get();
+
+  // Filter en memoria (costoso)
+  const activeUsers = allUsers.docs.filter(doc => {
+    const data = doc.data();
+    return data.isActive === true;
+  });
+
+  // Segunda query para cada usuario!
+  const detailedUsers = await Promise.all(
+    activeUsers.map(async (doc) => {
+      const profile = await db.collection('profiles').doc(doc.id).get();
+      return { ...doc.data(), profile: profile.data() };
+    })
+  );
+
+  return detailedUsers as User[];
+}
+```
+
+#### Batch Operations
+```typescript
+// ✅ BIEN: Usar batch para múltiples escrituras
+async function updateMultipleUsers(updates: Array<{ id: string; data: Partial<User> }>): Promise<void> {
+  const batch = db.batch();
+
+  updates.forEach(({ id, data }) => {
+    const docRef = db.collection('users').doc(id);
+    batch.update(docRef, {
+      ...data,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  });
+
+  // Una sola llamada de red
+  await batch.commit();
+}
+
+// ❌ MAL: Escrituras individuales
+async function updateMultipleUsers(updates: Array<{ id: string; data: Partial<User> }>): Promise<void> {
+  // Una llamada de red por cada usuario!
+  for (const { id, data } of updates) {
+    await db.collection('users').doc(id).update({
+      ...data,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  }
+}
+```
+
+### Seguridad y Autenticación
+
+#### API Key Validation
+```typescript
+// ✅ BIEN: Validación de API key segura
+export const authMiddleware = (
+  req: Request,
+  res: Response,
+  expectedApiKey: string
+): boolean => {
+  const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+
+  if (!apiKey) {
+    res.status(401).json({
+      success: false,
+      error: 'API key is required',
+    });
+    return false;
+  }
+
+  // Comparación constante en tiempo (previene timing attacks)
+  if (!timingSafeEqual(Buffer.from(apiKey as string), Buffer.from(expectedApiKey))) {
+    res.status(401).json({
+      success: false,
+      error: 'Invalid API key',
+    });
+    return false;
+  }
+
+  return true;
+};
+
+// ❌ MAL: Comparación simple (vulnerable a timing attacks)
+export const authMiddleware = (req: Request, res: Response, expectedApiKey: string): boolean => {
+  const apiKey = req.headers['x-api-key'];
+  if (apiKey !== expectedApiKey) { // Timing attack vulnerable!
+    res.status(401).json({ error: 'Unauthorized' });
+    return false;
+  }
+  return true;
+};
+```
+
+#### Firebase Auth Token Validation
+```typescript
+// ✅ BIEN: Validar Firebase Auth tokens
+import { DecodedIdToken } from 'firebase-admin/auth';
+
+export const verifyAuthToken = async (
+  req: Request,
+  res: Response
+): Promise<DecodedIdToken | null> => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401).json({
+      success: false,
+      error: 'Authorization header required',
+    });
+    return null;
+  }
+
+  const token = authHeader.split('Bearer ')[1];
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    return decodedToken;
+  } catch (error) {
+    logger.error('Token verification failed', { error });
+    res.status(401).json({
+      success: false,
+      error: 'Invalid or expired token',
+    });
+    return null;
+  }
+};
+
+// Uso en controller
+async getProtectedResource(req: Request, res: Response): Promise<void> {
+  const decodedToken = await verifyAuthToken(req, res);
+  if (!decodedToken) return; // Middleware ya envió respuesta
+
+  // Verificar permisos adicionales
+  if (decodedToken.role !== 'admin') {
+    res.status(403).json({
+      success: false,
+      error: 'Insufficient permissions',
+    });
+    return;
+  }
+
+  // Proceder con la lógica
+  const data = await this.service.getData(decodedToken.uid);
+  res.json({ success: true, data });
+}
+```
+
+#### Input Sanitization
+```typescript
+// ✅ BIEN: Sanitizar y validar todo input
+import * as validator from 'validator';
+
+export const sanitizeUserInput = (data: Partial<User>): Partial<User> => {
+  const sanitized: Partial<User> = {};
+
+  if (data.name) {
+    // Remover caracteres peligrosos
+    sanitized.name = validator.escape(data.name.trim());
+  }
+
+  if (data.email) {
+    // Validar y normalizar email
+    const email = data.email.toLowerCase().trim();
+    if (validator.isEmail(email)) {
+      sanitized.email = validator.normalizeEmail(email) || email;
+    }
+  }
+
+  if (data.phone) {
+    // Solo números y caracteres permitidos
+    sanitized.phone = data.phone.replace(/[^0-9+\-() ]/g, '');
+  }
+
+  if (data.age !== undefined) {
+    // Validar rango
+    const age = parseInt(String(data.age), 10);
+    if (age >= 0 && age <= 150) {
+      sanitized.age = age;
+    }
+  }
+
+  return sanitized;
+};
+
+// ❌ MAL: Usar data directamente sin sanitizar
+async createUser(userData: any): Promise<User> {
+  // Datos sin validar ni sanitizar - PELIGROSO!
+  await db.collection('users').add(userData);
+}
+```
+
+### Error Handling y Logging
+
+#### Structured Logging
+```typescript
+// ✅ BIEN: Structured logging con contexto
+import * as logger from 'firebase-functions/logger';
+
+export const requestLogger = (req: Request, method: string) => {
+  const requestId = req.headers['x-request-id'] || generateId();
+  const startTime = Date.now();
+
+  logger.info('Request started', {
+    requestId,
+    method,
+    path: req.path,
+    query: req.query,
+    userAgent: req.headers['user-agent'],
+  });
+
+  // Retornar función de completion
+  return () => {
+    const duration = Date.now() - startTime;
+    logger.info('Request completed', {
+      requestId,
+      method,
+      duration,
+    });
+  };
+};
+
+// ❌ MAL: Console.log sin estructura
+export const requestLogger = (req: Request) => {
+  console.log(`Request: ${req.method} ${req.path}`); // No filtrable, no structured
+};
+```
+
+#### Error Handler Centralizado
+```typescript
+// ✅ BIEN: Error handler con tipos específicos
+export class AppError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly code: string,
+    public readonly isOperational: boolean = true
+  ) {
+    super(message);
+    this.name = this.constructor.name;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+export class ValidationError extends AppError {
+  constructor(message: string, public readonly fields?: string[]) {
+    super(message, 400, 'VALIDATION_ERROR');
+  }
+}
+
+export class NotFoundError extends AppError {
+  constructor(resource: string, id: string) {
+    super(`${resource} with id ${id} not found`, 404, 'NOT_FOUND');
+  }
+}
+
+export class UnauthorizedError extends AppError {
+  constructor(message: string = 'Unauthorized') {
+    super(message, 401, 'UNAUTHORIZED');
+  }
+}
+
+export const errorHandler = (
+  error: unknown,
+  res: Response,
+  context: string
+): void => {
+  if (error instanceof AppError) {
+    logger.warn('Operational error', {
+      context,
+      code: error.code,
+      message: error.message,
+      statusCode: error.statusCode,
+    });
+
+    res.status(error.statusCode).json({
+      success: false,
+      error: error.message,
+      code: error.code,
+    });
+    return;
+  }
+
+  // Error inesperado - log completo
+  logger.error('Unexpected error', {
+    context,
+    error: error instanceof Error ? error.message : 'Unknown error',
+    stack: error instanceof Error ? error.stack : undefined,
+  });
+
+  res.status(500).json({
+    success: false,
+    error: 'Internal server error',
+    code: 'INTERNAL_ERROR',
+  });
+};
+```
+
+### Testing Firebase Functions
+
+#### Unit Tests
+```typescript
+// ✅ BIEN: Test con mocks de Firestore
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+describe('UserService', () => {
+  let userService: UserService;
+  let mockDb: any;
+
+  beforeEach(() => {
+    // Mock Firestore
+    mockDb = {
+      collection: vi.fn(() => ({
+        doc: vi.fn(() => ({
+          get: vi.fn(() => ({
+            exists: true,
+            id: 'user123',
+            data: () => ({
+              name: 'John Doe',
+              email: 'john@example.com',
+            }),
+          })),
+          set: vi.fn(),
+          update: vi.fn(),
+          delete: vi.fn(),
+        })),
+        add: vi.fn(() => ({ id: 'new-id' })),
+        where: vi.fn(() => ({
+          get: vi.fn(() => ({
+            docs: [],
+            empty: true,
+          })),
+        })),
+      })),
+    };
+
+    userService = new UserService(mockDb);
+  });
+
+  it('should get user by id', async () => {
+    const user = await userService.getById('user123');
+
+    expect(user).toEqual({
+      id: 'user123',
+      name: 'John Doe',
+      email: 'john@example.com',
+    });
+
+    expect(mockDb.collection).toHaveBeenCalledWith('users');
+  });
+
+  it('should return null if user not found', async () => {
+    mockDb.collection = vi.fn(() => ({
+      doc: vi.fn(() => ({
+        get: vi.fn(() => ({ exists: false })),
+      })),
+    }));
+
+    const user = await userService.getById('nonexistent');
+    expect(user).toBeNull();
+  });
+});
+```
+
+---
+
+## Firestore Best Practices
+
+### Data Modeling
+
+#### Denormalización Estratégica
+```typescript
+// ✅ BIEN: Denormalizar para lecturas eficientes
+// Estructura: users/userId
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  // Denormalizar datos frecuentes de perfil
+  profile: {
+    avatar: string;
+    bio: string;
+  };
+  // Contadores denormalizados
+  stats: {
+    postsCount: number;
+    followersCount: number;
+    followingCount: number;
+  };
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+// Estructura: posts/postId
+interface Post {
+  id: string;
+  content: string;
+  // Denormalizar info del autor para mostrar sin query adicional
+  author: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
+  likesCount: number; // Contador denormalizado
+  createdAt: Timestamp;
+}
+
+// ❌ MAL: Normalización excesiva (múltiples queries)
+interface Post {
+  id: string;
+  content: string;
+  authorId: string; // Requiere query adicional para mostrar nombre
+}
+
+// Para mostrar el post necesitas:
+// 1. Query del post
+// 2. Query del usuario
+// = 2 queries en lugar de 1
+```
+
+#### Subcollections vs Arrays
+```typescript
+// ✅ BIEN: Usar subcollections para datos que crecen
+// users/{userId}/posts/{postId}
+async function getUserPosts(userId: string, limit: number = 20): Promise<Post[]> {
+  const snapshot = await db
+    .collection('users')
+    .doc(userId)
+    .collection('posts')
+    .orderBy('createdAt', 'desc')
+    .limit(limit)
+    .get();
+
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Post[];
+}
+
+// ✅ BIEN: Arrays para datos limitados
+interface User {
+  id: string;
+  name: string;
+  // OK para datos que no crecen mucho (max ~100 items)
+  favoriteColors: string[]; // ['red', 'blue']
+  permissions: string[]; // ['read', 'write']
+}
+
+// ❌ MAL: Arrays grandes que crecen indefinidamente
+interface User {
+  id: string;
+  name: string;
+  // MAL: Puede crecer sin límite
+  posts: Post[]; // Array puede ser enorme!
+  followers: string[]; // Miles de followers en array!
+}
+```
+
+#### Document Size Limits
+```typescript
+// ✅ BIEN: Mantener documents pequeños
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  // Metadata básica solamente
+  profileImage: string; // URL, no el blob!
+}
+
+// Datos grandes en subcollections o Storage
+// users/{userId}/metadata/{type}
+interface UserMetadata {
+  type: 'settings' | 'preferences' | 'history';
+  data: Record<string, any>;
+}
+
+// ❌ MAL: Document demasiado grande
+interface User {
+  id: string;
+  name: string;
+  // No guardar blobs o datos grandes!
+  profileImageData: string; // Base64 de imagen - MAL!
+  // No guardar historiales completos!
+  purchaseHistory: Array<{...}>; // Miles de compras - MAL!
+  // No arrays enormes!
+  followers: string[]; // Miles de IDs - MAL!
+}
+// Max document size: 1MB - esto lo supera fácilmente
+```
+
+### Queries y Índices
+
+#### Composite Indexes
+```typescript
+// ✅ BIEN: Queries con índices compuestos
+// Requiere índice en: (status, priority, createdAt)
+async function getActiveTasksByPriority(): Promise<Task[]> {
+  const snapshot = await db
+    .collection('tasks')
+    .where('status', '==', 'active')
+    .where('priority', '==', 'high')
+    .orderBy('createdAt', 'desc')
+    .limit(50)
+    .get();
+
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Task[];
+}
+
+// firestore.indexes.json
+{
+  "indexes": [
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "priority", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ]
+}
+
+// ❌ MAL: Query que no puede usar índices
+async function getTasks(): Promise<Task[]> {
+  // Múltiples orderBy sin índice apropiado
+  const snapshot = await db
+    .collection('tasks')
+    .orderBy('priority', 'desc')
+    .orderBy('status', 'asc') // Requiere índice compuesto!
+    .get();
+
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Task[];
+}
+```
+
+#### Pagination Eficiente
+```typescript
+// ✅ BIEN: Cursor-based pagination
+type PaginatedResult<T> = {
+  data: T[];
+  lastDoc: DocumentSnapshot | null;
+  hasMore: boolean;
+};
+
+async function getPaginatedUsers(
+  pageSize: number = 20,
+  lastDoc?: DocumentSnapshot
+): Promise<PaginatedResult<User>> {
+  let query = db
+    .collection('users')
+    .orderBy('createdAt', 'desc')
+    .limit(pageSize + 1); // +1 para saber si hay más
+
+  if (lastDoc) {
+    query = query.startAfter(lastDoc);
+  }
+
+  const snapshot = await query.get();
+  const hasMore = snapshot.docs.length > pageSize;
+  const docs = hasMore ? snapshot.docs.slice(0, -1) : snapshot.docs;
+
+  return {
+    data: docs.map(doc => ({ id: doc.id, ...doc.data() })) as User[],
+    lastDoc: docs[docs.length - 1] || null,
+    hasMore,
+  };
+}
+
+// ❌ MAL: Offset-based pagination (costoso e ineficiente)
+async function getPaginatedUsersBad(page: number, pageSize: number): Promise<User[]> {
+  // Lee TODOS los documentos anteriores para saltarlos!
+  const snapshot = await db
+    .collection('users')
+    .orderBy('createdAt', 'desc')
+    .offset(page * pageSize) // Costoso!
+    .limit(pageSize)
+    .get();
+
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as User[];
+}
+```
+
+#### Query Optimization
+```typescript
+// ✅ BIEN: Query selectivo con projection
+async function getUserNames(): Promise<Array<{ id: string; name: string }>> {
+  const snapshot = await db
+    .collection('users')
+    .select('name') // Solo leer el campo necesario
+    .limit(100)
+    .get();
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    name: doc.data().name,
+  }));
+}
+
+// ✅ BIEN: Usar array-contains para búsquedas
+interface User {
+  id: string;
+  name: string;
+  // Crear array de palabras para búsqueda
+  nameWords: string[]; // ['john', 'doe', 'jo', 'joh', ...]
+  tags: string[]; // ['developer', 'senior', 'javascript']
+}
+
+async function searchUsersByName(searchTerm: string): Promise<User[]> {
+  const term = searchTerm.toLowerCase();
+  const snapshot = await db
+    .collection('users')
+    .where('nameWords', 'array-contains', term)
+    .limit(20)
+    .get();
+
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as User[];
+}
+
+// ❌ MAL: Leer todos los documentos y filtrar en cliente
+async function searchUsersByNameBad(searchTerm: string): Promise<User[]> {
+  // Lee TODOS los usuarios!
+  const snapshot = await db.collection('users').get();
+
+  // Filtra en cliente - muy costoso!
+  return snapshot.docs
+    .filter(doc => doc.data().name.includes(searchTerm))
+    .map(doc => ({ id: doc.id, ...doc.data() })) as User[];
+}
+```
+
+### Transacciones y Batch Writes
+
+#### Cuándo Usar Transacciones
+```typescript
+// ✅ BIEN: Transacción para operaciones que dependen entre sí
+async function transferPoints(
+  fromUserId: string,
+  toUserId: string,
+  points: number
+): Promise<void> {
+  await db.runTransaction(async (transaction) => {
+    const fromRef = db.collection('users').doc(fromUserId);
+    const toRef = db.collection('users').doc(toUserId);
+
+    // Leer en la transacción
+    const fromDoc = await transaction.get(fromRef);
+    const toDoc = await transaction.get(toRef);
+
+    if (!fromDoc.exists || !toDoc.exists) {
+      throw new NotFoundError('User', fromUserId);
+    }
+
+    const fromPoints = fromDoc.data()?.points || 0;
+
+    if (fromPoints < points) {
+      throw new ValidationError('Insufficient points');
+    }
+
+    // Escribir en la transacción
+    transaction.update(fromRef, {
+      points: FieldValue.increment(-points),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    transaction.update(toRef, {
+      points: FieldValue.increment(points),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  });
+}
+
+// ✅ BIEN: Batch para escrituras independientes
+async function updateMultipleDocuments(updates: Array<{ id: string; data: any }>): Promise<void> {
+  const batch = db.batch();
+
+  updates.forEach(({ id, data }) => {
+    const docRef = db.collection('items').doc(id);
+    batch.update(docRef, {
+      ...data,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  });
+
+  await batch.commit();
+}
+
+// ❌ MAL: Usar transacción cuando batch es suficiente
+async function updateMultipleDocumentsBad(updates: Array<{ id: string; data: any }>): Promise<void> {
+  // No necesita transacción si las operaciones son independientes!
+  await db.runTransaction(async (transaction) => {
+    updates.forEach(({ id, data }) => {
+      const docRef = db.collection('items').doc(id);
+      transaction.update(docRef, data);
+    });
+  });
+}
+```
+
+### Timestamps y Metadata
+
+#### Server Timestamps
+```typescript
+// ✅ BIEN: Usar FieldValue.serverTimestamp()
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+
+interface BaseDocument {
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+async function createDocument<T extends BaseDocument>(
+  collection: string,
+  data: Omit<T, 'createdAt' | 'updatedAt'>
+): Promise<{ id: string; data: T }> {
+  const docRef = await db.collection(collection).add({
+    ...data,
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+
+  // Para retornar con timestamp real
+  const doc = await docRef.get();
+  return {
+    id: docRef.id,
+    data: { id: docRef.id, ...doc.data() } as T,
+  };
+}
+
+async function updateDocument<T>(
+  collection: string,
+  id: string,
+  data: Partial<T>
+): Promise<void> {
+  await db.collection(collection).doc(id).update({
+    ...data,
+    updatedAt: FieldValue.serverTimestamp(), // Siempre actualizar
+  });
+}
+
+// ❌ MAL: Usar timestamp del cliente
+async function createDocumentBad(data: any): Promise<void> {
+  await db.collection('items').add({
+    ...data,
+    createdAt: new Date(), // Depende del reloj del cliente!
+    updatedAt: Date.now(), // Puede estar mal sincronizado!
+  });
+}
+```
+
+### Seguridad en Firestore
+
+#### Firestore Security Rules
+```javascript
+// ✅ BIEN: Rules estrictas con validación
+// firestore.rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+
+    function isValidUser() {
+      let data = request.resource.data;
+      return data.name is string &&
+             data.name.size() > 0 &&
+             data.name.size() < 100 &&
+             data.email is string &&
+             data.email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Solo el dueño puede leer su documento
+      allow read: if isOwner(userId) || hasRole('admin');
+
+      // Solo el dueño puede actualizar, con validación
+      allow update: if isOwner(userId) && isValidUser();
+
+      // Solo admins pueden crear usuarios
+      allow create: if hasRole('admin') && isValidUser();
+
+      // Solo admins pueden eliminar
+      allow delete: if hasRole('admin');
+    }
+
+    // Posts collection
+    match /posts/{postId} {
+      // Todos pueden leer posts públicos
+      allow read: if resource.data.isPublic == true || 
+                     isOwner(resource.data.authorId) ||
+                     hasRole('admin');
+
+      // Solo el autor puede actualizar
+      allow update: if isOwner(resource.data.authorId);
+
+      // Usuarios autenticados pueden crear
+      allow create: if isAuthenticated() &&
+                       request.resource.data.authorId == request.auth.uid;
+
+      // Solo el autor o admin pueden eliminar
+      allow delete: if isOwner(resource.data.authorId) || hasRole('admin');
+    }
+  }
+}
+
+// ❌ MAL: Rules demasiado permisivas
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true; // ¡PELIGROSO!
+    }
+  }
+}
+```
+
+### Optimización de Costos
+
+#### Minimizar Lecturas
+```typescript
+// ✅ BIEN: Cache y estrategias para reducir lecturas
+import { LRUCache } from 'lru-cache';
+
+// Cache en memoria para datos que cambian poco
+const configCache = new LRUCache<string, any>({
+  max: 100,
+  ttl: 1000 * 60 * 5, // 5 minutos
+});
+
+async function getConfig(key: string): Promise<any> {
+  // Check cache primero
+  const cached = configCache.get(key);
+  if (cached) {
+    return cached;
+  }
+
+  // Si no está en cache, leer de Firestore
+  const doc = await db.collection('config').doc(key).get();
+  if (!doc.exists) return null;
+
+  const data = doc.data();
+  configCache.set(key, data);
+  return data;
+}
+
+// ✅ BIEN: Usar select para leer solo campos necesarios
+async function getUserEmails(): Promise<string[]> {
+  const snapshot = await db
+    .collection('users')
+    .select('email') // Solo leer email, no todo el documento
+    .get();
+
+  return snapshot.docs.map(doc => doc.data().email);
+}
+
+// ❌ MAL: Leer documentos completos innecesariamente
+async function getUserEmailsBad(): Promise<string[]> {
+  const snapshot = await db.collection('users').get(); // Lee TODO!
+
+  return snapshot.docs.map(doc => doc.data().email);
+}
+```
+
+#### Contadores Distribuidos
+```typescript
+// ✅ BIEN: Distributed counter para alta concurrencia
+const SHARD_COUNT = 10;
+
+async function incrementCounter(counterId: string): Promise<void> {
+  // Seleccionar shard random
+  const shardId = Math.floor(Math.random() * SHARD_COUNT);
+  const shardRef = db
+    .collection('counters')
+    .doc(counterId)
+    .collection('shards')
+    .doc(shardId.toString());
+
+  await shardRef.set(
+    {
+      count: FieldValue.increment(1),
+    },
+    { merge: true }
+  );
+}
+
+async function getCounterValue(counterId: string): Promise<number> {
+  const shardsSnapshot = await db
+    .collection('counters')
+    .doc(counterId)
+    .collection('shards')
+    .get();
+
+  let total = 0;
+  shardsSnapshot.forEach(doc => {
+    total += doc.data().count || 0;
+  });
+
+  return total;
+}
+
+// ❌ MAL: Contador simple con alta contención
+async function incrementCounterBad(counterId: string): Promise<void> {
+  const ref = db.collection('counters').doc(counterId);
+
+  // Muchas escrituras concurrentes = conflictos y retries
+  await ref.update({
+    count: FieldValue.increment(1),
+  });
+}
+```
+
+---
+
+## Patrones Comunes y Anti-Patrones
+
+### ✅ Patrón: Repository Pattern
+```typescript
+// repository.interface.ts
+export interface Repository<T> {
+  getById(id: string): Promise<T | null>;
+  getAll(options?: QueryOptions): Promise<T[]>;
+  create(data: Omit<T, 'id'>): Promise<{ id: string; data: T }>;
+  update(id: string, data: Partial<T>): Promise<void>;
+  delete(id: string): Promise<void>;
+}
+
+// base.repository.ts
+export abstract class BaseRepository<T> implements Repository<T> {
+  constructor(
+    protected readonly db: Firestore,
+    protected readonly collectionName: string
+  ) {}
+
+  async getById(id: string): Promise<T | null> {
+    const doc = await this.db.collection(this.collectionName).doc(id).get();
+    if (!doc.exists) return null;
+    return this.mapToEntity(doc);
+  }
+
+  async getAll(options: QueryOptions = {}): Promise<T[]> {
+    let query: Query = this.db.collection(this.collectionName);
+
+    if (options.limit) {
+      query = query.limit(options.limit);
+    }
+
+    const snapshot = await query.get();
+    return snapshot.docs.map(doc => this.mapToEntity(doc));
+  }
+
+  async create(data: Omit<T, 'id'>): Promise<{ id: string; data: T }> {
+    const docRef = await this.db.collection(this.collectionName).add({
+      ...data,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    const doc = await docRef.get();
+    return {
+      id: docRef.id,
+      data: this.mapToEntity(doc),
+    };
+  }
+
+  async update(id: string, data: Partial<T>): Promise<void> {
+    await this.db.collection(this.collectionName).doc(id).update({
+      ...data,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.db.collection(this.collectionName).doc(id).delete();
+  }
+
+  protected abstract mapToEntity(doc: DocumentSnapshot): T;
+}
+
+// user.repository.ts
+export class UserRepository extends BaseRepository<User> {
+  constructor(db: Firestore) {
+    super(db, 'users');
+  }
+
+  protected mapToEntity(doc: DocumentSnapshot): User {
+    return {
+      id: doc.id,
+      ...doc.data(),
+    } as User;
+  }
+
+  // Métodos específicos de User
+  async findByEmail(email: string): Promise<User | null> {
+    const snapshot = await this.db
+      .collection(this.collectionName)
+      .where('email', '==', email)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) return null;
+    return this.mapToEntity(snapshot.docs[0]);
+  }
+}
+```
+
+### ❌ Anti-Patrón: God Functions
+```typescript
+// ❌ MAL: Función que hace demasiado
+async function handleUserRequest(req: Request, res: Response): Promise<void> {
+  // Validación
+  if (!req.body.email) {
+    res.status(400).send('Email required');
+    return;
+  }
+
+  // Auth
+  const apiKey = req.headers['x-api-key'];
+  if (apiKey !== process.env.API_KEY) {
+    res.status(401).send('Unauthorized');
+    return;
+  }
+
+  // Business logic
+  const user = await db.collection('users').where('email', '==', req.body.email).get();
+
+  if (user.empty) {
+    const newUser = await db.collection('users').add({
+      email: req.body.email,
+      name: req.body.name,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    await db.collection('emails').add({
+      to: req.body.email,
+      template: 'welcome',
+    });
+
+    res.status(201).json({ id: newUser.id });
+  } else {
+    const userId = user.docs[0].id;
+    await db.collection('users').doc(userId).update({
+      lastLogin: FieldValue.serverTimestamp(),
+    });
+
+    res.status(200).json({ id: userId });
+  }
+}
+
+// ✅ BIEN: Separado en capas
+async function handleUserRequest(req: Request, res: Response): Promise<void> {
+  try {
+    if (!authMiddleware(req, res)) return;
+
+    const validation = validateUserData(req.body);
+    if (!validation.isValid) {
+      res.status(400).json({ error: validation.errors });
+      return;
+    }
+
+    const result = await userService.findOrCreate(req.body.email, req.body.name);
+    res.status(result.created ? 201 : 200).json({ id: result.id });
+  } catch (error) {
+    errorHandler(error, res, 'handleUserRequest');
+  }
+}
+```
+
+---
+
+## Checklist de Buenas Prácticas
+
+### Antes de Deploy
+- [ ] Todas las functions tienen runtime options apropiados (memory, timeout, maxInstances)
+- [ ] Inicialización de Admin SDK está fuera de los handlers
+- [ ] Se usan servicios singleton cuando es posible
+- [ ] Input validation en todas las funciones públicas
+- [ ] Input sanitization para prevenir injection attacks
+- [ ] Error handling centralizado con logging estructurado
+- [ ] CORS configurado apropiadamente (no usar `*`)
+- [ ] Authentication/Authorization implementada
+- [ ] Índices compuestos creados en firestore.indexes.json
+- [ ] Security Rules actualizadas y testeadas
+- [ ] Queries optimizadas (usar select, limit, paginación)
+- [ ] Timestamps usando FieldValue.serverTimestamp()
+- [ ] Batch writes donde sea posible
+- [ ] Tests unitarios para business logic crítica
+- [ ] Logging estructurado con contexto relevante
+- [ ] Manejo de rate limiting si es necesario
+
+### Performance
+- [ ] Minimizar lecturas/escrituras de Firestore
+- [ ] Usar cache para datos que cambian poco
+- [ ] Denormalizar estratégicamente para reducir queries
+- [ ] Evitar queries sin índices
+- [ ] Usar pagination cursor-based
+- [ ] Limitar tamaño de responses
+- [ ] Usar select() para leer solo campos necesarios
+
+### Seguridad
+- [ ] Nunca confiar en input del cliente
+- [ ] Validar y sanitizar todo input
+- [ ] Usar timing-safe comparison para secrets
+- [ ] Security Rules restrictivas por defecto
+- [ ] API keys en variables de entorno
+- [ ] Logs no contienen información sensible
+- [ ] Rate limiting para prevenir abuse
+
+### Costos
+- [ ] Configuración de memory apropiada por función
+- [ ] maxInstances para controlar concurrencia
+- [ ] Cache para reducir lecturas repetidas
+- [ ] Índices necesarios para queries
+- [ ] Denormalización para reducir queries múltiples
+- [ ] Batch operations en lugar de individuales
+- [ ] Cleanup de datos antiguos con TTL o scheduled functions

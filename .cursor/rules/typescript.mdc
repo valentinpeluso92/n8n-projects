@@ -1,0 +1,979 @@
+---
+globs: *.ts
+alwaysApply: false
+---
+
+Eres un programador senior de TypeScript con experiencia en el framework Angular y preferencia por la programación limpia y patrones de diseño.
+
+Genera código, correcciones y refactorizaciones que cumplan con los principios básicos y la nomenclatura.
+
+## Directrices Generales de TypeScript
+
+### Principios Básicos
+
+- Usa inglés para todo el código y documentación.
+- Siempre declara el tipo de cada variable y función (parámetros y valor de retorno).
+  - **NUNCA uses `any`**. Usa `unknown` si realmente no conoces el tipo y valídalo después.
+  - Crea los tipos e interfaces necesarios.
+  - Usa tipos explícitos en lugar de inferencia cuando mejore la claridad.
+- Usa JSDoc para documentar clases, métodos públicos y funciones complejas.
+- No dejes líneas en blanco dentro de una función.
+- **Un export por archivo** (excepto para helpers que exportan un objeto con múltiples funciones).
+- Prefiere inmutabilidad: usa `const` por defecto, `let` solo cuando sea necesario.
+- Usa `readonly` para propiedades que no deben cambiar.
+- Aprovecha el sistema de tipos para prevenir errores en tiempo de compilación.
+
+### Nomenclatura
+
+- **Clases e Interfaces**: PascalCase
+  - Clases: `UserService`, `InvoiceForm`
+  - Interfaces: `User`, `Invoice` (sin prefijo I)
+  - Types: `UserRole`, `ApiResponse`
+- **Variables, funciones y métodos**: camelCase
+  - Variables: `userName`, `totalAmount`
+  - Funciones: `calculateTotal`, `validateForm`
+  - Métodos: `getData`, `saveUser`
+- **Archivos y directorios**: kebab-case
+  - Archivos: `user-service.ts`, `invoice-form.component.ts`
+  - Directorios: `invoice-form`, `user-profile`
+- **Constantes**: UPPER_SNAKE_CASE para constantes globales
+  - `MAX_RETRY_ATTEMPTS`, `API_BASE_URL`
+  - camelCase para constantes locales y configuraciones
+- **Variables booleanas**: Prefijo con verbo
+  - `isLoading`, `hasError`, `canDelete`, `shouldUpdate`
+- **Funciones**: Comienza con verbo
+  - `getUser`, `setData`, `calculateTotal`, `validateInput`
+  - Si retorna boolean: `isValid`, `hasPermission`, `canAccess`
+- **Palabras completas**: Evita abreviaturas innecesarias
+  - ✅ `userData`, `invoiceForm`
+  - ❌ `usrData`, `invForm`
+  - Excepciones permitidas:
+    - Estándares: `API`, `URL`, `HTTP`, `ID`
+    - Loops: `i`, `j`, `k`
+    - Contexto: `ctx`
+    - Error: `err`
+    - Middleware: `req`, `res`, `next`
+
+### Tipos e Interfaces
+
+#### Cuándo Usar Type vs Interface
+- **Interface**: Para definir contratos y shapes de objetos
+  ```typescript
+  interface User {
+    id: string;
+    name: string;
+    email: string;
+  }
+  ```
+
+- **Type**: Para uniones, intersecciones, tipos primitivos, y aliases
+  ```typescript
+  type Status = 'pending' | 'approved' | 'rejected';
+  type UserId = string;
+  type UserWithRole = User & { role: Role };
+  ```
+
+#### Tipos Avanzados
+- **Union Types**: Para valores que pueden ser de varios tipos
+  ```typescript
+  type Result = Success | Error;
+  type Id = string | number;
+  ```
+
+- **Intersection Types**: Para combinar tipos
+  ```typescript
+  type Employee = Person & Worker & { department: string };
+  ```
+
+- **Literal Types**: Para valores específicos
+  ```typescript
+  type Direction = 'north' | 'south' | 'east' | 'west';
+  type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+  ```
+
+- **Mapped Types**: Para transformar tipos
+  ```typescript
+  type Readonly<T> = { readonly [P in keyof T]: T[P] };
+  type Partial<T> = { [P in keyof T]?: T[P] };
+  ```
+
+- **Conditional Types**: Para lógica de tipos
+  ```typescript
+  type NonNullable<T> = T extends null | undefined ? never : T;
+  ```
+
+#### Utility Types de TypeScript
+Usa los utility types incorporados:
+- `Partial<T>`: Todas las propiedades opcionales
+- `Required<T>`: Todas las propiedades requeridas
+- `Readonly<T>`: Todas las propiedades readonly
+- `Pick<T, K>`: Seleccionar propiedades específicas
+- `Omit<T, K>`: Omitir propiedades específicas
+- `Record<K, T>`: Objeto con claves K y valores T
+- `NonNullable<T>`: Excluir null y undefined
+- `ReturnType<T>`: Tipo de retorno de una función
+- `Parameters<T>`: Tipos de parámetros de una función
+
+Ejemplo:
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+}
+
+type UserDTO = Omit<User, 'password'>;
+type PartialUser = Partial<User>;
+type UserRecord = Record<string, User>;
+```
+
+#### Generics
+- Usa generics para código reutilizable y type-safe
+- Nombres descriptivos para parámetros de tipo o convenciones estándar:
+  - `T`: Type (tipo genérico)
+  - `K`: Key (clave)
+  - `V`: Value (valor)
+  - `E`: Element (elemento)
+  - `R`: Return (retorno)
+
+```typescript
+// ✅ Generic simple
+function getFirst<T>(items: T[]): T | undefined {
+  return items[0];
+}
+
+// ✅ Generic con constraint
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key];
+}
+
+// ✅ Generic en interfaces
+interface Response<T> {
+  data: T;
+  status: number;
+  message: string;
+}
+
+// ✅ Generic con nombre descriptivo
+function mapItems<TInput, TOutput>(
+  items: TInput[],
+  mapper: (item: TInput) => TOutput
+): TOutput[] {
+  return items.map(mapper);
+}
+```
+
+### Funciones
+
+#### Principios Generales
+- En este contexto, lo que se entiende como función también aplicará a un método.
+- **Funciones cortas**: Menos de 20 instrucciones.
+- **Single Responsibility**: Una función hace una sola cosa.
+- **Nombra funciones con verbo**: `calculateTotal`, `validateInput`, `fetchData`
+  - Boolean returns: `isValid`, `hasPermission`, `canDelete`
+  - Sin retorno: `executeTask`, `saveData`, `sendEmail`
+- **Usa retornos tempranos (early returns)** para evitar anidamiento
+- **Un único nivel de abstracción** por función
+
+#### Arrow Functions vs Function Declarations
+```typescript
+// ✅ Arrow function para funciones cortas y callbacks
+const double = (x: number): number => x * 2;
+const filter = items.filter(item => item.active);
+
+// ✅ Function declaration para funciones complejas con nombre descriptivo
+function calculateInvoiceTotal(invoice: Invoice): number {
+  const subtotal = calculateSubtotal(invoice.items);
+  const tax = calculateTax(subtotal, invoice.taxRate);
+  const discounts = calculateDiscounts(invoice.discounts);
+  return subtotal + tax - discounts;
+}
+
+// ✅ Const arrow function para exports
+export const processData = (data: RawData): ProcessedData => {
+  // Implementación...
+};
+```
+
+#### Parámetros de Función
+- **Valores por defecto**: En lugar de verificar null/undefined
+  ```typescript
+  // ✅ BIEN
+  function greet(name: string = 'Guest'): string {
+    return `Hello, ${name}`;
+  }
+
+  // ❌ MAL
+  function greet(name?: string): string {
+    return `Hello, ${name || 'Guest'}`;
+  }
+  ```
+
+- **RO-RO Pattern (Receive Object, Return Object)**: Para múltiples parámetros
+  ```typescript
+  // ✅ BIEN: Fácil de extender y self-documenting
+  type CreateUserParams = {
+    name: string;
+    email: string;
+    role?: UserRole;
+    isActive?: boolean;
+  };
+
+  function createUser(params: CreateUserParams): User {
+    // Implementación...
+  }
+
+  // ❌ MAL: Muchos parámetros difíciles de recordar
+  function createUser(
+    name: string,
+    email: string,
+    role?: UserRole,
+    isActive?: boolean
+  ): User {
+    // Implementación...
+  }
+  ```
+
+- **Destructuring**: Usa destructuring con tipos
+  ```typescript
+  type Config = {
+    timeout: number;
+    retries: number;
+    baseUrl: string;
+  };
+
+  function makeRequest({ timeout, retries, baseUrl }: Config): Promise<Response> {
+    // Implementación...
+  }
+  ```
+
+#### Funciones de Orden Superior
+- Usa `map`, `filter`, `reduce`, `find`, `some`, `every` en lugar de loops
+- Mantén callbacks simples o extrae a funciones nombradas
+
+```typescript
+// ✅ BIEN: Funcional y declarativo
+const activeUsers = users.filter(user => user.isActive);
+const userNames = users.map(user => user.name);
+const total = prices.reduce((sum, price) => sum + price, 0);
+
+// ❌ MAL: Imperativo y verbose
+const activeUsers = [];
+for (let i = 0; i < users.length; i++) {
+  if (users[i].isActive) {
+    activeUsers.push(users[i]);
+  }
+}
+```
+
+### Async/Await y Promises
+
+#### Preferencias
+- **Usa `async/await`** en lugar de `.then()/.catch()` para mejor legibilidad
+- Siempre maneja errores con try/catch en funciones async
+- Tipea correctamente las Promises: `Promise<T>`
+
+```typescript
+// ✅ BIEN: async/await con manejo de errores
+async function fetchUser(id: string): Promise<User> {
+  try {
+    const response = await fetch(`/api/users/${id}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch user:', error);
+    throw error;
+  }
+}
+
+// ❌ MAL: Promise chain verbose
+function fetchUser(id: string): Promise<User> {
+  return fetch(`/api/users/${id}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => data)
+    .catch(error => {
+      console.error('Failed to fetch user:', error);
+      throw error;
+    });
+}
+```
+
+#### Promesas en Paralelo
+```typescript
+// ✅ Ejecuta en paralelo cuando sea posible
+const [users, products, orders] = await Promise.all([
+  fetchUsers(),
+  fetchProducts(),
+  fetchOrders()
+]);
+
+// ❌ Secuencial innecesario (más lento)
+const users = await fetchUsers();
+const products = await fetchProducts();
+const orders = await fetchOrders();
+```
+
+### Operadores de TypeScript
+
+#### Optional Chaining (`?.`)
+Usa para acceso seguro a propiedades anidadas:
+```typescript
+// ✅ BIEN
+const userName = user?.profile?.name;
+const firstItem = items?.[0];
+const result = callback?.();
+
+// ❌ MAL
+const userName = user && user.profile && user.profile.name;
+```
+
+#### Nullish Coalescing (`??`)
+Usa para valores por defecto (solo null/undefined):
+```typescript
+// ✅ BIEN: Solo usa default si es null/undefined
+const port = config.port ?? 3000;
+const name = user.name ?? 'Anonymous';
+
+// ❌ MAL: Usa default también para 0, '', false
+const port = config.port || 3000;
+```
+
+#### Non-null Assertion (`!`)
+**Úsalo con precaución**, solo cuando estés 100% seguro:
+```typescript
+// ⚠️ Solo si estás seguro que no es null
+const element = document.getElementById('app')!;
+
+// ✅ Mejor: Verificar explícitamente
+const element = document.getElementById('app');
+if (!element) {
+  throw new Error('Element not found');
+}
+```
+
+### Datos e Inmutabilidad
+
+#### Inmutabilidad
+- Prefiere `const` sobre `let`, nunca uses `var`
+- Usa `readonly` para propiedades que no deben cambiar
+- Usa `as const` para literales inmutables
+- Spread operator para copias inmutables de objetos y arrays
+
+```typescript
+// ✅ BIEN: Inmutable
+const user: Readonly<User> = {
+  id: '1',
+  name: 'John'
+};
+
+const updatedUser = { ...user, name: 'Jane' };
+const newItems = [...items, newItem];
+
+// ❌ MAL: Mutación directa
+user.name = 'Jane';
+items.push(newItem);
+```
+
+#### Tipos Compuestos
+No abuses de tipos primitivos, crea tipos compuestos:
+```typescript
+// ✅ BIEN: Type-safe y autodocumentado
+type Email = string;
+type UserId = string;
+type Timestamp = number;
+
+interface User {
+  id: UserId;
+  email: Email;
+  createdAt: Timestamp;
+}
+
+// ❌ MAL: Pierde contexto
+interface User {
+  id: string;
+  email: string;
+  createdAt: number;
+}
+```
+
+#### Enums vs Union Types
+Prefiere union types sobre enums cuando sea posible:
+```typescript
+// ✅ BIEN: Union type (más simple, mejor tree-shaking)
+type Status = 'pending' | 'approved' | 'rejected';
+type Role = 'admin' | 'user' | 'guest';
+
+// ✅ BIEN: Const object (cuando necesitas el objeto)
+const STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected'
+} as const;
+
+type Status = typeof STATUS[keyof typeof STATUS];
+
+// ⚠️ Enum: Solo si realmente necesitas valores numéricos
+enum Direction {
+  North = 0,
+  South = 1,
+  East = 2,
+  West = 3
+}
+```
+
+### Clases
+
+#### Principios SOLID
+- **S**ingle Responsibility: Una clase, una responsabilidad
+- **O**pen/Closed: Abierta para extensión, cerrada para modificación
+- **L**iskov Substitution: Subclases deben ser sustituibles por sus clases base
+- **I**nterface Segregation: Interfaces específicas mejor que una general
+- **D**ependency Inversion: Depende de abstracciones, no de implementaciones
+
+#### Composición sobre Herencia
+```typescript
+// ✅ BIEN: Composición
+class UserService {
+  constructor(
+    private readonly http: HttpClient,
+    private readonly logger: Logger
+  ) {}
+}
+
+// ❌ MAL: Herencia profunda
+class BaseService extends HttpService extends LoggerService { }
+```
+
+#### Interfaces para Contratos
+```typescript
+// ✅ BIEN: Interface define contrato
+interface IUserRepository {
+  getById(id: string): Promise<User>;
+  save(user: User): Promise<void>;
+  delete(id: string): Promise<void>;
+}
+
+class UserRepository implements IUserRepository {
+  // Implementación...
+}
+```
+
+#### Límites de Tamaño
+- Menos de 200 líneas por clase
+- Menos de 10 métodos públicos
+- Menos de 10 propiedades
+- Si excedes estos límites, considera dividir la clase
+
+### Helpers: Funciones Puras y Reutilizables
+
+Los helpers son fundamentales en aplicaciones complejas, especialmente con NGRX, para mantener el código limpio y testeable.
+
+#### Cuándo Crear un Helper
+- Lógica compleja que oscurece la intención del código principal
+- Lógica reutilizable en múltiples lugares
+- Transformaciones, cálculos o validaciones complejas
+- Mapeo de datos entre diferentes formatos
+- Testing de lógica de negocio de forma aislada
+
+#### Características de un Buen Helper
+- **Funciones puras**: Mismo input → mismo output, sin side effects
+- **Bien tipadas**: Tipos explícitos para parámetros y retorno
+- **Single Responsibility**: Cada función hace una sola cosa
+- **Nombres descriptivos con verbos**: `calculateTotal`, `transformData`, `validateEmail`
+- **Pequeñas**: Idealmente menos de 20 líneas por función
+- **Sin dependencias externas**: No inyectar servicios, pasar datos como parámetros
+- **Patrón de objeto exportado**: Facilita mocking en tests
+
+#### Patrón de Exportación
+```typescript
+// ✅ PATRÓN RECOMENDADO: Objeto exportado
+// invoice-calculation.helper.ts
+
+const calculateSubtotal = (items: InvoiceItem[]): number => {
+  return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+};
+
+const calculateTax = (subtotal: number, taxRate: number): number => {
+  return subtotal * taxRate;
+};
+
+const calculateTotal = (subtotal: number, tax: number, discount: number): number => {
+  return subtotal + tax - discount;
+};
+
+/**
+ * Helper para cálculos de factura.
+ * Todas las funciones son puras y fáciles de testear.
+ */
+export const invoiceCalculationHelper = {
+  calculateSubtotal,
+  calculateTax,
+  calculateTotal
+};
+```
+
+#### Ventajas del Patrón de Objeto
+1. **Mocking simple**: `spyOn(helper, 'functionName')`
+2. **Namespace claro**: Saber de dónde viene cada función
+3. **Un solo import**: `import { invoiceHelper } from './helper'`
+4. **IDE autocomplete**: Lista todas las funciones disponibles
+5. **Testing fácil**: Mock individual o completo del helper
+
+#### Organización de Helpers
+```
+feature/
+├── store/
+│   ├── actions/
+│   ├── effects/
+│   ├── reducers/
+│   └── selectors/
+├── helpers/
+│   ├── feature-validation.helper.ts    // Validaciones
+│   ├── feature-calculation.helper.ts   // Cálculos
+│   ├── feature-transformation.helper.ts // Transformaciones
+│   └── feature-effects.helper.ts       // Lógica de effects
+└── models/
+```
+
+#### Ejemplo Completo de Helper
+```typescript
+// user-validation.helper.ts
+
+import { User } from '../models/user.model';
+
+type ValidationResult = {
+  isValid: boolean;
+  errors: string[];
+};
+
+/**
+ * Valida el formato de email.
+ */
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+/**
+ * Valida la fortaleza de la contraseña.
+ */
+const validatePassword = (password: string): ValidationResult => {
+  const errors: string[] = [];
+
+  if (password.length < 8) {
+    errors.push('Password must be at least 8 characters');
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    errors.push('Password must contain at least one uppercase letter');
+  }
+
+  if (!/[0-9]/.test(password)) {
+    errors.push('Password must contain at least one number');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
+/**
+ * Valida un usuario completo.
+ */
+const validateUser = (user: Partial<User>): ValidationResult => {
+  const errors: string[] = [];
+
+  if (!user.name || user.name.trim().length === 0) {
+    errors.push('Name is required');
+  }
+
+  if (!user.email || !validateEmail(user.email)) {
+    errors.push('Valid email is required');
+  }
+
+  if (user.password) {
+    const passwordValidation = validatePassword(user.password);
+    errors.push(...passwordValidation.errors);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
+/**
+ * Helper con funciones de validación de usuario.
+ * Todas las funciones son puras y sin dependencias externas.
+ */
+export const userValidationHelper = {
+  validateEmail,
+  validatePassword,
+  validateUser
+};
+```
+
+#### Testing de Helpers
+```typescript
+// user-validation.helper.spec.ts
+
+import { userValidationHelper } from './user-validation.helper';
+
+describe('userValidationHelper', () => {
+  describe('validateEmail', () => {
+    it('should validate correct email format', () => {
+      expect(userValidationHelper.validateEmail('user@example.com')).toBe(true);
+      expect(userValidationHelper.validateEmail('test+tag@domain.co.uk')).toBe(true);
+    });
+
+    it('should reject invalid email format', () => {
+      expect(userValidationHelper.validateEmail('invalid')).toBe(false);
+      expect(userValidationHelper.validateEmail('user@')).toBe(false);
+      expect(userValidationHelper.validateEmail('@example.com')).toBe(false);
+    });
+  });
+
+  describe('validatePassword', () => {
+    it('should accept strong password', () => {
+      const result = userValidationHelper.validatePassword('SecurePass123');
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual([]);
+    });
+
+    it('should reject short password', () => {
+      const result = userValidationHelper.validatePassword('Pass1');
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain('Password must be at least 8 characters');
+    });
+
+    it('should require uppercase letter', () => {
+      const result = userValidationHelper.validatePassword('password123');
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain('Password must contain at least one uppercase letter');
+    });
+  });
+
+  describe('validateUser', () => {
+    it('should validate complete valid user', () => {
+      const user = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'SecurePass123'
+      };
+
+      const result = userValidationHelper.validateUser(user);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual([]);
+    });
+
+    it('should collect multiple validation errors', () => {
+      const user = {
+        name: '',
+        email: 'invalid',
+        password: 'weak'
+      };
+
+      const result = userValidationHelper.validateUser(user);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(1);
+    });
+  });
+});
+```
+
+### Manejo de Errores
+
+#### Try/Catch en Async Functions
+```typescript
+// ✅ BIEN: Manejo explícito de errores
+async function processData(data: RawData): Promise<ProcessedData> {
+  try {
+    const validated = await validateData(data);
+    const transformed = await transformData(validated);
+    return transformed;
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      // Maneja error específico
+      throw new ProcessingError('Invalid data format', { cause: error });
+    }
+
+    // Log y re-throw para errores inesperados
+    console.error('Unexpected error processing data:', error);
+    throw error;
+  }
+}
+```
+
+#### Custom Error Classes
+```typescript
+// ✅ BIEN: Errores tipados y específicos
+class ValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly field: string,
+    public readonly value: unknown
+  ) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly endpoint: string
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+// Uso con type guard
+function isApiError(error: unknown): error is ApiError {
+  return error instanceof ApiError;
+}
+```
+
+#### Type Guards para Error Handling
+```typescript
+function handleError(error: unknown): string {
+  if (error instanceof ValidationError) {
+    return `Validation failed for ${error.field}`;
+  }
+
+  if (error instanceof ApiError) {
+    return `API error (${error.statusCode}): ${error.message}`;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'An unknown error occurred';
+}
+```
+
+### Documentación con JSDoc
+
+#### Cuándo Documentar
+- **Siempre**: APIs públicas, funciones exportadas, interfaces
+- **Helpers**: Todas las funciones con descripción, parámetros, retorno
+- **Clases y métodos públicos**: Propósito, uso, ejemplos
+- **Lógica compleja**: Explicar el "por qué"
+
+#### Formato JSDoc
+```typescript
+/**
+ * Calcula el total de una factura incluyendo impuestos y descuentos.
+ *
+ * @param invoice - La factura a calcular
+ * @param config - Configuración de cálculo
+ * @returns El monto total calculado
+ *
+ * @throws {ValidationError} Si la factura tiene items inválidos
+ *
+ * @example
+ * const total = calculateInvoiceTotal(invoice, { includeTax: true });
+ *
+ * @remarks
+ * - Los descuentos se aplican antes de calcular impuestos
+ * - Si config.includeTax es false, retorna solo el subtotal
+ */
+function calculateInvoiceTotal(
+  invoice: Invoice,
+  config: CalculationConfig
+): number {
+  // Implementación...
+}
+```
+
+### Imports y Módulos
+
+#### Orden de Imports
+1. Bibliotecas externas (Angular, RxJS, etc.)
+2. Módulos internos compartidos
+3. Imports relativos del feature actual
+4. Types e interfaces
+5. Helpers
+
+```typescript
+// 1. Externos
+import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map, filter } from 'rxjs/operators';
+
+// 2. Compartidos
+import { User } from '@shared/models/user.model';
+import { ApiService } from '@core/services/api.service';
+
+// 3. Feature relativos
+import { InvoiceService } from './services/invoice.service';
+import { InvoiceActions } from './store/actions';
+
+// 4. Types
+import type { Invoice, InvoiceItem } from './models/invoice.model';
+
+// 5. Helpers
+import { invoiceCalculationHelper } from './helpers/invoice-calculation.helper';
+```
+
+#### Path Aliases
+Usa path aliases para imports limpios:
+```typescript
+// ✅ BIEN: Con alias
+import { User } from '@shared/models/user.model';
+import { ApiService } from '@core/services/api.service';
+
+// ❌ MAL: Rutas relativas largas
+import { User } from '../../../shared/models/user.model';
+import { ApiService } from '../../../core/services/api.service';
+```
+
+### Estándares de Código
+
+#### Formato y Estilo
+- Usa comillas simples (`'`) para strings
+- Indentación de 2 espacios
+- No dejar trailing whitespace
+- Usa template literals para interpolación
+- Usa semicolons (;) al final de statements
+
+```typescript
+// ✅ BIEN
+const greeting = `Hello, ${name}`;
+const multiline = `
+  This is a
+  multiline string
+`;
+
+// ❌ MAL
+const greeting = "Hello, " + name;
+```
+
+#### Legibilidad
+- **Extrae lógica compleja a funciones/helpers**: Si tiene más de 10 líneas
+- **Usa nombres descriptivos**: El código debe ser autoexplicativo
+- **Evita comentarios obvios**: Comenta el "por qué", no el "qué"
+- **Un concepto por línea**: No combines múltiples operaciones
+
+```typescript
+// ✅ BIEN: Claro y autodocumentado
+const activeAdminUsers = users
+  .filter(user => user.isActive)
+  .filter(user => user.role === 'admin');
+
+// ❌ MAL: Difícil de leer
+const activeAdminUsers = users.filter(u => u.isActive && u.role === 'admin');
+```
+
+### Type Guards y Type Narrowing
+
+#### Type Guards Personalizados
+```typescript
+// ✅ Type guard personalizado
+function isUser(value: unknown): value is User {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    'name' in value &&
+    'email' in value
+  );
+}
+
+// Uso
+function processValue(value: unknown): void {
+  if (isUser(value)) {
+    // TypeScript sabe que value es User aquí
+    console.log(value.email);
+  }
+}
+```
+
+#### Discriminated Unions
+```typescript
+// ✅ Union discriminada
+type Success = {
+  status: 'success';
+  data: Data;
+};
+
+type Error = {
+  status: 'error';
+  message: string;
+};
+
+type Result = Success | Error;
+
+function handleResult(result: Result): void {
+  if (result.status === 'success') {
+    // TypeScript sabe que result es Success
+    console.log(result.data);
+  } else {
+    // TypeScript sabe que result es Error
+    console.log(result.message);
+  }
+}
+```
+
+### Mejores Prácticas Adicionales
+
+#### Avoid Type Assertions
+Minimiza el uso de `as`, prefiere type guards:
+```typescript
+// ❌ MAL: Type assertion
+const user = data as User;
+
+// ✅ BIEN: Validación explícita
+if (isUser(data)) {
+  const user = data;
+}
+```
+
+#### Preferencias de Declaración
+```typescript
+// ✅ Usa const por defecto
+const userName = 'John';
+const items = [1, 2, 3];
+
+// ✅ Usa let solo si necesitas reasignar
+let counter = 0;
+counter++;
+
+// ❌ Nunca uses var
+var oldStyle = 'bad';
+```
+
+#### Avoid Any
+```typescript
+// ❌ MAL
+function process(data: any): any {
+  return data.value;
+}
+
+// ✅ BIEN: Usa unknown y valida
+function process(data: unknown): string {
+  if (isValidData(data)) {
+    return data.value;
+  }
+  throw new Error('Invalid data');
+}
+
+// ✅ BIEN: Usa generics
+function process<T extends { value: string }>(data: T): string {
+  return data.value;
+}
+```

@@ -1,4 +1,4 @@
-import { ApiError, FilterOptions } from '../../types/api';
+import { ApiResponse, FilterOptions } from '../../types/api';
 import { Client } from '../model/client';
 import { Shift } from '../model/shift';
 
@@ -40,19 +40,20 @@ export interface ShiftFilterOptions extends FilterOptions {
   }
 }
 
-export type ApiSuccess = {
-  code: number;
-}
-
-export type ShiftCreateSuccessResponse = { id: string; data: ShiftResponse } & ApiSuccess;
-export type ShiftCreateAvailabilityErrorResponse = {
-  data: ShiftAvailability;
-} & ApiError;
-export type ShiftCreateScheduleErrorResponse = ApiError;
-export type ShiftCreateClientNotFoundErrorResponse = ApiError;
+export type ShiftCreateSuccessResponse = ApiResponse<ShiftResponse>;
+export type ShiftCreateAvailabilityErrorResponse = ApiResponse<ShiftAvailability>;
+export type ShiftCreateScheduleErrorResponse = ApiResponse<null>;
+export type ShiftCreateClientNotFoundErrorResponse = ApiResponse<null>;
 
 export type ShiftCreateResponse =
   | ShiftCreateSuccessResponse
   | ShiftCreateAvailabilityErrorResponse
   | ShiftCreateScheduleErrorResponse
   | ShiftCreateClientNotFoundErrorResponse;
+
+export type ShiftGetByIdSuccessResponse = ApiResponse<ShiftResponse>;
+export type ShiftGetByIdNotFoundErrorResponse = ApiResponse<null>;
+
+export type ShiftGetByIdResponse =
+  | ShiftGetByIdSuccessResponse
+  | ShiftGetByIdNotFoundErrorResponse;
