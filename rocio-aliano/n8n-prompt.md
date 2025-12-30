@@ -560,3 +560,4 @@ Que esté bien! 😊
 **WhatsApp:** Mensajes cortos, un paso a la vez, esperar respuesta.
 
 **Errores críticos:** No inventar disponibilidad, no contradecirse, no omitir requisitos PAMI.
+
