@@ -538,6 +538,71 @@ Sugerencia: Enviar recordatorios de confirmación
 
 ---
 
+## 📊 ESTRUCTURA DE DATOS (Google Sheets)
+
+### HOJA: Turnos
+**Columnas:** `id`, `fecha`, `hora`, `nombre_completo`, `dni`, `obra_social`, `tipo_consulta`, `primera_vez`, `estado`, `telefono`, `fecha_de_registro`
+
+**Estados posibles:** `Confirmado`, `Pendiente`, `Cancelado`, `Atendido`, `No asistió`
+
+**Acceso desde código:**
+```javascript
+const turno = {
+  id: "turno_06012025_1703952341234",
+  fecha: "06/01/2025",
+  hora: "9:00",
+  nombre_completo: "María González",
+  dni: "35123456",
+  obra_social: "PAMI",
+  tipo_consulta: "Consulta",
+  primera_vez: "SI",
+  estado: "Confirmado",
+  telefono: "11-2345-6789",
+  fecha_de_registro: "30/12/2024 14:30"
+};
+```
+
+### HOJA: Pacientes
+**Columnas:** `id`, `dni`, `nombre_completo`, `obra_social`, `telefono`, `ultima_visita`, `total_consultas`
+
+**Ejemplo:**
+```javascript
+const paciente = {
+  id: "pac_35123456",
+  dni: "35123456",
+  nombre_completo: "María González",
+  obra_social: "PAMI",
+  telefono: "11-2345-6789",
+  ultima_visita: "15/11/2024",
+  total_consultas: 3
+};
+```
+
+### HOJA: Agenda
+**Columnas:** `id`, `fecha`, `tipo_dia`, `horarios_bloqueados`
+
+**Tipos de día válidos:** `PARTICULAR`, `PAMI_NUEVO`, `PAMI_VIEJO`, `CIRUGIA`, `CONTROL`, `MEDICION`, `DIA_LIBRE`
+
+**Ejemplo:**
+```javascript
+const dia = {
+  id: "agenda_06012025",
+  fecha: "06/01/2025",
+  tipo_dia: "PARTICULAR",
+  horarios_bloqueados: "10:20,12:00" // Separados por coma
+};
+```
+
+### HOJA: Observaciones_Pacientes
+**Columnas:** `id`, `dni`, `observaciones`, `fecha_de_registro`
+
+### HOJA: Observaciones_Agenda
+**Columnas:** `id`, `id_agenda`, `observaciones`, `fecha_de_registro`
+
+**Nota:** Ver documento `estructura-planillas.md` para detalles completos.
+
+---
+
 ## ✅ REGLAS Y MEJORES PRÁCTICAS
 
 ### SIEMPRE:

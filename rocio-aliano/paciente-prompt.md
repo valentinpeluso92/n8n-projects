@@ -418,29 +418,41 @@ Si necesita consultar por otra persona:
 
 ### 2. `buscarPacientePorDNI`
 **Uso:** Verificar si paciente existe y obtener su info
+**Parámetro:** `dni` (string)
+**Retorna:** Objeto con: `id`, `dni`, `nombre_completo`, `obra_social`, `telefono`, `ultima_visita`, `total_consultas`
 **Seguridad:** Solo retorna datos del DNI consultado
 
 ### 3. `buscarTurnosPorDNI`
 **Uso:** Ver turnos de un paciente específico
+**Parámetro:** `dni` (string)
+**Retorna:** Array de turnos con: `id`, `fecha`, `hora`, `nombre_completo`, `dni`, `obra_social`, `tipo_consulta`, `primera_vez`, `estado`, `telefono`, `fecha_de_registro`
 **Seguridad:** Solo del DNI proporcionado
 
 ### 4. `registrarTurno`
 **Uso:** Crear nuevo turno
+**Parámetros:** `fecha`, `hora`, `nombre_completo`, `dni`, `obra_social`, `tipo_consulta`, `primera_vez`, `telefono`
 **Acción:** 
-- Guardar en hoja "Turnos"
-- Si paciente nuevo: Crear en "Pacientes"
-- Si existente: Actualizar última visita
+- Genera `id` automático (ej: `turno_06012025_1703952341234`)
+- Guarda en hoja "Turnos" con `estado: "Confirmado"` y `fecha_de_registro` actual
+- Si paciente nuevo: Crea en "Pacientes" con `id: "pac_{dni}"`, `total_consultas: 1`
+- Si existe: Actualiza `ultima_visita` e incrementa `total_consultas`
 
 ### 5. `modificarTurno`
 **Uso:** Cambiar fecha/hora de turno existente
+**Parámetros:** `id_turno` (del turno a modificar), `nueva_fecha`, `nueva_hora`, `dni` (para validación)
+**Acción:** Actualiza `fecha` y `hora` en hoja "Turnos", actualiza `fecha_de_registro`
 **Validación:** Solo del DNI del paciente actual
 
 ### 6. `cancelarTurno`
 **Uso:** Cancelar turno
+**Parámetros:** `id_turno`, `dni` (para validación)
+**Acción:** Actualiza `estado` a "Cancelado" en hoja "Turnos"
 **Validación:** Solo del DNI del paciente actual
 
 ### 7. `derivarASecretaria`
 **Uso:** Urgencias, recetas, problemas técnicos
+**Parámetros:** `nombre_completo`, `dni`, `telefono`, `motivo`, `observaciones` (opcional)
+**Acción:** Notifica a secretaria humana con todos los datos capturados
 
 ---
 
