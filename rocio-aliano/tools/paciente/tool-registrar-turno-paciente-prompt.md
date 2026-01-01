@@ -25,11 +25,13 @@ Registra un nuevo turno en la hoja "Turnos" de Google Sheets para el paciente ac
 - `tipo_consulta` (string): Tipo de consulta/estudio
   - Valores: `"Consulta"`, `"OCT"`, `"Campo Visual"`, `"Fondo de Ojo"`, etc.
 
-- `primera_vez` (string): Si es primera visita al consultorio
-  - Valores: `"SI"`, `"NO"`
-
 - `telefono` (string): Teléfono de contacto
   - Formato: `"11-2345-6789"`
+
+**⚠️ IMPORTANTE:** 
+- La tool **determina automáticamente** si es primera vez consultando la base de datos de pacientes
+- NO es necesario llamar `buscarPacientePorDNI` antes de usar esta tool
+- La tool se encarga de crear o actualizar el registro del paciente según corresponda
 
 ## 📤 RETORNA
 
@@ -86,20 +88,29 @@ Registra un nuevo turno en la hoja "Turnos" de Google Sheets para el paciente ac
 
 ### La tool ejecuta automáticamente:
 
-1. **Genera ID único** del turno:
+1. **Busca paciente en BD** por DNI:
+   - Consulta hoja "Pacientes" para verificar si existe
+   - Determina automáticamente si es primera vez
+
+2. **Determina `primera_vez`**:
+   - Si NO existe en "Pacientes" → `primera_vez: "SI"`
+   - Si existe y es PAMI con última visita > 1 año → `primera_vez: "SI"`
+   - Si existe y última visita < 1 año → `primera_vez: "NO"`
+
+3. **Genera ID único** del turno:
    ```javascript
    id = `turno_${fecha.replace(/\//g, '')}_${Date.now()}`
    // Ejemplo: "turno_06012025_1703952341234"
    ```
 
-2. **Registra en hoja "Turnos"**:
+4. **Registra en hoja "Turnos"**:
    - Guarda todos los datos proporcionados
+   - Incluye `primera_vez` determinado automáticamente
    - Establece `estado: "Confirmado"`
    - Registra `fecha_de_registro` actual
 
-3. **Si es paciente nuevo** (`primera_vez === "SI"`):
-   - Verifica que no exista en "Pacientes" (por DNI)
-   - Crea registro con:
+5. **Si es paciente nuevo**:
+   - Crea registro en "Pacientes" con:
      ```javascript
      {
        id: `pac_${dni}`,
@@ -112,8 +123,7 @@ Registra un nuevo turno en la hoja "Turnos" de Google Sheets para el paciente ac
      }
      ```
 
-4. **Si es paciente recurrente**:
-   - Busca paciente en "Pacientes" por DNI
+6. **Si es paciente recurrente**:
    - Actualiza `ultima_visita` con fecha del nuevo turno
    - Incrementa `total_consultas` en 1
 
@@ -145,7 +155,6 @@ Consulta para validar que el horario esté libre.
 - nombre: "María González"
 - dni: "35123456"
 - obra_social: "Particular"
-- primera_vez: "SI"
 - telefono: "11-2345-6789"
 
 [Disponibilidad consultada:]
@@ -162,13 +171,18 @@ Usuario: "Sí, me viene bien"
   dni: "35123456",
   obra_social: "Particular",
   tipo_consulta: "Consulta",
-  primera_vez: "SI",
   telefono: "11-2345-6789"
 })]
 
-→ Crea turno en "Turnos"
-→ Crea paciente en "Pacientes"
-→ Retorna: { status: "success", paciente_nuevo: true }
+→ Tool busca DNI en "Pacientes" (NO existe)
+→ Tool determina: primera_vez = "SI"
+→ Crea turno en "Turnos" con primera_vez: "SI"
+→ Crea paciente en "Pacientes" con total_consultas: 1
+→ Retorna: { 
+    status: "success", 
+    paciente_nuevo: true,
+    turno: { ..., primera_vez: "SI" }
+}
 
 Agente: "✅ Turno confirmado para el Lunes 6/1 a las 9:00.
          Le enviaremos un recordatorio el día anterior."
@@ -176,7 +190,14 @@ Agente: "✅ Turno confirmado para el Lunes 6/1 a las 9:00.
 
 ### Ejemplo 2: Paciente PAMI recurrente
 ```
-[Paciente ya existe, última visita: 15/11/2024]
+[Datos capturados:]
+- nombre: "José Pérez"
+- dni: "28999888"
+- obra_social: "PAMI"
+- tipo_consulta: "Control"
+- telefono: "11-9876-5432"
+
+[Usuario confirma horario]
 
 [Llama: registrarTurno({
   fecha: "06/01/2025",
@@ -185,20 +206,58 @@ Agente: "✅ Turno confirmado para el Lunes 6/1 a las 9:00.
   dni: "28999888",
   obra_social: "PAMI",
   tipo_consulta: "Control",
-  primera_vez: "NO",
   telefono: "11-9876-5432"
 })]
 
-→ Crea turno en "Turnos"
+→ Tool busca DNI en "Pacientes" (SÍ existe)
+→ Tool verifica ultima_visita: "15/11/2024" (hace 2 meses)
+→ Tool determina: primera_vez = "NO"
+→ Crea turno en "Turnos" con primera_vez: "NO"
 → Actualiza "Pacientes":
    • ultima_visita: "06/01/2025"
    • total_consultas: 5 → 6
+→ Retorna: { 
+    status: "success", 
+    paciente_nuevo: false,
+    turno: { ..., primera_vez: "NO" }
+}
 
 Agente: "✅ Turno confirmado para el Lunes 6/1 a las 10:00.
          Recuerde traer la app de PAMI con el código token."
 ```
 
-### Ejemplo 3: Error - Horario ocupado
+### Ejemplo 3: Paciente PAMI +1 año (considerado como primera vez)
+```
+[Llama: registrarTurno({
+  fecha: "06/01/2025",
+  hora: "9:00",
+  nombre_completo: "Carlos Ramírez",
+  dni: "30111222",
+  obra_social: "PAMI",
+  tipo_consulta: "Consulta",
+  telefono: "11-3333-4444"
+})]
+
+→ Tool busca DNI en "Pacientes" (SÍ existe)
+→ Tool verifica ultima_visita: "10/11/2023" (hace más de 1 año)
+→ Tool determina: primera_vez = "SI" (para efectos de PAMI)
+→ Crea turno en "Turnos" con primera_vez: "SI"
+→ Actualiza "Pacientes":
+   • ultima_visita: "06/01/2025"
+   • total_consultas: 2 → 3
+→ Retorna: { 
+    status: "success", 
+    paciente_nuevo: false,
+    turno: { ..., primera_vez: "SI" }
+}
+
+Agente: "✅ Turno confirmado para el Lunes 6/1 a las 9:00.
+         Como hace más de 1 año que no viene, necesita:
+         • App de PAMI con código token
+         • Orden de primera consulta (cod 429001)"
+```
+
+### Ejemplo 4: Error - Horario ocupado
 ```
 [Llama: registrarTurno({...
   fecha: "06/01/2025",
@@ -271,24 +330,38 @@ function validarDatosCompletos(datos) {
 ## 🔄 FLUJO COMPLETO DE REGISTRO
 
 ```
-1. Capturar datos del paciente (nombre, DNI, obra social)
-2. Validar requisitos PAMI (si aplica)
+1. Capturar datos del paciente (nombre, DNI, obra social, teléfono)
+2. Validar requisitos PAMI (si aplica: app + orden si primera vez)
 3. Determinar tipoDia según obra social
 4. Llamar consultarDisponibilidadAgenda({ tipoDia })
 5. Ofrecer fecha/hora disponible
 6. Usuario confirma
-7. ✅ Llamar registrarTurno({ ...datos })
+7. ✅ Llamar registrarTurno({ fecha, hora, nombre_completo, dni, obra_social, tipo_consulta, telefono })
+   → La tool automáticamente:
+   • Busca si el paciente existe en BD
+   • Determina si es primera vez (o +1 año para PAMI)
+   • Registra el turno
+   • Crea o actualiza el paciente
 8. Evaluar resultado:
-   ├─ Si success → Confirmar y dar instrucciones
+   ├─ Si success → Confirmar y dar instrucciones según primera_vez
    ├─ Si error HORARIO_OCUPADO → Buscar nueva disponibilidad
    ├─ Si error VALIDACION → Corregir dato y reintentar
    └─ Si error técnico → derivarASecretaria
-9. Enviar recordatorio final con todos los detalles
+9. Enviar recordatorio final con requisitos según obra social y primera_vez
 ```
 
 ## 📝 MENSAJE DE CONFIRMACIÓN
 
-### Estructura sugerida:
+### Estructura sugerida (basada en respuesta de la tool):
+
+```javascript
+// Leer respuesta de registrarTurno
+const resultado = registrarTurno({ ... });
+const turno = resultado.turno;
+const esPrimeraVez = turno.primera_vez === "SI";
+const esPAMI = turno.obra_social === "PAMI";
+```
+
 ```
 ✅ Turno confirmado
 
@@ -297,10 +370,17 @@ function validarDatosCompletos(datos) {
 👤 Paciente: [Nombre]
 🏥 Tipo: [Consulta/Estudio]
 
-[Si PAMI:]
-⚠️ Requisitos PAMI:
+[Si PAMI y primera_vez === "SI":]
+⚠️ Requisitos PAMI (Primera Vez):
 • App de PAMI con código token
-[Si primera vez: • Orden de primera consulta (cod 429001)]
+• Orden de primera consulta oftalmológica (código 429001)
+
+[Si PAMI y primera_vez === "NO":]
+⚠️ Requisito PAMI:
+• App de PAMI con código token
+
+[Si Particular:]
+💰 Consulta: $[PRECIO]
 
 📍 Dirección: [Dirección del consultorio]
 
