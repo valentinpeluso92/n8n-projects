@@ -5,12 +5,12 @@ Consulta horarios disponibles en la agenda de Google Sheets filtrando por tipo d
 ## 📋 PARÁMETROS
 
 **OBLIGATORIOS:**
-- `tipoDia` (string): Tipo de día según el tipo de paciente
+- `tipo_dia` (string): Tipo de día según el tipo de paciente
   - Valores válidos: `"PARTICULAR"`, `"PAMI_NUEVO"`, `"PAMI_VIEJO"`
   - Ver sección "LÓGICA DE SELECCIÓN" para determinar cuál usar
 
 **OPCIONALES:**
-- `fechaDesde` (string): Fecha desde la cual buscar (formato DD/MM/AAAA)
+- `fecha_desde` (string): Fecha desde la cual buscar (formato DD/MM/AAAA)
   - Default: Hoy
   - Ejemplo: `"06/01/2025"`
   - Útil para buscar disponibilidad en semana específica
@@ -22,33 +22,33 @@ Consulta horarios disponibles en la agenda de Google Sheets filtrando por tipo d
 {
   "status": "success",
   "mensaje": "Tengo lugar el Lunes 06/01/2025 a las 9:00",
-  "tipoDiaBuscado": "PAMI_NUEVO",
-  "proximoTurno": {
+  "tipo_dia_buscado": "PAMI_NUEVO",
+  "proximo_turno": {
     "fecha": "06/01/2025",
-    "diaSemana": "Lunes",
+    "dia_semana": "Lunes",
     "hora": "9:00"
   },
   "disponibilidad": [
     {
       "fecha": "06/01/2025",
-      "diaSemana": "Lunes",
-      "horariosLibres": ["9:00", "9:20", "10:00", "10:40", "11:00"],
-      "cantidadDisponibles": 5
+      "dia_semana": "Lunes",
+      "horarios_libres": ["9:00", "9:20", "10:00", "10:40", "11:00"],
+      "cantidad_disponibles": 5
     },
     {
       "fecha": "08/01/2025",
-      "diaSemana": "Miércoles",
-      "horariosLibres": ["8:40", "9:00", "11:20", "11:40"],
-      "cantidadDisponibles": 4
+      "dia_semana": "Miércoles",
+      "horarios_libres": ["8:40", "9:00", "11:20", "11:40"],
+      "cantidad_disponibles": 4
     }
   ],
-  "totalDiasDisponibles": 2,
-  "totalHorariosDisponibles": 9
+  "total_dias_disponibles": 2,
+  "total_horarios_disponibles": 9
 }
 ```
 
 **El agente debe:**
-- Leer `proximoTurno.fecha`, `proximoTurno.hora` y `proximoTurno.diaSemana`
+- Leer `proximo_turno.fecha`, `proximo_turno.hora` y `proximo_turno.dia_semana`
 - Responder: "Tengo lugar el Lunes 6/1 a las 9:00. ¿Le viene bien?"
 - Si rechaza, ofrecer alternativas de `disponibilidad` array
 
@@ -57,11 +57,11 @@ Consulta horarios disponibles en la agenda de Google Sheets filtrando por tipo d
 {
   "status": "success",
   "mensaje": "No hay horarios disponibles en los próximos días de este tipo",
-  "tipoDiaBuscado": "PARTICULAR",
-  "proximoTurno": null,
+  "tipo_dia_buscado": "PARTICULAR",
+  "proximo_turno": null,
   "disponibilidad": [],
-  "totalDiasDisponibles": 0,
-  "totalHorariosDisponibles": 0
+  "total_dias_disponibles": 0,
+  "total_horarios_disponibles": 0
 }
 ```
 
@@ -98,35 +98,35 @@ Consulta horarios disponibles en la agenda de Google Sheets filtrando por tipo d
 
 ## 🎯 LÓGICA DE SELECCIÓN DE TIPO DE DÍA
 
-### Determinar `tipoDia` según datos del paciente:
+### Determinar `tipo_dia` según datos del paciente:
 
 ```javascript
-function determinarTipoDia(obraSocial, esPrimeraVez, ultimaVisita) {
+function determinarTipoDia(obra_social, es_primera_vez, ultima_visita) {
   // 1. Particular u OSDE
-  if (obraSocial === "Particular" || obraSocial === "OSDE") {
+  if (obra_social === "Particular" || obra_social === "OSDE") {
     return "PARTICULAR";
   }
   
   // 2. Bebé (siempre PARTICULAR)
-  if (esBebe) {
+  if (es_bebe) {
     return "PARTICULAR";
   }
   
   // 3. PAMI
-  if (obraSocial === "PAMI") {
+  if (obra_social === "PAMI") {
     // Primera vez en el consultorio
-    if (esPrimeraVez) {
+    if (es_primera_vez) {
       return "PAMI_NUEVO";
     }
     
     // Ya vino antes, verificar cuándo
-    if (ultimaVisita) {
-      const fechaUltimaVisita = parseFecha(ultimaVisita); // DD/MM/AAAA
-      const haceUnAno = new Date();
-      haceUnAno.setFullYear(haceUnAno.getFullYear() - 1);
+    if (ultima_visita) {
+      const fecha_ultima_visita = parseFecha(ultima_visita); // DD/MM/AAAA
+      const hace_un_ano = new Date();
+      hace_un_ano.setFullYear(hace_un_ano.getFullYear() - 1);
       
       // Si última visita fue hace más de 1 año
-      if (fechaUltimaVisita < haceUnAno) {
+      if (fecha_ultima_visita < hace_un_ano) {
         return "PAMI_NUEVO"; // Necesita orden de primera vez
       } else {
         return "PAMI_VIEJO"; // Es control
@@ -144,7 +144,7 @@ function determinarTipoDia(obraSocial, esPrimeraVez, ultimaVisita) {
 
 ### Tabla de decisión rápida:
 
-| Obra Social | Primera Vez | Última Visita | → tipoDia |
+| Obra Social | Primera Vez | Última Visita | → tipo_dia |
 |-------------|-------------|---------------|-----------|
 | Particular  | -           | -             | `PARTICULAR` |
 | OSDE        | -           | -             | `PARTICULAR` |
@@ -169,21 +169,21 @@ Usuario: "35123456"
 Agente: "¿Tiene obra social?"
 Usuario: "Soy particular"
 
-[Determina: tipoDia = "PARTICULAR"]
+[Determina: tipo_dia = "PARTICULAR"]
 
 Agente: "¿Es su primera vez en el consultorio?"
 Usuario: "Sí"
 
 [Llama: consultarDisponibilidadAgenda({ 
-  tipoDia: "PARTICULAR" 
+  tipo_dia: "PARTICULAR" 
 })]
 
 → Retorna: {
     status: "success",
-    proximoTurno: { fecha: "06/01/2025", diaSemana: "Lunes", hora: "9:00" },
+    proximo_turno: { fecha: "06/01/2025", dia_semana: "Lunes", hora: "9:00" },
     disponibilidad: [
-      { fecha: "06/01/2025", horariosLibres: ["9:00", "9:20", "10:00"] },
-      { fecha: "08/01/2025", horariosLibres: ["8:40", "11:00"] }
+      { fecha: "06/01/2025", horarios_libres: ["9:00", "9:20", "10:00"] },
+      { fecha: "08/01/2025", horarios_libres: ["8:40", "11:00"] }
     ]
 }
 
@@ -206,7 +206,7 @@ Usuario: "28999888"
 Agente: "¿Tiene obra social?"
 Usuario: "PAMI"
 
-[Determina: es primera vez → tipoDia = "PAMI_NUEVO"]
+[Determina: es primera vez → tipo_dia = "PAMI_NUEVO"]
 
 Agente: "Como tiene PAMI, ¿es su primera vez o hace más de un año que no viene?"
 Usuario: "Primera vez"
@@ -218,12 +218,12 @@ Agente: "Va a necesitar:
 Usuario: "Sí, todo listo"
 
 [Llama: consultarDisponibilidadAgenda({ 
-  tipoDia: "PAMI_NUEVO" 
+  tipo_dia: "PAMI_NUEVO" 
 })]
 
 → Retorna: {
     status: "success",
-    proximoTurno: { fecha: "07/01/2025", diaSemana: "Martes", hora: "9:00" }
+    proximo_turno: { fecha: "07/01/2025", dia_semana: "Martes", hora: "9:00" }
 }
 
 Agente: "Tengo lugar el Martes 7/1 a las 9:00. ¿Le sirve?"
@@ -243,7 +243,7 @@ Usuario: "Tengo PAMI"
     }
 }
 
-[Calcula: ultima_visita hace +1 año → tipoDia = "PAMI_NUEVO"]
+[Calcula: ultima_visita hace +1 año → tipo_dia = "PAMI_NUEVO"]
 
 Agente: "Veo que hace más de un año que no viene.
          Va a necesitar orden de primera consulta del médico de cabecera.
@@ -251,7 +251,7 @@ Agente: "Veo que hace más de un año que no viene.
 Usuario: "Sí"
 
 [Llama: consultarDisponibilidadAgenda({ 
-  tipoDia: "PAMI_NUEVO" 
+  tipo_dia: "PAMI_NUEVO" 
 })]
 ```
 
@@ -265,7 +265,7 @@ Usuario: "Sí"
   }
 }
 
-[Calcula: ultima_visita < 1 año → tipoDia = "PAMI_VIEJO"]
+[Calcula: ultima_visita < 1 año → tipo_dia = "PAMI_VIEJO"]
 
 Agente: "Bienvenido/a de nuevo. Veo que vino en julio.
          Para el turno solo necesita la app de PAMI con el código.
@@ -273,18 +273,18 @@ Agente: "Bienvenido/a de nuevo. Veo que vino en julio.
 Usuario: "Sí"
 
 [Llama: consultarDisponibilidadAgenda({ 
-  tipoDia: "PAMI_VIEJO" 
+  tipo_dia: "PAMI_VIEJO" 
 })]
 ```
 
 ### Ejemplo 5: Sin disponibilidad
 ```
-[Llama: consultarDisponibilidadAgenda({ tipoDia: "PARTICULAR" })]
+[Llama: consultarDisponibilidadAgenda({ tipo_dia: "PARTICULAR" })]
 
 → Retorna: {
     status: "success",
     disponibilidad: [],
-    totalHorariosDisponibles: 0
+    total_horarios_disponibles: 0
 }
 
 Agente: "No tengo turnos disponibles en los próximos días.
@@ -306,7 +306,7 @@ Agente: "✅ Su solicitud fue registrada.
 
 ### Ejemplo 6: Error técnico
 ```
-[Llama: consultarDisponibilidadAgenda({ tipoDia: "PAMI_NUEVO" })]
+[Llama: consultarDisponibilidadAgenda({ tipo_dia: "PAMI_NUEVO" })]
 
 → Retorna: {
     status: "error",
@@ -354,8 +354,8 @@ Usuario: "Sí, el miércoles 8 a las 9:20"
 ```javascript
 const TIPOS_VALIDOS_PACIENTE = ["PARTICULAR", "PAMI_NUEVO", "PAMI_VIEJO"];
 
-function validarTipoDia(tipoDia) {
-  if (!TIPOS_VALIDOS_PACIENTE.includes(tipoDia)) {
+function validarTipoDia(tipo_dia) {
+  if (!TIPOS_VALIDOS_PACIENTE.includes(tipo_dia)) {
     return { 
       valido: false, 
       error: "Tipo de día inválido para agente paciente" 
@@ -367,10 +367,10 @@ function validarTipoDia(tipoDia) {
 
 ### 2. Validar fecha desde (si se proporciona):
 ```javascript
-function validarFechaDesde(fechaDesde) {
-  if (!fechaDesde) return { valido: true }; // Opcional
+function validarFechaDesde(fecha_desde) {
+  if (!fecha_desde) return { valido: true }; // Opcional
   
-  const fecha = parseFecha(fechaDesde); // DD/MM/AAAA
+  const fecha = parseFecha(fecha_desde); // DD/MM/AAAA
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
   
@@ -393,7 +393,7 @@ function validarFechaDesde(fechaDesde) {
 2. Buscar paciente en BD:
    [buscarPacientePorDNI({ dni })]
    
-3. Determinar tipoDia:
+3. Determinar tipo_dia:
    ├─ Si Particular/OSDE → "PARTICULAR"
    ├─ Si PAMI primera vez → "PAMI_NUEVO"
    ├─ Si PAMI + ultima_visita > 1 año → "PAMI_NUEVO"
@@ -404,15 +404,15 @@ function validarFechaDesde(fechaDesde) {
    - App con código token
    - Orden de primera consulta (si PAMI_NUEVO)
 
-5. ✅ Llamar consultarDisponibilidadAgenda({ tipoDia })
+5. ✅ Llamar consultarDisponibilidadAgenda({ tipo_dia })
 
 6. Evaluar resultado:
    ├─ Si status "error" → derivarASecretaria
    ├─ Si disponibilidad vacía → derivarASecretaria
-   └─ Si hay disponibilidad → Ofrecer proximoTurno
+   └─ Si hay disponibilidad → Ofrecer proximo_turno
 
 7. Usuario elige horario:
-   ├─ Acepta proximoTurno → registrarTurno
+   ├─ Acepta proximo_turno → registrarTurno
    └─ Rechaza → Ofrecer alternativas de array disponibilidad
 
 8. Confirmar y registrar turno
@@ -431,44 +431,44 @@ function validarFechaDesde(fechaDesde) {
 **Query lógica:**
 ```javascript
 // 1. Filtrar por tipo_dia
-const diasDelTipo = agenda.filter(row => row.json.tipo_dia === tipoDia);
+const dias_del_tipo = agenda.filter(row => row.json.tipo_dia === tipo_dia);
 
 // 2. Filtrar solo fechas futuras
 const hoy = new Date();
-const diasFuturos = diasDelTipo.filter(row => {
-  const fechaDia = parseFecha(row.json.fecha);
-  return fechaDia >= hoy;
+const dias_futuros = dias_del_tipo.filter(row => {
+  const fecha_dia = parseFecha(row.json.fecha);
+  return fecha_dia >= hoy;
 });
 
 // 3. Para cada día, calcular horarios libres
-const horariosStandard = ["8:40", "9:00", "9:20", "9:40", "10:00", 
+const horarios_standard = ["8:40", "9:00", "9:20", "9:40", "10:00", 
                           "10:40", "11:00", "11:20", "11:40"];
 
-const disponibilidad = diasFuturos.map(dia => {
+const disponibilidad = dias_futuros.map(dia => {
   const bloqueados = dia.json.horarios_bloqueados.split(',');
-  const turnosOcupados = obtenerTurnosDelDia(dia.json.fecha);
+  const turnos_ocupados = obtenerTurnosDelDia(dia.json.fecha);
   
-  const horariosLibres = horariosStandard.filter(hora => {
+  const horarios_libres = horarios_standard.filter(hora => {
     return !bloqueados.includes(hora) && 
-           !turnosOcupados.includes(hora);
+           !turnos_ocupados.includes(hora);
   });
   
   return {
     fecha: dia.json.fecha,
-    diaSemana: obtenerDiaSemana(dia.json.fecha),
-    horariosLibres: horariosLibres,
-    cantidadDisponibles: horariosLibres.length
+    dia_semana: obtenerDiaSemana(dia.json.fecha),
+    horarios_libres: horarios_libres,
+    cantidad_disponibles: horarios_libres.length
   };
 });
 
 // 4. Filtrar días con al menos 1 horario libre
-const diasConDisponibilidad = disponibilidad.filter(d => d.cantidadDisponibles > 0);
+const dias_con_disponibilidad = disponibilidad.filter(d => d.cantidad_disponibles > 0);
 
 // 5. Determinar próximo turno (primer horario del primer día)
-const proximoTurno = diasConDisponibilidad.length > 0 ? {
-  fecha: diasConDisponibilidad[0].fecha,
-  diaSemana: diasConDisponibilidad[0].diaSemana,
-  hora: diasConDisponibilidad[0].horariosLibres[0]
+const proximo_turno = dias_con_disponibilidad.length > 0 ? {
+  fecha: dias_con_disponibilidad[0].fecha,
+  dia_semana: dias_con_disponibilidad[0].dia_semana,
+  hora: dias_con_disponibilidad[0].horarios_libres[0]
 } : null;
 ```
 
@@ -476,34 +476,34 @@ const proximoTurno = diasConDisponibilidad.length > 0 ? {
 
 ❌ **NO hacer:**
 ```javascript
-// Llamar sin determinar tipoDia primero
-consultarDisponibilidadAgenda({ tipoDia: "PAMI" }); // ¡Incorrecto! No existe "PAMI"
+// Llamar sin determinar tipo_dia primero
+consultarDisponibilidadAgenda({ tipo_dia: "PAMI" }); // ¡Incorrecto! No existe "PAMI"
 
 // Usar tipos administrativos
-consultarDisponibilidadAgenda({ tipoDia: "CIRUGIA" }); // ¡Solo admin!
+consultarDisponibilidadAgenda({ tipo_dia: "CIRUGIA" }); // ¡Solo admin!
 
 // No validar resultado antes de usar
-const turno = resultado.proximoTurno; // Puede ser null!
+const turno = resultado.proximo_turno; // Puede ser null!
 
 // Llamar múltiples veces en el mismo flujo
-consultarDisponibilidadAgenda({ tipoDia: "PARTICULAR" });
+consultarDisponibilidadAgenda({ tipo_dia: "PARTICULAR" });
 // ... usuario rechaza ...
-consultarDisponibilidadAgenda({ tipoDia: "PARTICULAR" }); // ¡Redundante! Usar array disponibilidad
+consultarDisponibilidadAgenda({ tipo_dia: "PARTICULAR" }); // ¡Redundante! Usar array disponibilidad
 ```
 
 ✅ **SÍ hacer:**
 ```javascript
-// 1. Determinar tipoDia correctamente
-const tipoDia = determinarTipoDia(obraSocial, esPrimeraVez, ultimaVisita);
+// 1. Determinar tipo_dia correctamente
+const tipo_dia = determinarTipoDia(obra_social, es_primera_vez, ultima_visita);
 
 // 2. Validar antes de llamar
-const validacion = validarTipoDia(tipoDia);
+const validacion = validarTipoDia(tipo_dia);
 if (!validacion.valido) {
   return error(validacion.error);
 }
 
 // 3. Llamar UNA vez
-const resultado = consultarDisponibilidadAgenda({ tipoDia });
+const resultado = consultarDisponibilidadAgenda({ tipo_dia });
 
 // 4. Validar resultado
 if (resultado.status === "error") {
@@ -511,13 +511,13 @@ if (resultado.status === "error") {
 }
 
 // 5. Verificar disponibilidad
-if (!resultado.proximoTurno || resultado.totalHorariosDisponibles === 0) {
+if (!resultado.proximo_turno || resultado.total_horarios_disponibles === 0) {
   return derivarASecretaria({ motivo: "sin_disponibilidad" });
 }
 
-// 6. Usar proximoTurno
-const { fecha, hora, diaSemana } = resultado.proximoTurno;
-responder(`Tengo lugar el ${diaSemana} ${fecha} a las ${hora}`);
+// 6. Usar proximo_turno
+const { fecha, hora, dia_semana } = resultado.proximo_turno;
+responder(`Tengo lugar el ${dia_semana} ${fecha} a las ${hora}`);
 
 // 7. Si rechaza, usar array disponibilidad (mismo resultado)
 if (rechaza) {
@@ -530,15 +530,15 @@ if (rechaza) {
 
 ### Hay disponibilidad:
 ```
-"Tengo lugar el [DiaSemana] [fecha] a las [hora]. ¿Le viene bien?"
+"Tengo lugar el [dia_semana] [fecha] a las [hora]. ¿Le viene bien?"
 ```
 
 ### Múltiples opciones:
 ```
 "Tengo varios horarios disponibles:
-• [DiaSemana] [fecha] a las [hora]
-• [DiaSemana] [fecha] a las [hora]
-• [DiaSemana] [fecha] a las [hora]
+• [dia_semana] [fecha] a las [hora]
+• [dia_semana] [fecha] a las [hora]
+• [dia_semana] [fecha] a las [hora]
 
 ¿Cuál prefiere?"
 ```
@@ -558,7 +558,7 @@ if (rechaza) {
 ## 📝 NOTAS IMPORTANTES
 
 - 🔄 **Usar UNA sola vez** por solicitud de turno
-- ✅ **Validar tipoDia** antes de llamar
+- ✅ **Validar tipo_dia** antes de llamar
 - 📅 **Solo fechas futuras** en resultado
 - 🚫 **NO usar tipos admin** (CIRUGIA, CONTROL, MEDICION, DIA_LIBRE)
 - 💾 **Guardar resultado** en memoria del agente para no volver a llamar
@@ -568,4 +568,4 @@ if (rechaza) {
 
 ---
 
-**IMPORTANTE:** Determinar correctamente el `tipoDia` es CRÍTICO. Un error aquí significa ofrecer turnos del tipo equivocado de día.
+**IMPORTANTE:** Determinar correctamente el `tipo_dia` es CRÍTICO. Un error aquí significa ofrecer turnos del tipo equivocado de día.
