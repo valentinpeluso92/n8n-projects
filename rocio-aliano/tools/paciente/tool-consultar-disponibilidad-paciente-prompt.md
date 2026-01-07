@@ -9,8 +9,10 @@ Consulta horarios disponibles en la agenda de Google Sheets filtrando por tipo d
 - Verificar si hay disponibilidad antes de confirmar un turno
 - Ofrecer opciones de fechas y horarios al paciente
 
-**Requisito previo:**
-- Debes conocer la obra social del paciente para determinar el `tipo_dia` correcto (PARTICULAR, PAMI_NUEVO, PAMI_VIEJO)
+**Requisitos previos:**
+1. Debes conocer la obra social del paciente
+2. **Si es PAMI:** PRIMERO llamar a `buscarPacientePorDNI` para determinar si es PAMI_NUEVO o PAMI_VIEJO según su última visita
+3. Si es PARTICULAR u OSDE: usar `tipo_dia: "PARTICULAR"` directamente
 
 ## 📋 PARÁMETROS
 

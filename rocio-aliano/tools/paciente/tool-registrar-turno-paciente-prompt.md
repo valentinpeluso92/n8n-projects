@@ -9,8 +9,9 @@ Registra un nuevo turno en la hoja "Turnos" de Google Sheets para el paciente ac
 - Crear el registro completo del turno en el sistema
 - Registrar un paciente nuevo automáticamente si es su primera vez
 
-**Requisito previo:**
+**Requisitos previos:**
 - Debes haber capturado TODOS los datos requeridos: nombre completo, DNI, obra social, teléfono, tipo de consulta, fecha y horario elegidos
+- NO necesitas llamar a `buscarPacientePorDNI` antes - Esta tool lo hace automáticamente para determinar si es primera vez
 
 ## 📋 PARÁMETROS
 
