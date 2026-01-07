@@ -100,8 +100,10 @@ Consulta horarios disponibles en la agenda de Google Sheets filtrando por tipo d
 
 ### Determinar `tipo_dia` según datos del paciente:
 
+**⚠️ IMPORTANTE:** NO buscar al paciente en BD durante FLUJO A. Preguntar directamente al usuario.
+
 ```javascript
-function determinarTipoDia(obra_social, es_primera_vez, ultima_visita) {
+function determinarTipoDia(obra_social, respuesta_ha_venido_antes, respuesta_cuando_ultima_visita) {
   // 1. Particular u OSDE
   if (obra_social === "Particular" || obra_social === "OSDE") {
     return "PARTICULAR";
@@ -112,28 +114,25 @@ function determinarTipoDia(obra_social, es_primera_vez, ultima_visita) {
     return "PARTICULAR";
   }
   
-  // 3. PAMI
+  // 3. PAMI - Preguntar directamente al usuario
   if (obra_social === "PAMI") {
-    // Primera vez en el consultorio
-    if (es_primera_vez) {
+    // Pregunta: "¿Ya ha venido antes al consultorio?"
+    if (respuesta_ha_venido_antes === "NO") {
       return "PAMI_NUEVO";
     }
     
-    // Ya vino antes, verificar cuándo
-    if (ultima_visita) {
-      const fecha_ultima_visita = parseFecha(ultima_visita); // DD/MM/AAAA
-      const hace_un_ano = new Date();
-      hace_un_ano.setFullYear(hace_un_ano.getFullYear() - 1);
-      
-      // Si última visita fue hace más de 1 año
-      if (fecha_ultima_visita < hace_un_ano) {
-        return "PAMI_NUEVO"; // Necesita orden de primera vez
+    // Si ya vino, preguntar: "¿Recuerda cuándo fue su última visita?"
+    if (respuesta_ha_venido_antes === "SI") {
+      // Respuesta: "Hace más de 1 año" → PAMI_NUEVO
+      // Respuesta: "Hace menos de 1 año" o "Este año" → PAMI_VIEJO
+      if (respuesta_cuando_ultima_visita === "mas_de_un_anio") {
+        return "PAMI_NUEVO";
       } else {
-        return "PAMI_VIEJO"; // Es control
+        return "PAMI_VIEJO";
       }
     }
     
-    // No sabemos última visita, asumir primera vez
+    // Default: si no está seguro, usar PAMI_NUEVO (más restrictivo)
     return "PAMI_NUEVO";
   }
   
@@ -144,14 +143,24 @@ function determinarTipoDia(obra_social, es_primera_vez, ultima_visita) {
 
 ### Tabla de decisión rápida:
 
-| Obra Social | Primera Vez | Última Visita | → tipo_dia |
-|-------------|-------------|---------------|-----------|
-| Particular  | -           | -             | `PARTICULAR` |
-| OSDE        | -           | -             | `PARTICULAR` |
-| PAMI        | ✅ SÍ       | -             | `PAMI_NUEVO` |
-| PAMI        | ❌ NO       | > 1 año       | `PAMI_NUEVO` |
-| PAMI        | ❌ NO       | < 1 año       | `PAMI_VIEJO` |
-| Bebé        | -           | -             | `PARTICULAR` |
+| Obra Social | Respuesta Usuario "¿Ha venido antes?" | Última visita | → tipo_dia |
+|-------------|--------------------------------------|---------------|-----------|
+| Particular  | -                                    | -             | `PARTICULAR` |
+| OSDE        | -                                    | -             | `PARTICULAR` |
+| PAMI        | "NO" (primera vez)                   | -             | `PAMI_NUEVO` |
+| PAMI        | "SÍ" → "Hace más de 1 año"          | > 1 año       | `PAMI_NUEVO` |
+| PAMI        | "SÍ" → "Hace menos de 1 año"        | < 1 año       | `PAMI_VIEJO` |
+| Bebé        | -                                    | -             | `PARTICULAR` |
+
+### Preguntas a hacer al usuario PAMI:
+
+1. **Primera pregunta:** "¿Ya ha venido antes al consultorio de la Dra. Aliano?"
+   - Si NO → `tipoDia = "PAMI_NUEVO"`
+   - Si SÍ → Hacer segunda pregunta
+
+2. **Segunda pregunta (si dijo SÍ):** "¿Recuerda aproximadamente cuándo fue su última visita?"
+   - "Hace más de un año" → `tipoDia = "PAMI_NUEVO"`
+   - "Hace menos de un año" / "Este año" → `tipoDia = "PAMI_VIEJO"`
 
 ## 💡 EJEMPLOS DE USO COMPLETOS
 
@@ -163,16 +172,20 @@ Usuario: "María González"
 Agente: "¿Y su DNI?"
 Usuario: "35123456"
 
-[Llama: buscarPacientePorDNI({ dni: "35123456" })]
-→ Retorna: { encontrado: false } // Es paciente nuevo
+[⚠️ NO buscar paciente aquí - es FLUJO A]
 
 Agente: "¿Tiene obra social?"
 Usuario: "Soy particular"
 
-[Determina: tipo_dia = "PARTICULAR"]
+[Determina: tipo_dia = "PARTICULAR" (directo para Particular/OSDE)]
 
-Agente: "¿Es su primera vez en el consultorio?"
-Usuario: "Sí"
+Agente: "¿Me dice su número de teléfono?"
+Usuario: "2342-567890"
+
+Agente: "¿Es para consulta con la doctora o para un estudio?"
+Usuario: "Consulta"
+
+[Ahora SÍ consultar disponibilidad]
 
 [Llama: consultarDisponibilidadAgenda({ 
   tipo_dia: "PARTICULAR" 
@@ -196,20 +209,28 @@ Usuario: "Sí perfecto"
 ### Ejemplo 2: PAMI Primera vez - Hay disponibilidad
 ```
 Usuario: "Necesito un turno"
-Agente: "¿Su nombre?"
+Agente: "¿Me dice su nombre completo?"
 Usuario: "José Pérez"
-Agente: "¿DNI?"
+Agente: "¿Y su DNI?"
 Usuario: "28999888"
 
-[buscarPacientePorDNI → encontrado: false]
+[⚠️ NO buscar paciente - es FLUJO A]
 
 Agente: "¿Tiene obra social?"
 Usuario: "PAMI"
 
-[Determina: es primera vez → tipo_dia = "PAMI_NUEVO"]
+[Es PAMI → Preguntar historial para determinar tipoDia]
 
-Agente: "Como tiene PAMI, ¿es su primera vez o hace más de un año que no viene?"
-Usuario: "Primera vez"
+Agente: "¿Ya ha venido antes al consultorio de la Dra. Aliano?"
+Usuario: "No, es mi primera vez"
+
+[Respuesta: NO → tipo_dia = "PAMI_NUEVO"]
+
+Agente: "¿Me dice su número de teléfono?"
+Usuario: "2342-123456"
+
+Agente: "¿Es para consulta o para un estudio?"
+Usuario: "Consulta"
 
 Agente: "Va a necesitar:
 ⚠️ App de PAMI con código token
@@ -232,23 +253,26 @@ Agente: "Tengo lugar el Martes 7/1 a las 9:00. ¿Le sirve?"
 ### Ejemplo 3: PAMI Recurrente (+1 año) - Es PAMI_NUEVO
 ```
 Usuario: "Quiero turno"
-[... captura datos...]
+[... captura nombre, DNI, obra social...]
 Usuario: "Tengo PAMI"
 
-[Llama: buscarPacientePorDNI({ dni: "30555666" })]
-→ Retorna: { 
-    encontrado: true,
-    paciente: { 
-      ultima_visita: "10/11/2023"  // Hace más de 1 año
-    }
-}
+[⚠️ NO buscar paciente - Preguntar directamente]
 
-[Calcula: ultima_visita hace +1 año → tipo_dia = "PAMI_NUEVO"]
+Agente: "¿Ya ha venido antes al consultorio de la Dra. Aliano?"
+Usuario: "Sí, pero hace mucho"
 
-Agente: "Veo que hace más de un año que no viene.
-         Va a necesitar orden de primera consulta del médico de cabecera.
-         ¿Ya la tiene?"
+Agente: "¿Recuerda aproximadamente cuándo fue su última visita?"
+Usuario: "Creo que hace más de un año"
+
+[Respuesta: Más de 1 año → tipo_dia = "PAMI_NUEVO"]
+
+Agente: "Como hace más de un año, va a necesitar:
+         • App de PAMI con código token
+         • Orden de primera consulta del médico de cabecera
+         ¿Ya tiene ambas?"
 Usuario: "Sí"
+
+[Capturar teléfono y tipo de consulta]
 
 [Llama: consultarDisponibilidadAgenda({ 
   tipo_dia: "PAMI_NUEVO" 
@@ -257,20 +281,23 @@ Usuario: "Sí"
 
 ### Ejemplo 4: PAMI Recurrente (menos de 1 año) - PAMI_VIEJO
 ```
-[buscarPacientePorDNI retorna:]
-{
-  encontrado: true,
-  paciente: { 
-    ultima_visita: "15/07/2024"  // Hace 5 meses
-  }
-}
+Usuario: "Necesito turno"
+[... captura datos...]
+Usuario: "PAMI"
 
-[Calcula: ultima_visita < 1 año → tipo_dia = "PAMI_VIEJO"]
+Agente: "¿Ya ha venido antes al consultorio?"
+Usuario: "Sí, vine hace unos meses"
 
-Agente: "Bienvenido/a de nuevo. Veo que vino en julio.
-         Para el turno solo necesita la app de PAMI con el código.
+Agente: "¿Recuerda cuándo aproximadamente?"
+Usuario: "En julio de este año"
+
+[Respuesta: Menos de 1 año → tipo_dia = "PAMI_VIEJO"]
+
+Agente: "Perfecto, para el turno solo necesita la app de PAMI con el código.
          ¿La tiene?"
 Usuario: "Sí"
+
+[Capturar teléfono y tipo de consulta]
 
 [Llama: consultarDisponibilidadAgenda({ 
   tipo_dia: "PAMI_VIEJO" 
@@ -289,11 +316,11 @@ Usuario: "Sí"
 
 Agente: "No tengo turnos disponibles en los próximos días.
          ¿Me deja su teléfono? La secretaria lo llama para coordinar."
-Usuario: "11-2345-6789"
+Usuario: "2342-567890"
 
 [Llama: derivarASecretaria({
   nombre_completo: "María González",
-  telefono: "11-2345-6789",
+  telefono: "2342-567890",
   dni: "35123456",
   motivo: "solicitar_turno",
   observaciones: "Sin disponibilidad para PARTICULAR en agenda",
@@ -316,11 +343,11 @@ Agente: "✅ Su solicitud fue registrada.
 
 Agente: "Disculpe, tengo un problema técnico con la agenda.
          ¿Me deja su teléfono? La secretaria lo llama hoy para agendar."
-Usuario: "11-9999-8888"
+Usuario: "2342-123456"
 
 [Llama: derivarASecretaria({
   nombre_completo: "José Pérez",
-  telefono: "11-9999-8888",
+  telefono: "2342-123456",
   dni: "28999888",
   motivo: "error_tecnico",
   observaciones: "Error al consultar agenda PAMI_NUEVO. Timeout en Google Sheets.",
@@ -382,27 +409,36 @@ function validarFechaDesde(fecha_desde) {
 }
 ```
 
-## 🔄 FLUJO COMPLETO
+## 🔄 FLUJO COMPLETO (FLUJO A - Solicitar turno nuevo)
 
 ```
 1. Capturar datos del paciente:
    - Nombre completo
    - DNI
    - Obra social
-
-2. Buscar paciente en BD:
-   [buscarPacientePorDNI({ dni })]
    
-3. Determinar tipo_dia:
-   ├─ Si Particular/OSDE → "PARTICULAR"
-   ├─ Si PAMI primera vez → "PAMI_NUEVO"
-   ├─ Si PAMI + ultima_visita > 1 año → "PAMI_NUEVO"
-   ├─ Si PAMI + ultima_visita < 1 año → "PAMI_VIEJO"
-   └─ Si bebé → "PARTICULAR"
+2. Determinar tipo_dia (SIN buscar en BD):
+   
+   Si Particular/OSDE:
+   └─ tipo_dia = "PARTICULAR" (directo)
+   
+   Si PAMI:
+   ├─ Preguntar: "¿Ya ha venido antes?"
+   │  ├─ NO → tipo_dia = "PAMI_NUEVO"
+   │  └─ SÍ → Preguntar: "¿Cuándo fue su última visita?"
+   │     ├─ "Hace más de 1 año" → tipo_dia = "PAMI_NUEVO"
+   │     └─ "Hace menos de 1 año" → tipo_dia = "PAMI_VIEJO"
+   
+   Si bebé:
+   └─ tipo_dia = "PARTICULAR"
+
+3. Capturar datos restantes:
+   - Teléfono
+   - Tipo de consulta
 
 4. Validar requisitos PAMI (si aplica):
-   - App con código token
-   - Orden de primera consulta (si PAMI_NUEVO)
+   - App con código token (siempre)
+   - Orden de primera consulta (solo si PAMI_NUEVO)
 
 5. ✅ Llamar consultarDisponibilidadAgenda({ tipo_dia })
 
@@ -415,7 +451,7 @@ function validarFechaDesde(fecha_desde) {
    ├─ Acepta proximo_turno → registrarTurno
    └─ Rechaza → Ofrecer alternativas de array disponibilidad
 
-8. Confirmar y registrar turno
+8. Confirmar y registrar turno con registrarTurno
 ```
 
 ## 📊 ESTRUCTURA GOOGLE SHEETS

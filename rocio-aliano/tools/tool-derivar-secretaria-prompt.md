@@ -9,7 +9,7 @@ Deriva el caso a la secretaria humana cuando el agente no puede resolver la cons
   - Ejemplo: `"María González"`
 
 - `telefono` (string): Teléfono de contacto
-  - Formato: `"11-2345-6789"`
+  - Formato: `"2342-567890"`
 
 - `motivo` (string): Categoría de derivación
   - Valores: 
@@ -46,7 +46,7 @@ Deriva el caso a la secretaria humana cuando el agente no puede resolver la cons
     "id": "deriv_1703952341234",
     "nombre_completo": "María González",
     "dni": "35123456",
-    "telefono": "11-2345-6789",
+    "telefono": "2342-567890",
     "motivo": "urgencia",
     "observaciones": "Ojo rojo con dolor intenso",
     "prioridad": "alta",
@@ -144,11 +144,11 @@ Agente: "Entiendo que tiene molestia en el ojo.
          
          ¿Me confirma su nombre y teléfono para que la contacten urgente?"
 
-Usuario: "María González, 11-2345-6789"
+Usuario: "María González, 2342-567890"
 
 [Llama: derivarASecretaria({
   nombre_completo: "María González",
-  telefono: "11-2345-6789",
+  telefono: "2342-567890",
   motivo: "urgencia",
   observaciones: "Dolor intenso y ojo muy rojo",
   prioridad: "alta"
@@ -164,8 +164,9 @@ Agente: "✅ Su caso fue derivado como URGENCIA.
          
          Si el dolor empeora, vaya a guardia médica.
          
-         Consultorio: [DIRECCIÓN]
-         Teléfono directo: [TELÉFONO]"
+         📍 Consultorio: Lavalle 241, Bragado
+         🗺️ Google Maps: https://www.google.com/maps/search/?api=1&query=calle+lavalle+241+bragado
+         📞 Teléfono directo: [TELÉFONO]"
 ```
 
 ### Ejemplo 2: Solicitud de receta
@@ -178,11 +179,11 @@ Agente: "Para recetas necesito derivarlo/a con la secretaria.
          
          ¿Me dice su nombre y teléfono?"
 
-Usuario: "José Pérez, 11-9876-5432"
+Usuario: "José Pérez, 2342-567891"
 
 [Llama: derivarASecretaria({
   nombre_completo: "José Pérez",
-  telefono: "11-9876-5432",
+  telefono: "2342-567891",
   dni: "28999888",  // Si se capturó antes
   motivo: "receta",
   observaciones: "Solicita receta de anteojos",
@@ -202,11 +203,11 @@ Usuario: "Cuánto sale el OCT macular?"
 Agente: "Para presupuestos necesito que hable con la secretaria.
          ¿Me dice su nombre y teléfono?"
 
-Usuario: "Ana López, 11-5555-1234"
+Usuario: "Ana López, 2342-567892"
 
 [Llama: derivarASecretaria({
   nombre_completo: "Ana López",
-  telefono: "11-5555-1234",
+  telefono: "2342-567892",
   motivo: "presupuesto",
   observaciones: "Consulta precio OCT macular",
   prioridad: "media"
@@ -230,7 +231,7 @@ Agente: "Disculpe, tengo un problema técnico con la agenda.
          ¿Me deja su teléfono? La secretaria lo llama hoy 
          para coordinar el turno."
 
-Usuario: "35123456, teléfono 11-2345-6789"
+Usuario: "35123456, teléfono 2342-567890"
 
 [Llama: derivarASecretaria({
   nombre_completo: "Nombre capturado anteriormente",
@@ -257,11 +258,11 @@ Agente: "Por el momento trabajamos con PAMI, OSDE y Particular.
          Para consultar sobre Swiss Medical, 
          ¿me deja su teléfono? La secretaria puede informarle."
 
-Usuario: "Sí, 11-3333-4444, soy Roberto Díaz"
+Usuario: "Sí, 2342-567893, soy Roberto Díaz"
 
 [Llama: derivarASecretaria({
   nombre_completo: "Roberto Díaz",
-  telefono: "11-3333-4444",
+  telefono: "2342-567893",
   motivo: "obra_social",
   observaciones: "Consulta por Swiss Medical",
   prioridad: "baja"
@@ -337,9 +338,10 @@ Agente: "✅ Su caso fue derivado como urgente.
 "✅ Su caso fue derivado como URGENCIA.
 La secretaria lo contactará en los próximos 30 minutos.
 
-Consultorio: [DIRECCIÓN]
-Teléfono directo: [TELÉFONO]
-Horario: Lunes a Viernes 9-12hs
+📍 Consultorio: Lavalle 241, Bragado
+🗺️ Google Maps: https://www.google.com/maps/search/?api=1&query=calle+lavalle+241+bragado
+📞 Teléfono directo: [TELÉFONO]
+⏰ Horario: Lunes a Viernes 9-12hs
 
 [Si es urgencia médica:
 Si el problema empeora, vaya a guardia médica.]"
@@ -360,9 +362,10 @@ Si prefiere, puede llamar directamente:
 "Disculpe, no pude registrar su consulta por un problema técnico.
 
 Por favor comuníquese directamente:
-📞 [TELÉFONO]
-⏰ Lunes a Viernes 9-12hs
-📍 [DIRECCIÓN]
+📞 Teléfono: [TELÉFONO]
+⏰ Horario: Lunes a Viernes 9-12hs
+📍 Consultorio: Lavalle 241, Bragado
+🗺️ Google Maps: https://www.google.com/maps/search/?api=1&query=calle+lavalle+241+bragado
 
 Disculpe las molestias."
 ```

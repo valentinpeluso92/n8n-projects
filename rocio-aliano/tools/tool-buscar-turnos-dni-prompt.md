@@ -35,7 +35,7 @@ Busca todos los turnos de un paciente en la hoja "Turnos" de Google Sheets filtr
       "tipo_consulta": "Consulta",
       "primera_vez": "NO",
       "estado": "Confirmado",
-      "telefono": "11-2345-6789",
+      "telefono": "2342-567890",
       "fecha_de_registro": "30/12/2024 14:30"
     },
     {
@@ -48,7 +48,7 @@ Busca todos los turnos de un paciente en la hoja "Turnos" de Google Sheets filtr
       "tipo_consulta": "Control",
       "primera_vez": "NO",
       "estado": "Pendiente",
-      "telefono": "11-2345-6789",
+      "telefono": "2342-567890",
       "fecha_de_registro": "30/12/2024 15:45"
     }
   ],

@@ -20,7 +20,7 @@ Busca un paciente en la hoja "Pacientes" de Google Sheets por su número de DNI.
     "dni": "35123456",
     "nombre_completo": "María González",
     "obra_social": "PAMI",
-    "telefono": "11-2345-6789",
+    "telefono": "2342-567890",
     "ultima_visita": "15/11/2024",
     "total_consultas": 3
   },
@@ -50,9 +50,15 @@ Busca un paciente en la hoja "Pacientes" de Google Sheets por su número de DNI.
 ## 🎯 CUÁNDO USAR
 
 ### Agente PACIENTE:
-1. **Al inicio del flujo de solicitud de turno** - Para verificar si es paciente nuevo o recurrente
-2. **Antes de modificar/cancelar turno** - Para validar identidad
-3. **Para determinar tipo PAMI** - Si `ultima_visita` > 1 año = PAMI_NUEVO, sino PAMI_VIEJO
+
+**❌ NO USAR en FLUJO A (Solicitar turno nuevo):**
+- La tool `registrarTurno` ya busca automáticamente al paciente
+- NO es necesario llamar esta tool antes de registrar un turno
+
+**✅ SÍ USAR en FLUJO B y C:**
+1. **FLUJO B - Consultar turno existente** - Para obtener datos del paciente antes de buscar turnos
+2. **FLUJO C - Modificar/Cancelar turno** - Para validar identidad antes de modificar
+3. **Consultas administrativas** - Para ver historial y datos de contacto
 
 ### Agente ADMINISTRADOR:
 1. **Búsqueda rápida de info de paciente**
@@ -61,29 +67,38 @@ Busca un paciente en la hoja "Pacientes" de Google Sheets por su número de DNI.
 
 ## 📊 LÓGICA DE USO
 
+### FLUJO B - Consultar turno:
 ```javascript
-// 1. Paciente solicita turno
+// Usuario: "¿Qué turno tengo?"
+// Agente: "¿Me dice su DNI?"
+
 const resultado = buscarPacientePorDNI({ dni: "35123456" });
 
 if (resultado.encontrado) {
-  // Paciente existe
   const paciente = resultado.paciente;
+  responder(`Hola ${paciente.nombre_completo}`);
   
-  // Determinar tipo PAMI si corresponde
-  if (paciente.obra_social === "PAMI") {
-    const ultimaVisita = parseDate(paciente.ultima_visita);
-    const haceUnAno = new Date();
-    haceUnAno.setFullYear(haceUnAno.getFullYear() - 1);
-    
-    const tipoDia = ultimaVisita < haceUnAno ? "PAMI_NUEVO" : "PAMI_VIEJO";
-  }
-  
-  // Pre-cargar datos para confirmar
-  responder(`Bienvenido/a de nuevo ${paciente.nombre_completo}`);
+  // Ahora buscar sus turnos
+  buscarTurnosPorDNI({ dni: paciente.dni });
   
 } else {
-  // Paciente nuevo
-  responder("Es su primera vez, voy a registrar sus datos.");
+  responder("No encuentro un registro con ese DNI.");
+}
+```
+
+### FLUJO C - Modificar/Cancelar:
+```javascript
+// Usuario: "Quiero cancelar mi turno"
+// Agente: "¿Me dice su DNI?"
+
+const resultado = buscarPacientePorDNI({ dni: "35123456" });
+
+if (resultado.encontrado) {
+  // Verificar que tiene turnos y proceder
+  const turnos = buscarTurnosPorDNI({ dni: resultado.paciente.dni });
+  // ... continuar con cancelación
+} else {
+  responder("No encuentro turnos con ese DNI.");
 }
 ```
 
@@ -108,7 +123,7 @@ if (resultado.encontrado) {
 - `dni`: string (ej: "35123456")
 - `nombre_completo`: string
 - `obra_social`: string ("PAMI", "OSDE", "Particular")
-- `telefono`: string (formato: "11-2345-6789")
+- `telefono`: string (formato: "2342-567890" con código de área)
 - `ultima_visita`: string (formato: "DD/MM/AAAA")
 - `total_consultas`: number
 
@@ -120,21 +135,10 @@ const paciente = pacientes.find(row => row.json.dni === dni);
 
 ## 💡 EJEMPLOS DE USO
 
-### Ejemplo 1: Verificar si es primera vez
+### Ejemplo 1: FLUJO B - Consultar turno existente
 ```
-Usuario: "Quiero un turno"
-Agente: "¿Me dice su DNI?"
-Usuario: "35123456"
-
-[Llama: buscarPacientePorDNI({ dni: "35123456" })]
-→ Retorna: { encontrado: false }
-
-Agente: "Es su primera vez en el consultorio. 
-         ¿Me dice su nombre completo?"
-```
-
-### Ejemplo 2: Paciente recurrente
-```
+Usuario: "¿Qué turno tengo?"
+Agente: "Para ver su turno, ¿me dice su DNI?"
 Usuario: "35123456"
 
 [Llama: buscarPacientePorDNI({ dni: "35123456" })]
@@ -147,25 +151,38 @@ Usuario: "35123456"
     }
 }
 
-Agente: "Bienvenida de nuevo María. 
-         Veo que tiene PAMI, ¿verdad?"
+Agente: "Bienvenida de nuevo María."
+
+[Ahora buscar sus turnos con buscarTurnosPorDNI]
 ```
 
-### Ejemplo 3: Determinar tipo de día PAMI
+### Ejemplo 2: FLUJO C - Antes de cancelar turno
 ```
-Usuario: "Tengo PAMI"
+Usuario: "Quiero cancelar mi turno"
+Agente: "Para ayudarlo/a, necesito verificar su identidad. ¿Me dice su DNI?"
+Usuario: "28999888"
 
-[Llama: buscarPacientePorDNI({ dni: "35123456" })]
+[Llama: buscarPacientePorDNI({ dni: "28999888" })]
 → Retorna: { 
-    paciente: { 
-      ultima_visita: "15/01/2023"  // Hace más de 1 año
-    }
+    encontrado: true,
+    paciente: { nombre_completo: "José Pérez" }
 }
 
-→ Determinar: ultima_visita > 1 año → tipoDia = "PAMI_NUEVO"
+[Verificar que tiene turnos y proceder a cancelar]
+```
 
-Agente: "Como hace más de un año que no viene, 
-         va a necesitar la orden de primera consulta."
+### Ejemplo 3: Paciente NO encontrado
+```
+Usuario: "¿Cuándo es mi turno?"
+Agente: "¿Me dice su DNI?"
+Usuario: "40111222"
+
+[Llama: buscarPacientePorDNI({ dni: "40111222" })]
+→ Retorna: { encontrado: false }
+
+Agente: "No encuentro un registro con ese DNI. 
+         ¿Está seguro/a del número?
+         O si prefiere, puedo ayudarle a solicitar un turno nuevo."
 ```
 
 ## ⚠️ VALIDACIONES
@@ -195,19 +212,30 @@ function necesitaOrdenPrimeraVez(ultimaVisita) {
 }
 ```
 
-## 🔄 FLUJO TÍPICO
+## 🔄 FLUJOS DE USO
 
+### FLUJO A - Solicitar turno nuevo:
 ```
-1. Usuario proporciona DNI
-2. Llamar buscarPacientePorDNI({ dni })
-3. Evaluar resultado:
-   ├─ Si encontrado = false → Registrar como nuevo
-   ├─ Si encontrado = true → Validar datos
-   │  ├─ Si PAMI → Verificar ultima_visita
-   │  │  ├─ +1 año → Solicitar orden primera vez
-   │  │  └─ -1 año → No necesita orden
-   │  └─ Si Particular/OSDE → Continuar normal
-   └─ Si error → derivarASecretaria
+❌ NO llamar buscarPacientePorDNI
+→ registrarTurno lo hace automáticamente
+```
+
+### FLUJO B - Consultar turno existente:
+```
+1. Usuario: "¿Qué turno tengo?"
+2. Pedir DNI
+3. ✅ Llamar buscarPacientePorDNI({ dni })
+4. Si encontrado → buscarTurnosPorDNI({ dni })
+5. Si no encontrado → Informar que no tiene turnos
+```
+
+### FLUJO C - Modificar/Cancelar:
+```
+1. Usuario: "Quiero cancelar mi turno"
+2. Pedir DNI
+3. ✅ Llamar buscarPacientePorDNI({ dni })
+4. Si encontrado → Verificar turnos y proceder
+5. Si no encontrado → Informar que no tiene turnos
 ```
 
 ## 🚫 ERRORES COMUNES

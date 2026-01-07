@@ -26,7 +26,9 @@ Registra un nuevo turno en la hoja "Turnos" de Google Sheets para el paciente ac
   - Valores: `"Consulta"`, `"OCT"`, `"Campo Visual"`, `"Fondo de Ojo"`, etc.
 
 - `telefono` (string): Teléfono de contacto
-  - Formato: `"11-2345-6789"`
+  - Formato recomendado: `"2342-567890"` (código de área + número)
+  - También aceptado: `"2342567890"` (sin guiones)
+  - Ejemplo: `"2342-123456"`, `"11-23456789"`
 
 **⚠️ IMPORTANTE:** 
 - La tool **determina automáticamente** si es primera vez consultando la base de datos de pacientes
@@ -49,7 +51,7 @@ Registra un nuevo turno en la hoja "Turnos" de Google Sheets para el paciente ac
     "tipo_consulta": "Consulta",
     "primera_vez": "NO",
     "estado": "Confirmado",
-    "telefono": "11-2345-6789",
+    "telefono": "2342-567890",
     "fecha_de_registro": "31/12/2024 10:30"
   },
   "paciente_nuevo": false,
@@ -155,7 +157,7 @@ Consulta para validar que el horario esté libre.
 - nombre: "María González"
 - dni: "35123456"
 - obra_social: "Particular"
-- telefono: "11-2345-6789"
+- telefono: "2342-567890"
 
 [Disponibilidad consultada:]
 - fecha: "06/01/2025"
@@ -171,7 +173,7 @@ Usuario: "Sí, me viene bien"
   dni: "35123456",
   obra_social: "Particular",
   tipo_consulta: "Consulta",
-  telefono: "11-2345-6789"
+  telefono: "2342-567890"
 })]
 
 → Tool busca DNI en "Pacientes" (NO existe)
@@ -195,7 +197,7 @@ Agente: "✅ Turno confirmado para el Lunes 6/1 a las 9:00.
 - dni: "28999888"
 - obra_social: "PAMI"
 - tipo_consulta: "Control"
-- telefono: "11-9876-5432"
+- telefono: "2342-123456"
 
 [Usuario confirma horario]
 
@@ -206,7 +208,7 @@ Agente: "✅ Turno confirmado para el Lunes 6/1 a las 9:00.
   dni: "28999888",
   obra_social: "PAMI",
   tipo_consulta: "Control",
-  telefono: "11-9876-5432"
+  telefono: "2342-123456"
 })]
 
 → Tool busca DNI en "Pacientes" (SÍ existe)
@@ -235,7 +237,7 @@ Agente: "✅ Turno confirmado para el Lunes 6/1 a las 10:00.
   dni: "30111222",
   obra_social: "PAMI",
   tipo_consulta: "Consulta",
-  telefono: "11-3333-4444"
+  telefono: "2342-789012"
 })]
 
 → Tool busca DNI en "Pacientes" (SÍ existe)
@@ -313,8 +315,9 @@ function validarDNI(dniTurno, dniUsuario) {
 
 // 4. Datos completos
 function validarDatosCompletos(datos) {
+  // ⚠️ NO incluir 'primera_vez' - la tool lo determina automáticamente
   const requeridos = ['fecha', 'hora', 'nombre_completo', 'dni', 
-                      'obra_social', 'tipo_consulta', 'primera_vez', 'telefono'];
+                      'obra_social', 'tipo_consulta', 'telefono'];
   const faltantes = requeridos.filter(campo => !datos[campo]);
   
   if (faltantes.length > 0) {
@@ -380,7 +383,7 @@ const esPAMI = turno.obra_social === "PAMI";
 • App de PAMI con código token
 
 [Si Particular:]
-💰 Consulta: $[PRECIO]
+💰 Consulta: $40.000 en efectivo
 
 📍 Dirección: [Dirección del consultorio]
 
@@ -429,7 +432,7 @@ const resultado = registrarTurno({ ...datos });
 ### Éxito - Paciente Particular/OSDE:
 ```
 "✅ Turno confirmado para el Lunes 6/1 a las 9:00.
-La consulta tiene un costo de [PRECIO].
+La consulta tiene un costo de $40.000 en efectivo.
 Le enviaremos un recordatorio el día anterior."
 ```
 
