@@ -2,6 +2,19 @@
 
 Registra un nuevo turno en la hoja "Turnos" de Google Sheets para cualquier paciente. Tiene capacidades administrativas completas.
 
+## 🎯 CUÁNDO Y POR QUÉ USAR ESTA TOOL
+
+**Llama a esta tool cuando necesites:**
+- Registrar un turno nuevo para cualquier paciente (propio o de terceros)
+- Agendar turnos administrativos (CIRUGIA, CONTROL, MEDICION, DIA_LIBRE)
+- Crear sobreturnos o turnos especiales que requieren privilegios de admin
+- Registrar turnos con control total sobre todos los parámetros
+
+**Ventaja del admin:** Puede especificar manualmente `primera_vez` y acceder a todos los tipos de día, incluso fuera del horario normal de pacientes.
+
+**Requisito previo:**
+- Debes haber capturado o conocer TODOS los datos: nombre, DNI, obra social, teléfono, tipo de consulta, si es primera vez, fecha y horario
+
 ## 📋 PARÁMETROS
 
 **OBLIGATORIOS:**

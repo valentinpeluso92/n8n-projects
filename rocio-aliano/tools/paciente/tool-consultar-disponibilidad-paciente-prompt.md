@@ -2,6 +2,16 @@
 
 Consulta horarios disponibles en la agenda de Google Sheets filtrando por tipo de día específico. Solo accede a tipos de día para pacientes (PARTICULAR, PAMI_NUEVO, PAMI_VIEJO).
 
+## 🎯 CUÁNDO Y POR QUÉ USAR ESTA TOOL
+
+**Llama a esta tool cuando necesites:**
+- Mostrar al paciente los horarios disponibles para agendar un turno nuevo
+- Verificar si hay disponibilidad antes de confirmar un turno
+- Ofrecer opciones de fechas y horarios al paciente
+
+**Requisito previo:**
+- Debes conocer la obra social del paciente para determinar el `tipo_dia` correcto (PARTICULAR, PAMI_NUEVO, PAMI_VIEJO)
+
 ## 📋 PARÁMETROS
 
 **OBLIGATORIOS:**

@@ -2,6 +2,21 @@
 
 Modifica cualquier turno existente sin restricciones de propiedad. Capacidades administrativas completas.
 
+## 🎯 CUÁNDO Y POR QUÉ USAR ESTA TOOL
+
+**Llama a esta tool cuando necesites:**
+- Modificar CUALQUIER turno (fecha, hora, estado), incluso de otros pacientes
+- Cambiar turnos con menos de 24hs (sin restricción de tiempo)
+- Actualizar estado del turno (Confirmado, Atendido, No asistió, etc.)
+- Registrar motivos administrativos de modificación
+- Reprogramaciones masivas o cambios de última hora
+
+**Ventaja del admin:** Sin restricciones de propiedad ni tiempo, puede cambiar estados y registrar motivos administrativos.
+
+**Requisito previo:**
+- Debes conocer el `id_turno` (usar `buscarTurnosPorDNI` o búsqueda por fecha si es necesario)
+- Si cambias fecha/hora, consulta disponibilidad primero con `consultarDisponibilidadAgenda`
+
 ## 📋 PARÁMETROS
 
 **OBLIGATORIOS:**

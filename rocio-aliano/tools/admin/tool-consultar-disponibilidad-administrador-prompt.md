@@ -2,6 +2,16 @@
 
 Consulta horarios disponibles en la agenda de Google Sheets filtrando por tipo de día específico. Acceso administrativo completo a todos los 7 tipos de día.
 
+## 🎯 CUÁNDO Y POR QUÉ USAR ESTA TOOL
+
+**Llama a esta tool cuando necesites:**
+- Consultar disponibilidad para agendar un turno (cualquier tipo: PARTICULAR, PAMI, CIRUGIA, CONTROL, etc.)
+- Verificar horarios disponibles antes de registrar o modificar turnos
+- Planificar agenda futura o revisar disponibilidad en rangos de fechas específicos
+- Acceder a tipos de día administrativos (CIRUGIA, CONTROL, MEDICION, DIA_LIBRE)
+
+**Ventaja del admin:** Acceso a TODOS los 7 tipos de día, incluyendo los administrativos que pacientes no pueden ver.
+
 ## 📋 PARÁMETROS
 
 **OBLIGATORIOS:**

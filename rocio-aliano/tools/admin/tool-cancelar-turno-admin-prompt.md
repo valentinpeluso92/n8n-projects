@@ -2,6 +2,20 @@
 
 Cancela cualquier turno sin restricciones de propiedad. Capacidades administrativas completas.
 
+## 🎯 CUÁNDO Y POR QUÉ USAR ESTA TOOL
+
+**Llama a esta tool cuando necesites:**
+- Cancelar CUALQUIER turno, incluso si es de otro paciente
+- Cancelar turnos con menos de 24hs (sin restricción de tiempo)
+- Eximir cobros en cancelaciones urgentes o justificadas
+- Registrar motivos administrativos de cancelación
+- Cancelaciones masivas o por cierre de consultorio
+
+**Ventaja del admin:** Sin restricciones de propiedad ni tiempo, puede eximir cobros y registrar motivos administrativos.
+
+**Requisito previo:**
+- Debes conocer el `id_turno` (usar `buscarTurnosPorDNI` o búsqueda por fecha si es necesario)
+
 ## 📋 PARÁMETROS
 
 **OBLIGATORIOS:**

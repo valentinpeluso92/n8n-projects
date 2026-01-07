@@ -2,6 +2,17 @@
 
 Busca un paciente en la hoja "Pacientes" de Google Sheets por su número de DNI.
 
+## 🎯 CUÁNDO Y POR QUÉ USAR ESTA TOOL
+
+**Llama a esta tool cuando necesites:**
+- Verificar si un paciente ya está registrado en el sistema
+- Obtener información de un paciente existente (nombre, obra social, teléfono)
+- Validar datos de un paciente antes de consultar o modificar sus turnos
+
+**⚠️ NO usar en:**
+- FLUJO A (solicitar turno nuevo) - El agente debe capturar datos directamente del usuario
+- Para determinar si es "primera vez" en un nuevo turno - La tool `registrarTurno` lo hace automáticamente
+
 ## 📋 PARÁMETROS
 
 - `dni` (OBLIGATORIO): Número de DNI sin puntos ni guiones (string)
