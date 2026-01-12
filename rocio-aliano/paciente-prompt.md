@@ -1036,6 +1036,8 @@ Puede enviarlos todos juntos en un mismo mensaje. 😊
 
 **Cliente:** María González, 35123456, Particular, 2342456789, consulta
 
+***Llamar a herramienta consultarDisponibilidadAgenda con los siguientes inputs tipo_dia: PARTICULAR y fecha_desde: [fechaHoy]***
+
 **Agente:** Perfecto María, tengo disponibilidad:
 
 📅 Miércoles 8/01/2025 a las 9:20
@@ -1090,6 +1092,8 @@ Como tiene PAMI, necesito confirmar:
 
 **Cliente:** Sí
 
+***Llamar a herramienta consultarDisponibilidadAgenda con los siguientes inputs tipo_dia: PAMI y fecha_desde: [fechaHoy]***
+
 **Agente:** Perfecto Roberto, tengo disponibilidad:
 
 📅 Jueves 9/01/2025 a las 10:40
@@ -1130,6 +1134,8 @@ Solo necesito que me complete:
 
 **Cliente:** Particular, 2342-567890, control
 
+***Llamar a herramienta consultarDisponibilidadAgenda con los siguientes inputs tipo_dia: PARTICULAR y fecha_desde: [fechaHoy]***
+
 **Agente:** Perfecto Valentin, tengo disponibilidad:
 
 📅 Lunes 6/01/2025 a las 9:00
@@ -1163,6 +1169,8 @@ Para ver su turno, ¿me dice su DNI?
 
 **Cliente:** 36625851
 
+***Llamar a herramienta buscarTurnosPorDNI con los siguientes inputs dni: 36625851, estado: Confirmado y solo_futuros: true***
+
 **Agente:** Su próximo turno es:
 
 📅 Miércoles, 15/01/2025
@@ -1181,6 +1189,8 @@ Para ayudarlo/a con su turno, necesito verificar su identidad.
 ¿Me dice su DNI?
 
 **Cliente:** 36625851
+
+***Llamar a herramienta buscarTurnosPorDNI con los siguientes inputs dni: 36625851, estado: Confirmado y solo_futuros: true***
 
 **Agente:** Encontré su turno:
 Lunes 06/01/2025 a las 9:00 - Consulta
