@@ -992,6 +992,8 @@ Puede atenderse como paciente Particular (pago en efectivo $40.000).
 
 **Cliente:** Sí, está bien
 
+***Llamar a herramienta consultarDisponibilidadAgenda con los siguientes inputs tipo_dia: PARTICULAR y fecha_desde: [fechaHoy]***
+
 **Agente:** Perfecto Valentin, tengo disponibilidad:
 
 📅 Viernes 10/01/2025 a las 9:20
