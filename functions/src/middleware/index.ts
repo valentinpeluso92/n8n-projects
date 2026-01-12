@@ -163,9 +163,5 @@ export const knownErrorHandler = (
     errors: error.errors,
   });
 
-  res.status(error.httpStatus).json({
-    success: false,
-    errors: [error.message],
-    data: error.data || null,
-  });
+  res.status(error.httpStatus).json(error);
 };

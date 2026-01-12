@@ -1,4 +1,3 @@
-
 // === controllers/shiftController.ts ===
 
 import { Request } from 'firebase-functions/v2/https';
@@ -21,9 +20,9 @@ import {
   validateGetShiftsFilter,
 } from '../validators/shiftValidators';
 import { HTTP_STATUS } from '../../constants';
-import { ApiError, ApiResponse } from '../../types/api';
+import { ApiResponse } from '../../types/api';
 import { ErrorMessagesEnum } from '../enums/errorMessages';
-import { ShiftCreateResponse, ShiftCreateSuccessResponse } from '../types/api';
+import { ShiftCreateResponse, ShiftCreateSuccessResponse, ShiftGetByIdSuccessResponse } from '../types/api';
 
 export class ShiftController {
   private shiftService: ShiftService;
@@ -58,26 +57,20 @@ export class ShiftController {
   async postShift(req: Request, res: express.Response): Promise<void> {
     const logCompletion = requestLogger(req, 'POST');
 
-    // Apply middleware
-    if (!corsMiddleware(req, res, ['POST', 'OPTIONS'])) return;
-    if (!authMiddleware(req, res, this.API_KEY)) return;
-    if (!methodMiddleware(req, res, 'POST')) return;
-
     try {
+      // Apply middleware
+      if (!corsMiddleware(req, res, ['POST', 'OPTIONS'])) return;
+      if (!authMiddleware(req, res, this.API_KEY)) return;
+      if (!methodMiddleware(req, res, 'POST')) return;
+
       // Crear turno
       const result: ShiftCreateResponse = await this.shiftService.create(req);
-      if (result.code !== HTTP_STATUS.CREATED) {
-        knownErrorHandler(result as ApiError, res);
+      if (result.httpStatus !== HTTP_STATUS.CREATED) {
+        knownErrorHandler(result, res);
         return;
       }
 
-      const response: ApiResponse = {
-        success: true,
-        message: 'Turno creado exitosamente',
-        data: (result as ShiftCreateSuccessResponse).data,
-      };
-
-      res.status(HTTP_STATUS.CREATED).json(response);
+      res.status(HTTP_STATUS.CREATED).json(result);
     } catch (error) {
       errorHandler(error, res, 'postShift');
     } finally {
@@ -102,7 +95,7 @@ export class ShiftController {
         res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
           error: validation.errors.join(', '),
-        } as ApiResponse);
+        });
         return;
       }
 
@@ -125,21 +118,21 @@ export class ShiftController {
             res.status(HTTP_STATUS.BAD_REQUEST).json({
               success: false,
               error: serviceError.message,
-            } as ApiResponse);
+            });
             return;
           }
           if (serviceError.message === 'Turno no encontrado') {
             res.status(HTTP_STATUS.NOT_FOUND).json({
               success: false,
               error: ErrorMessagesEnum.SHIFT_NOT_FOUND,
-            } as ApiResponse);
+            });
             return;
           }
           if (serviceError.message === 'Cliente no encontrado') {
             res.status(HTTP_STATUS.BAD_REQUEST).json({
               success: false,
               error: ErrorMessagesEnum.CLIENT_NOT_FOUND,
-            } as ApiResponse);
+            });
             return;
           }
         }
@@ -168,7 +161,7 @@ export class ShiftController {
         res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
           error: idError,
-        } as ApiResponse);
+        });
         return;
       }
 
@@ -194,7 +187,7 @@ export class ShiftController {
           res.status(HTTP_STATUS.NOT_FOUND).json({
             success: false,
             error: ErrorMessagesEnum.SHIFT_NOT_FOUND,
-          } as ApiResponse);
+          });
           return;
         }
         throw serviceError;
@@ -207,31 +200,14 @@ export class ShiftController {
   }
 
   private async getShiftById(req: Request, res: express.Response): Promise<void> {
-    const id = req.query.id as string;
+    const shift = await this.shiftService.getById(req);
 
-    const idError = validateShiftId(id);
-    if (idError) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        error: idError,
-      } as ApiResponse);
+    if (shift.httpStatus && shift.httpStatus !== HTTP_STATUS.OK) {
+      knownErrorHandler(shift, res);
       return;
     }
 
-    const shift = await this.shiftService.getById(req, id);
-    if (!shift) {
-      res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        error: ErrorMessagesEnum.SHIFT_NOT_FOUND,
-      } as ApiResponse);
-      return;
-    }
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: shift,
-      searchCriteria: { id },
-    });
+    res.status(HTTP_STATUS.OK).json(shift);
   }
 
   private async getShiftsByFilter(req: Request, res: express.Response): Promise<void> {
@@ -239,8 +215,9 @@ export class ShiftController {
     if (!validation.isValid) {
       res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
+        httpStatus: HTTP_STATUS.BAD_REQUEST,
         error: validation.errors.join(', '),
-      } as ApiResponse);
+      });
       return;
     }
 

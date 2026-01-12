@@ -19,6 +19,7 @@ export type ShiftPriority =
   ShiftPriorityEnum.URGENT;
 
 export interface Shift {
+  id: string;
   clientId: string;
   date: Date | string;
   type: ShiftType;

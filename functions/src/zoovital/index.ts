@@ -15,7 +15,7 @@ const initializeShiftController = (db: Firestore, API_KEY: string): ShiftControl
   return shiftController;
 };
 
-const initializeController = (db: Firestore, API_KEY: string): ClientController => {
+const initializeClientController = (db: Firestore, API_KEY: string): ClientController => {
   if (!clientController) {
     clientController = new ClientController(db, API_KEY);
   }
@@ -28,7 +28,7 @@ const getClient = async (
   db: Firestore,
   API_KEY: string
 ) => {
-  const controller = initializeController(db, API_KEY);
+  const controller = initializeClientController(db, API_KEY);
   return controller.getClient(req, res);
 };
 
@@ -38,7 +38,7 @@ const postClient = async (
   db: Firestore,
   API_KEY: string
 ) => {
-  const controller = initializeController(db, API_KEY);
+  const controller = initializeClientController(db, API_KEY);
   return controller.postClient(req, res);
 };
 
@@ -48,7 +48,7 @@ const updateClient = async (
   db: Firestore,
   API_KEY: string
 ) => {
-  const controller = initializeController(db, API_KEY);
+  const controller = initializeClientController(db, API_KEY);
   return controller.updateClient(req, res);
 };
 
@@ -58,7 +58,7 @@ const removeClient = async (
   db: Firestore,
   API_KEY: string
 ) => {
-  const controller = initializeController(db, API_KEY);
+  const controller = initializeClientController(db, API_KEY);
   return controller.removeClient(req, res);
 };
 
