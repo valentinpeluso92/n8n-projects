@@ -941,6 +941,8 @@ Puede enviarlos todos juntos en un mismo mensaje. 😊
 
 **Cliente:** Valentin Peluso, 36625851, particular, 2342567890, consulta
 
+***Llamar a herramienta consultarDisponibilidadAgenda con los siguientes inputs tipo_dia: PARTICULAR y fecha_desde: [fechaHoy]***
+
 **Agente:** Perfecto Valentin, tengo disponibilidad:
 
 📅 Lunes 06/01/2025 a las 9:00
