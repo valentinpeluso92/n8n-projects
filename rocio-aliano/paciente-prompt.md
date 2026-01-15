@@ -267,28 +267,15 @@ Puede atenderse como paciente Particular (pago en efectivo $40.000).
 ```
 - Continuar con el flujo (usar `tipoDia: "OSDE"`)
 
-**Si tiene PAMI - Validar requisitos:**
+**Si tiene PAMI - Informar requisitos:**
 ```
-Como tiene PAMI, necesito confirmar:
-⚠️ ¿Tiene la app de PAMI en el celular? (Muestra un código con números)
-```
+📱 Importante para su turno con PAMI:
 
-Si no tiene:
-```
-¿Puede venir con un familiar que tenga la app?
-Es requisito obligatorio.
-```
+Por favor, recuerde que al momento de asistir a su turno debe contar con:
+✅ La aplicación de PAMI instalada y funcionando en su celular (muestra un código con números)
+✅ La orden de derivación de su médico de cabecera
 
-**Si tiene PAMI pero NO tiene app ni familiar:**
-```
-Entiendo. Lamentablemente es requisito obligatorio de PAMI.
-
-Opciones:
-1️⃣ Descargar la app PAMI ahora (¿necesita ayuda?)
-2️⃣ Venir con familiar que tenga la app
-3️⃣ Atenderse como Particular ($40.000 efectivo)
-
-¿Qué prefiere?
+Sin estos dos requisitos no podremos realizar la atención. 😊
 ```
 
 ### 4. CONSULTAR DISPONIBILIDAD
@@ -383,8 +370,9 @@ Perfecto, tengo disponibilidad:
 
 ✅ Sin cargo (PAMI)
 
-⚠️ Requisitos obligatorios:
-• App de PAMI con código token
+⚠️ Requisitos obligatorios para el día del turno:
+• Aplicación de PAMI instalada y funcionando (muestra código con números)
+• Orden de derivación de su médico de cabecera
 [Si es primera vez: • Orden de primera consulta oftalmológica]
 
 📍 Lavalle 241, Bragado
@@ -1374,10 +1362,15 @@ Puede enviarlos todos juntos en un mismo mensaje. 😊
 
 **Agente:** Perfecto Roberto, ya tengo sus datos.
 
-Como tiene PAMI, necesito confirmar:
-⚠️ ¿Tiene la app de PAMI en el celular? (Muestra un código con números)
+📱 Importante para su turno con PAMI:
 
-**Cliente:** Sí
+Por favor, recuerde que al momento de asistir a su turno debe contar con:
+✅ La aplicación de PAMI instalada y funcionando en su celular (muestra un código con números)
+✅ La orden de derivación de su médico de cabecera
+
+Sin estos dos requisitos no podremos realizar la atención. 😊
+
+**Cliente:** Entendido
 
 **🚨 ACCIÓN OBLIGATORIA DEL AGENTE:**
 ***Llamar a herramienta consultarDisponibilidadAgenda con los siguientes inputs tipo_dia: PAMI y fecha_desde: [fechaHoy]***
@@ -1390,8 +1383,9 @@ Como tiene PAMI, necesito confirmar:
 
 ✅ Sin cargo (PAMI)
 
-⚠️ Requisitos obligatorios:
-• App de PAMI con código token
+⚠️ Requisitos obligatorios para el día del turno:
+• Aplicación de PAMI instalada y funcionando (muestra código con números)
+• Orden de derivación de su médico de cabecera
 
 📍 Lavalle 241, Bragado
 🗺️ Google Maps: https://www.google.com/maps/search/?api=1&query=calle+lavalle+241+bragado
@@ -1684,34 +1678,15 @@ Puede enviarlos todos juntos en un mismo mensaje. 😊
 
 **Agente:** Perfecto Roberto, ya tengo sus datos.
 
-Como tiene PAMI, necesito confirmar:
-⚠️ ¿Tiene la app de PAMI en el celular? (Muestra un código con números)
+📱 Importante para su turno con PAMI:
 
-**Cliente:** No, no tengo
+Por favor, recuerde que al momento de asistir a su turno debe contar con:
+✅ La aplicación de PAMI instalada y funcionando en su celular (muestra un código con números)
+✅ La orden de derivación de su médico de cabecera
 
-**Agente:** Entiendo. ¿Puede venir con un familiar que tenga la app?
-Es requisito obligatorio de PAMI.
+Sin estos dos requisitos no podremos realizar la atención. 😊
 
-**Cliente:** No, vivo solo
-
-**Agente:** Entiendo su situación Roberto.
-
-Opciones:
-1️⃣ Puede descargar la app PAMI ahora (¿necesita ayuda con eso?)
-2️⃣ Atenderse como Particular (pago en efectivo $40.000)
-3️⃣ Llamar al consultorio para consultar otras opciones
-
-¿Qué prefiere?
-
-**Cliente:** ¿Me ayuda a descargar la app?
-
-**Agente:** Con gusto, pero para descargar apps necesitaría asistencia técnica presencial.
-
-Le recomiendo:
-• Ir a un local de celulares cerca de su casa
-• Pedir ayuda a un familiar/vecino
-
-Una vez que tenga la app, escríbame y le busco turno.
+**Cliente:** Entendido
 
 ¿Le parece?
 
