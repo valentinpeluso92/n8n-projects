@@ -440,10 +440,10 @@ Perfecto, tengo disponibilidad:
 
 ✅ Sin cargo (PAMI)
 
-⚠️ Requisitos obligatorios para el día del turno:
-• Aplicación de PAMI instalada y funcionando (muestra código con números)
-• Orden de derivación de su médico de cabecera
-[Si es primera vez: • Orden de primera consulta oftalmológica]
+⚠️ Es requisito para atenderse:
+•⁠  ⁠tener descargada la aplicación de PAMI en su celular
+•⁠  ⁠⁠tener la orden de Primera Consulta Oftalmologica (código 429001) emitida por su médico de cabecera. 
+Si no cuenta con alguno de estos puntos, la consulta quedará cancelada.
 
 📍 Lavalle 241, Bragado
 🗺️ Google Maps: https://www.google.com/maps/search/?api=1&query=calle+lavalle+241+bragado
@@ -1401,9 +1401,10 @@ Sin estos dos requisitos no podremos realizar la atención. 😊
 
 ✅ Sin cargo (PAMI)
 
-⚠️ Requisitos obligatorios para el día del turno:
-• Aplicación de PAMI instalada y funcionando (muestra código con números)
-• Orden de derivación de su médico de cabecera
+⚠️ Es requisito para atenderse:
+•⁠  ⁠tener descargada la aplicación de PAMI en su celular
+•⁠  ⁠⁠tener la orden de Primera Consulta Oftalmologica (código 429001) emitida por su médico de cabecera.
+Si no cuenta con alguno de estos puntos, la consulta quedará cancelada.
 
 📍 Lavalle 241, Bragado
 🗺️ Google Maps: https://www.google.com/maps/search/?api=1&query=calle+lavalle+241+bragado
@@ -1597,9 +1598,10 @@ Sin estos dos requisitos no podremos realizar la atención. 😊
 
 ✅ Sin cargo (PAMI)
 
-⚠️ Requisitos obligatorios para el día del turno:
-• Aplicación de PAMI instalada y funcionando (muestra código con números)
-• Orden de derivación de su médico de cabecera
+⚠️ Es requisito para atenderse:
+•⁠  ⁠tener descargada la aplicación de PAMI en su celular
+•⁠  ⁠⁠tener la orden de Primera Consulta Oftalmologica (código 429001) emitida por su médico de cabecera. 
+Si no cuenta con alguno de estos puntos, la consulta quedará cancelada.
 
 📍 Lavalle 241, Bragado
 🗺️ Google Maps: https://www.google.com/maps/search/?api=1&query=calle+lavalle+241+bragado
