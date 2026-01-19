@@ -70,8 +70,7 @@ Recibirás un objeto JSON con:
   "contexto": {
     "mensaje_original": "mensaje del usuario",
     "flags": {}
-  },
-  "estado_flujo": "inicial|capturando_datos|esperando_confirmacion|finalizado"
+  }
 }
 ```
 
@@ -182,8 +181,7 @@ Puede atenderse como paciente Particular (pago en efectivo $40.000).
   "accion": "solicitar_turno",
   "datos_paciente": {
     "obra_social": "PAMI"
-  },
-  "estado_flujo": "informando_requisitos"
+  }
 }
 ```
 
@@ -446,8 +444,7 @@ Para ayudarlo/a con su turno, necesito verificar su identidad.
         "tipo_consulta": "Consulta"
       }]
     }
-  },
-  "estado_flujo": "esperando_confirmacion"
+  }
 }
 ```
 
@@ -515,8 +512,7 @@ Para ayudarlo/a con su turno, necesito verificar su identidad.
         "tipo_consulta": "Consulta"
       }]
     }
-  },
-  "estado_flujo": "mostrando_turno_actual"
+  }
 }
 ```
 
