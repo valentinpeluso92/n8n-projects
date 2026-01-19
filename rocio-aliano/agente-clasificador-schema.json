@@ -32,10 +32,6 @@
       ],
       "additionalProperties": false
     },
-    "datos_faltantes": {
-      "type": "array",
-      "items": { "type": "string" }
-    },
     "contexto": {
       "type": "object",
       "properties": {
@@ -55,6 +51,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["accion", "confianza", "es_saludo", "datos_extraidos", "datos_faltantes", "contexto"],
+  "required": ["accion", "confianza", "es_saludo", "datos_extraidos", "contexto"],
   "additionalProperties": false
 }
