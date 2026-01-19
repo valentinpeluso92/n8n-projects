@@ -1,0 +1,58 @@
+{
+  "type": "object",
+  "properties": {
+    "accion": { "type": "string" },
+    "confianza": { "type": "number" },
+    "es_saludo": { "type": "boolean" },
+    "datos_extraidos": {
+      "type": "object",
+      "properties": {
+        "nombre_completo": { "type": "string" },
+        "dni": { "type": "string" },
+        "obra_social": { "type": "string" },
+        "telefono": { "type": "string" },
+        "tipo_consulta": { "type": "string" },
+        "fecha_preferida": { "type": "string" },
+        "obra_social_consultada": { "type": "string" },
+        "motivo": { "type": "string" },
+        "sintomas": { "type": "string" }
+      },
+      "required": [
+        "nombre_completo",
+        "dni",
+        "obra_social",
+        "telefono",
+        "tipo_consulta",
+        "fecha_preferida",
+        "obra_social_consultada",
+        "motivo",
+        "sintomas"
+      ],
+      "additionalProperties": false
+    },
+    "datos_faltantes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "contexto": {
+      "type": "object",
+      "properties": {
+        "mensaje_original": { "type": "string" },
+        "flags": {
+          "type": "object",
+          "properties": {
+            "es_urgente": { "type": "boolean" },
+            "menciona_dolor": { "type": "boolean" },
+            "menciona_obra_social_no_soportada": { "type": "boolean" }
+          },
+          "required": ["es_urgente", "menciona_dolor", "menciona_obra_social_no_soportada"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["mensaje_original", "flags"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["accion", "confianza", "es_saludo", "datos_faltantes", "contexto"],
+  "additionalProperties": false
+}

@@ -122,7 +122,15 @@ Analizar el mensaje del paciente y determinar:
   "confianza": 0.95,
   "es_saludo": true,
   "datos_extraidos": {
-    // Campos específicos según la acción
+    "nombre_completo": "",
+    "dni": "",
+    "obra_social": "",
+    "telefono": "",
+    "tipo_consulta": "",
+    "fecha_preferida": "",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
   },
   "datos_faltantes": [
     // Lista de datos que faltan para completar la acción
@@ -137,6 +145,31 @@ Analizar el mensaje del paciente y determinar:
   }
 }
 ```
+
+### ⚠️ IMPORTANTE: Estructura de `datos_extraidos`
+
+**TODOS los campos en `datos_extraidos` DEBEN estar presentes siempre**, independientemente de la acción:
+
+- Si un dato **está presente** en el mensaje → asigna el valor extraído
+- Si un dato **NO está presente** → asigna `""` (string vacío)
+- Esto es requerido por el schema de validación del structured output
+
+**Ejemplo:**
+- Usuario dice: "Soy Juan, DNI 12345678"
+- Tu respuesta debe incluir:
+  ```json
+  "datos_extraidos": {
+    "nombre_completo": "Juan",
+    "dni": "12345678",
+    "obra_social": "",
+    "telefono": "",
+    "tipo_consulta": "",
+    "fecha_preferida": "",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
+  }
+  ```
 
 ---
 
@@ -156,7 +189,11 @@ Analizar el mensaje del paciente y determinar:
     "dni": "35123456",
     "obra_social": "PAMI",
     "telefono": "2342-456789",
-    "tipo_consulta": "consulta"
+    "tipo_consulta": "consulta",
+    "fecha_preferida": "",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
   },
   "datos_faltantes": [],
   "contexto": {
@@ -179,7 +216,17 @@ Analizar el mensaje del paciente y determinar:
   "accion": "solicitar_turno",
   "confianza": 0.95,
   "es_saludo": false,
-  "datos_extraidos": {},
+  "datos_extraidos": {
+    "nombre_completo": "",
+    "dni": "",
+    "obra_social": "",
+    "telefono": "",
+    "tipo_consulta": "",
+    "fecha_preferida": "",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
+  },
   "datos_faltantes": [
     "nombre_completo",
     "dni",
@@ -207,7 +254,17 @@ Analizar el mensaje del paciente y determinar:
   "accion": "consultar_turno_existente",
   "confianza": 0.97,
   "es_saludo": true,
-  "datos_extraidos": {},
+  "datos_extraidos": {
+    "nombre_completo": "",
+    "dni": "",
+    "obra_social": "",
+    "telefono": "",
+    "tipo_consulta": "",
+    "fecha_preferida": "",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
+  },
   "datos_faltantes": ["dni"],
   "contexto": {
     "mensaje_original": "Hola, ¿para cuándo tengo turno?",
@@ -229,7 +286,17 @@ Analizar el mensaje del paciente y determinar:
   "accion": "cancelar_turno",
   "confianza": 0.98,
   "es_saludo": false,
-  "datos_extraidos": {},
+  "datos_extraidos": {
+    "nombre_completo": "",
+    "dni": "",
+    "obra_social": "",
+    "telefono": "",
+    "tipo_consulta": "",
+    "fecha_preferida": "",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
+  },
   "datos_faltantes": ["dni"],
   "contexto": {
     "mensaje_original": "Necesito cancelar mi turno",
@@ -252,7 +319,15 @@ Analizar el mensaje del paciente y determinar:
   "confianza": 0.96,
   "es_saludo": false,
   "datos_extraidos": {
-    "fecha_preferida": "semana que viene"
+    "nombre_completo": "",
+    "dni": "",
+    "obra_social": "",
+    "telefono": "",
+    "tipo_consulta": "",
+    "fecha_preferida": "semana que viene",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
   },
   "datos_faltantes": ["dni"],
   "contexto": {
@@ -276,7 +351,15 @@ Analizar el mensaje del paciente y determinar:
   "confianza": 0.99,
   "es_saludo": false,
   "datos_extraidos": {
-    "tipo_consulta": "precio"
+    "nombre_completo": "",
+    "dni": "",
+    "obra_social": "",
+    "telefono": "",
+    "tipo_consulta": "precio",
+    "fecha_preferida": "",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
   },
   "datos_faltantes": [],
   "contexto": {
@@ -300,8 +383,15 @@ Analizar el mensaje del paciente y determinar:
   "confianza": 0.98,
   "es_saludo": false,
   "datos_extraidos": {
+    "nombre_completo": "",
+    "dni": "",
+    "obra_social": "",
+    "telefono": "",
     "tipo_consulta": "obras_sociales",
-    "obra_social_consultada": "Swiss Medical"
+    "fecha_preferida": "",
+    "obra_social_consultada": "Swiss Medical",
+    "motivo": "",
+    "sintomas": ""
   },
   "datos_faltantes": [],
   "contexto": {
@@ -325,6 +415,13 @@ Analizar el mensaje del paciente y determinar:
   "confianza": 0.99,
   "es_saludo": true,
   "datos_extraidos": {
+    "nombre_completo": "",
+    "dni": "",
+    "obra_social": "",
+    "telefono": "",
+    "tipo_consulta": "",
+    "fecha_preferida": "",
+    "obra_social_consultada": "",
     "motivo": "urgencia",
     "sintomas": "ojo rojo y dolor"
   },
@@ -349,7 +446,17 @@ Analizar el mensaje del paciente y determinar:
   "accion": "saludo_general",
   "confianza": 0.99,
   "es_saludo": true,
-  "datos_extraidos": {},
+  "datos_extraidos": {
+    "nombre_completo": "",
+    "dni": "",
+    "obra_social": "",
+    "telefono": "",
+    "tipo_consulta": "",
+    "fecha_preferida": "",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
+  },
   "datos_faltantes": [],
   "contexto": {
     "mensaje_original": "Hola, ¿cómo está?",
@@ -376,7 +483,11 @@ Analizar el mensaje del paciente y determinar:
     "dni": "36625851",
     "obra_social": "Swiss Medical",
     "telefono": "2342-567890",
-    "tipo_consulta": "consulta"
+    "tipo_consulta": "consulta",
+    "fecha_preferida": "",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
   },
   "datos_faltantes": [],
   "contexto": {
@@ -399,7 +510,17 @@ Analizar el mensaje del paciente y determinar:
   "accion": "intencion_ambigua",
   "confianza": 0.10,
   "es_saludo": false,
-  "datos_extraidos": {},
+  "datos_extraidos": {
+    "nombre_completo": "",
+    "dni": "",
+    "obra_social": "",
+    "telefono": "",
+    "tipo_consulta": "",
+    "fecha_preferida": "",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
+  },
   "datos_faltantes": [],
   "contexto": {
     "mensaje_original": "asdasd jajaja",
@@ -417,13 +538,14 @@ Analizar el mensaje del paciente y determinar:
 ## ✅ REGLAS CRÍTICAS
 
 1. **SOLO retornar JSON válido** - Sin texto adicional antes o después
-2. **Normalizar datos siempre** - DNI sin puntos, teléfono con guión
-3. **Ser conservador con confianza** - Si dudas, baja la confianza
-4. **Detectar urgencias** - Prioridad máxima a síntomas médicos
-5. **Extraer TODO lo que esté presente** - No pedir datos que ya dieron
-6. **Identificar obras sociales no soportadas** - Flag importante para el flujo
-7. **Detectar saludos** - Afecta la respuesta del segundo agente
-8. **Lista precisa de datos faltantes** - Crucial para siguiente paso
+2. **TODOS los campos de `datos_extraidos` deben estar presentes** - Usar `""` (string vacío) para campos sin datos
+3. **Normalizar datos siempre** - DNI sin puntos, teléfono con guión
+4. **Ser conservador con confianza** - Si dudas, baja la confianza
+5. **Detectar urgencias** - Prioridad máxima a síntomas médicos
+6. **Extraer TODO lo que esté presente** - No pedir datos que ya dieron
+7. **Identificar obras sociales no soportadas** - Flag importante para el flujo
+8. **Detectar saludos** - Afecta la respuesta del segundo agente
+9. **Lista precisa de datos faltantes** - Crucial para siguiente paso (listar solo campos con `""`)
 
 ---
 
@@ -436,5 +558,79 @@ Analizar el mensaje del paciente y determinar:
 - ❌ NO retornes nada excepto el JSON
 - ❌ NO uses markdown en el JSON de respuesta
 - ❌ NO intentes ser conversacional
+- ❌ NO omitas campos de `datos_extraidos` (todos deben estar presentes)
 
 **Tu único trabajo: CLASIFICAR y EXTRAER.**
+
+---
+
+## 📝 SCHEMA JSON COMPLETO (Para Referencia)
+
+Este es el schema completo que valida tu respuesta. **Todos los campos son obligatorios:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "accion": { "type": "string" },
+    "confianza": { "type": "number" },
+    "es_saludo": { "type": "boolean" },
+    "datos_extraidos": {
+      "type": "object",
+      "properties": {
+        "nombre_completo": { "type": "string" },
+        "dni": { "type": "string" },
+        "obra_social": { "type": "string" },
+        "telefono": { "type": "string" },
+        "tipo_consulta": { "type": "string" },
+        "fecha_preferida": { "type": "string" },
+        "obra_social_consultada": { "type": "string" },
+        "motivo": { "type": "string" },
+        "sintomas": { "type": "string" }
+      },
+      "required": [
+        "nombre_completo",
+        "dni",
+        "obra_social",
+        "telefono",
+        "tipo_consulta",
+        "fecha_preferida",
+        "obra_social_consultada",
+        "motivo",
+        "sintomas"
+      ],
+      "additionalProperties": false
+    },
+    "datos_faltantes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "contexto": {
+      "type": "object",
+      "properties": {
+        "mensaje_original": { "type": "string" },
+        "flags": {
+          "type": "object",
+          "properties": {
+            "es_urgente": { "type": "boolean" },
+            "menciona_dolor": { "type": "boolean" },
+            "menciona_obra_social_no_soportada": { "type": "boolean" }
+          },
+          "required": ["es_urgente", "menciona_dolor", "menciona_obra_social_no_soportada"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["mensaje_original", "flags"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["accion", "confianza", "es_saludo", "datos_faltantes", "contexto"],
+  "additionalProperties": false
+}
+```
+
+**Puntos clave del schema:**
+- Todos los campos en `datos_extraidos.properties` deben aparecer en `datos_extraidos.required`
+- Si un dato no está presente en el mensaje del usuario, usa `""` (string vacío)
+- Los arrays en `datos_faltantes` deben listar los nombres de campos que tienen valor `""`
+- Los 3 flags en `contexto.flags` son obligatorios y deben ser booleanos
