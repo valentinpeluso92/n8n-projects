@@ -13,6 +13,7 @@
         "telefono": { "type": "string" },
         "tipo_consulta": { "type": "string" },
         "fecha_preferida": { "type": "string" },
+        "hora_preferida": { "type": "string" },
         "obra_social_consultada": { "type": "string" },
         "motivo": { "type": "string" },
         "sintomas": { "type": "string" }
@@ -24,6 +25,7 @@
         "telefono",
         "tipo_consulta",
         "fecha_preferida",
+        "hora_preferida",
         "obra_social_consultada",
         "motivo",
         "sintomas"
@@ -53,6 +55,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["accion", "confianza", "es_saludo", "datos_faltantes", "contexto"],
+  "required": ["accion", "confianza", "es_saludo", "datos_extraidos", "datos_faltantes", "contexto"],
   "additionalProperties": false
 }

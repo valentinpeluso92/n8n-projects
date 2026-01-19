@@ -22,6 +22,8 @@ Analizar el mensaje del paciente y determinar:
 - `obra_social`: string ("PAMI", "OSDE", "Particular", u otra)
 - `telefono`: string (formato: "2342-567890")
 - `tipo_consulta`: string (ej: "Consulta", "OCT", "Campo Visual")
+- `fecha_preferida`: string (si menciona día/fecha específica)
+- `hora_preferida`: string (si menciona horario específico, ej: "por la mañana", "14:00", "tarde")
 - `es_saludo`: boolean (si incluye "hola", "buenos días", etc.)
 
 ### 2. `consultar_turno_existente`
@@ -44,7 +46,8 @@ Analizar el mensaje del paciente y determinar:
 
 **Extraer si están presentes:**
 - `dni`: string
-- `fecha_preferida`: string (si menciona día específico)
+- `fecha_preferida`: string (si menciona día/fecha específica)
+- `hora_preferida`: string (si menciona horario específico, ej: "por la mañana", "15:00", "tarde")
 - `es_saludo`: boolean
 
 ### 5. `consulta_informativa`
@@ -128,6 +131,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "",
     "tipo_consulta": "",
     "fecha_preferida": "",
+    "hora_preferida": "",
     "obra_social_consultada": "",
     "motivo": "",
     "sintomas": ""
@@ -191,6 +195,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "2342-456789",
     "tipo_consulta": "consulta",
     "fecha_preferida": "",
+    "hora_preferida": "",
     "obra_social_consultada": "",
     "motivo": "",
     "sintomas": ""
@@ -223,6 +228,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "",
     "tipo_consulta": "",
     "fecha_preferida": "",
+    "hora_preferida": "",
     "obra_social_consultada": "",
     "motivo": "",
     "sintomas": ""
@@ -261,6 +267,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "",
     "tipo_consulta": "",
     "fecha_preferida": "",
+    "hora_preferida": "",
     "obra_social_consultada": "",
     "motivo": "",
     "sintomas": ""
@@ -293,6 +300,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "",
     "tipo_consulta": "",
     "fecha_preferida": "",
+    "hora_preferida": "",
     "obra_social_consultada": "",
     "motivo": "",
     "sintomas": ""
@@ -325,6 +333,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "",
     "tipo_consulta": "",
     "fecha_preferida": "semana que viene",
+    "hora_preferida": "",
     "obra_social_consultada": "",
     "motivo": "",
     "sintomas": ""
@@ -341,7 +350,46 @@ Analizar el mensaje del paciente y determinar:
 }
 ```
 
-### EJEMPLO 6: Consulta informativa - Precio
+### EJEMPLO 6: Solicitar turno con fecha y hora preferidas
+**Input:** "Hola, necesito turno para el próximo martes por la tarde"
+
+**Output:**
+```json
+{
+  "accion": "solicitar_turno",
+  "confianza": 0.95,
+  "es_saludo": true,
+  "datos_extraidos": {
+    "nombre_completo": "",
+    "dni": "",
+    "obra_social": "",
+    "telefono": "",
+    "tipo_consulta": "",
+    "fecha_preferida": "próximo martes",
+    "hora_preferida": "tarde",
+    "obra_social_consultada": "",
+    "motivo": "",
+    "sintomas": ""
+  },
+  "datos_faltantes": [
+    "nombre_completo",
+    "dni",
+    "obra_social",
+    "telefono",
+    "tipo_consulta"
+  ],
+  "contexto": {
+    "mensaje_original": "Hola, necesito turno para el próximo martes por la tarde",
+    "flags": {
+      "es_urgente": false,
+      "menciona_dolor": false,
+      "menciona_obra_social_no_soportada": false
+    }
+  }
+}
+```
+
+### EJEMPLO 8: Consulta informativa - Precio
 **Input:** "¿Cuánto cuesta una consulta?"
 
 **Output:**
@@ -357,6 +405,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "",
     "tipo_consulta": "precio",
     "fecha_preferida": "",
+    "hora_preferida": "",
     "obra_social_consultada": "",
     "motivo": "",
     "sintomas": ""
@@ -373,7 +422,7 @@ Analizar el mensaje del paciente y determinar:
 }
 ```
 
-### EJEMPLO 7: Consulta sobre obra social no soportada
+### EJEMPLO 9: Consulta sobre obra social no soportada
 **Input:** "¿Atienden Swiss Medical?"
 
 **Output:**
@@ -389,6 +438,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "",
     "tipo_consulta": "obras_sociales",
     "fecha_preferida": "",
+    "hora_preferida": "",
     "obra_social_consultada": "Swiss Medical",
     "motivo": "",
     "sintomas": ""
@@ -405,7 +455,7 @@ Analizar el mensaje del paciente y determinar:
 }
 ```
 
-### EJEMPLO 8: Urgencia médica
+### EJEMPLO 10: Urgencia médica
 **Input:** "Hola, tengo el ojo muy rojo y me duele mucho"
 
 **Output:**
@@ -421,6 +471,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "",
     "tipo_consulta": "",
     "fecha_preferida": "",
+    "hora_preferida": "",
     "obra_social_consultada": "",
     "motivo": "urgencia",
     "sintomas": "ojo rojo y dolor"
@@ -437,7 +488,7 @@ Analizar el mensaje del paciente y determinar:
 }
 ```
 
-### EJEMPLO 9: Solo saludo
+### EJEMPLO 11: Solo saludo
 **Input:** "Hola, ¿cómo está?"
 
 **Output:**
@@ -453,6 +504,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "",
     "tipo_consulta": "",
     "fecha_preferida": "",
+    "hora_preferida": "",
     "obra_social_consultada": "",
     "motivo": "",
     "sintomas": ""
@@ -469,7 +521,7 @@ Analizar el mensaje del paciente y determinar:
 }
 ```
 
-### EJEMPLO 10: Obra social no soportada en solicitud
+### EJEMPLO 12: Obra social no soportada en solicitud
 **Input:** "Valentin Peluso, 36625851, Swiss Medical, 2342567890, consulta"
 
 **Output:**
@@ -485,6 +537,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "2342-567890",
     "tipo_consulta": "consulta",
     "fecha_preferida": "",
+    "hora_preferida": "",
     "obra_social_consultada": "",
     "motivo": "",
     "sintomas": ""
@@ -501,7 +554,7 @@ Analizar el mensaje del paciente y determinar:
 }
 ```
 
-### EJEMPLO 11: Intención ambigua
+### EJEMPLO 13: Intención ambigua
 **Input:** "asdasd jajaja"
 
 **Output:**
@@ -517,6 +570,7 @@ Analizar el mensaje del paciente y determinar:
     "telefono": "",
     "tipo_consulta": "",
     "fecha_preferida": "",
+    "hora_preferida": "",
     "obra_social_consultada": "",
     "motivo": "",
     "sintomas": ""
@@ -584,6 +638,7 @@ Este es el schema completo que valida tu respuesta. **Todos los campos son oblig
         "telefono": { "type": "string" },
         "tipo_consulta": { "type": "string" },
         "fecha_preferida": { "type": "string" },
+        "hora_preferida": { "type": "string" },
         "obra_social_consultada": { "type": "string" },
         "motivo": { "type": "string" },
         "sintomas": { "type": "string" }
@@ -595,6 +650,7 @@ Este es el schema completo que valida tu respuesta. **Todos los campos son oblig
         "telefono",
         "tipo_consulta",
         "fecha_preferida",
+        "hora_preferida",
         "obra_social_consultada",
         "motivo",
         "sintomas"
@@ -624,7 +680,7 @@ Este es el schema completo que valida tu respuesta. **Todos los campos son oblig
       "additionalProperties": false
     }
   },
-  "required": ["accion", "confianza", "es_saludo", "datos_faltantes", "contexto"],
+  "required": ["accion", "confianza", "es_saludo", "datos_extraidos", "datos_faltantes", "contexto"],
   "additionalProperties": false
 }
 ```
@@ -634,3 +690,4 @@ Este es el schema completo que valida tu respuesta. **Todos los campos son oblig
 - Si un dato no está presente en el mensaje del usuario, usa `""` (string vacío)
 - Los arrays en `datos_faltantes` deben listar los nombres de campos que tienen valor `""`
 - Los 3 flags en `contexto.flags` son obligatorios y deben ser booleanos
+- `hora_preferida` puede contener valores como: "mañana", "tarde", "14:00", "por la tarde", "temprano", etc.
